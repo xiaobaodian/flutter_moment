@@ -242,16 +242,16 @@ class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMi
 /// DailyEvents 每天的事件句柄
 ///
 
-class DailyEvents {
+class DailyRecord {
   int boxId = 0;
   int dayIndex;
   //DateTime date;
   String weather;
   List<FocusEvent> focusEvents = [];
 
-  DailyEvents(this.dayIndex);
+  DailyRecord(this.dayIndex);
 
-  DailyEvents.build({
+  DailyRecord.build({
     this.boxId,
     this.dayIndex,
     var focusEventsFromJson,
@@ -260,8 +260,8 @@ class DailyEvents {
     focusEvents = list.map((item) => FocusEvent.fromJson(item)).toList();
   }
 
-  factory DailyEvents.fromJson(Map<String, dynamic> json) {
-    return DailyEvents.build(
+  factory DailyRecord.fromJson(Map<String, dynamic> json) {
+    return DailyRecord.build(
       boxId: json['boxId'],
       dayIndex: json['dayIndex'],
       focusEventsFromJson: json['focusEvents'],

@@ -1,6 +1,7 @@
 package com.threecats.fluttermoment.models
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.threecats.fluttermoment.MomentApplication
 import io.objectbox.Box
@@ -55,10 +56,20 @@ object DataSource {
 
     // DailyRecord
 
-    fun getDailyRecordsFromJson(): String = Gson().toJson(dailyRecordBox.query().build().find())
+    //fun getDailyRecordsFromJson(): String = Gson().toJson(dailyRecordBox.query().build().find())
+    fun getDailyRecordsFromJson(): String {
+        var recordList = dailyRecordBox.query().build().find()
+        recordList.forEach { record ->
+            Log.d("android", "count: ${record.focusEvents.size}")
+            record.focusEvents.forEach{
+                Log.d("android", "msg: ${it.note}")
+            }
+        }
+        return Gson().toJson(recordList)
+    }
     fun getDailyRecordFromJson(dayIndex: Long): DailyRecord? {
         val dailyEventQuery = dailyRecordBox.query()
-        return dailyEventQuery.equal(DailyEvent_.dayIndex, dayIndex).build().findFirst()
+        return dailyEventQuery.equal(DailyRecord_.dayIndex, dayIndex).build().findFirst()
     }
     fun putDailyRecord(dailyRecord: DailyRecord): Long = dailyRecordBox.put(dailyRecord)
     fun removeDailyRecordFor(id: Long) = dailyRecordBox.remove(id)

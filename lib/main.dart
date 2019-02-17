@@ -474,9 +474,9 @@ class SliverPanel extends SliverPersistentHeaderDelegate {
 
 Widget _getListView(BuildContext context, int dayIndex) {
   var store = GlobalStore.of(context);
-  var dailyEvents = store.calendarMap.everyDayIndex[dayIndex].dailyEvents;
+  var dailyRecord = store.calendarMap.everyDayIndex[dayIndex].dailyRecord;
 
-  if (dailyEvents == null) {
+  if (dailyRecord == null) {
     return Center(
       child: Text('还没有数据'),
     );
@@ -494,7 +494,7 @@ Widget _getListView(BuildContext context, int dayIndex) {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                   child: Text(
-                    store.getFocusTitleFrom(dailyEvents.focusEvents[index].focusItemBoxId),
+                    store.getFocusTitleFrom(dailyRecord.focusEvents[index].focusItemBoxId),
                     style: TextStyle(
                       fontSize: 16,
                       color: Theme.of(context).accentColor,
@@ -502,7 +502,7 @@ Widget _getListView(BuildContext context, int dayIndex) {
                   ),
                 ),
                 Text(
-                  dailyEvents.focusEvents[index].note,
+                  dailyRecord.focusEvents[index].note,
                   style: TextStyle(fontSize: 16, color: Colors.black87),
                 ),
               ],
@@ -511,14 +511,14 @@ Widget _getListView(BuildContext context, int dayIndex) {
           onTap: () {
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
-              return EditerFocusEventRoute(dailyEvents.focusEvents[index]);
+              return EditerFocusEventRoute(dailyRecord.focusEvents[index]);
             })).then((resultItem) {
               if (resultItem is FocusEvent) {
                 //dailyEvents.focusEvents[index] = resultItem;
                 //store.changeFocusEvent(resultItem);
                 store.changeFocusEventToSelectedDay(resultItem, index);
               } else if (resultItem is int) {
-                store.removeFocusEventToSelectedDay(index, dailyEvents.focusEvents[index].focusItemBoxId);
+                store.removeFocusEventToSelectedDay(index, dailyRecord.focusEvents[index].focusItemBoxId);
                 //store.getFocusItemFromId(dailyEvents.focusEvents[index].boxId).minusReferences();
                 //dailyEvents.focusEvents.removeAt(index);
               }
@@ -526,7 +526,7 @@ Widget _getListView(BuildContext context, int dayIndex) {
           },
         );
       },
-      itemCount: dailyEvents.focusEvents.length,
+      itemCount: dailyRecord.focusEvents.length,
     );
   }
 }

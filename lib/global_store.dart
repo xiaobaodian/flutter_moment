@@ -35,7 +35,6 @@ class GlobalStoreState extends State<GlobalStore> {
   List<FocusItem> focusItemList;
   List<PersonItem> personItemList;
   List<PlaceItem> placeItemList;
-  List<DailyEvents> dailyEventsList;
 
   @override
   void initState() {
@@ -72,9 +71,13 @@ class GlobalStoreState extends State<GlobalStore> {
       }).toList();
     });
 
-    _platformDataSource.invokeMethod('LoadDailyEvents').then((result) {
+    _platformDataSource.invokeMethod('LoadDailyRecords').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
-      placeItemList = resultJson.map((item) => PlaceItem.fromJson(item)).toList();
+      resultJson.forEach((item){
+        DailyRecord dailyRecord = DailyRecord.fromJson(item);
+        int dayIndex = dailyRecord.dayIndex;
+        calendarMap.everyDayIndex[dayIndex].dailyRecord = dailyRecord;
+      });
     });
 
     //placeItemList = FocusDateServices.getPlaceList();
@@ -146,39 +149,45 @@ class GlobalStoreState extends State<GlobalStore> {
     placeItemList.remove(place);
   }
 
-  // DilayEvents
+  // DilayRecords
 
-  void putDailyEvents(DailyEvents dailyEvens) {
-    var test = json.encode(dailyEvens);
-    print(test);
+  void putDailyRecord(DailyRecord dailyRecord) {
+    _platformDataSource.invokeMethod("PutDailyRecord", json.encode(dailyRecord)).then((id) {
+      dailyRecord.boxId = id;
+    });
   }
 
-  void changeDailyEvents(DailyEvents dailyEvens) {
-    var josn = json.encode(dailyEvens);
-    print(josn);
+  void changeDailyRecord(DailyRecord dailyRecord) {
+    _platformDataSource.invokeMethod("PutDailyRecord", json.encode(dailyRecord));
   }
 
-  void removeDailyEvents(DailyEvents dailyEvens) {
+  void removeDailyRecord(DailyRecord dailyEvens) {
     // 删除关联数据（focusEvents）
     // 删除DailyEvents数据
-    _platformDataSource.invokeMethod("RemoveDailyEvents", dailyEvens.boxId.toString());
-    dailyEventsList.remove(dailyEvens);
+    _platformDataSource.invokeMethod("RemoveDailyRecord", dailyEvens.boxId.toString());
     //dailyEventsMap
   }
 
   // FocusEvent
 
   void addFocusEventToSelectedDay(FocusEvent focusEvent, int focusItemBoxId) {
+    /// 获取FocusItem，引用增加一次
+    FocusItem focusItem = getFocusItemFromId(focusItemBoxId);
+    focusItem.addReferences();
+    changeFocusItem(focusItem);
+
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = calendarMap.selectedDateIndex;
 
-    /// 获取FocusItem，引用增加一次
-    getFocusItemFromId(focusItemBoxId).addReferences();
+    /// 获取选中日期的DailyRecord，如果还没有保存过就加入到数据库
+    var dailyRecord = calendarMap.getDailyRecordFromSelectedDay();
+    if (dailyRecord.boxId == 0) {
+      putDailyRecord(dailyRecord);
+    }
 
-    var selectedDayEvents = calendarMap.getFocusEventsFromSelectedDay();
-    selectedDayEvents.add(focusEvent);
+    dailyRecord.focusEvents.add(focusEvent);
     putFocusEvent(focusEvent);
-    debugPrint('add SelectedDay Events: ${json.encode(selectedDayEvents)}');
+    debugPrint('add SelectedDay Events: ${json.encode(dailyRecord.focusEvents)}');
   }
 
   void changeFocusEventToSelectedDay(FocusEvent focusEvent, int index) {
@@ -195,7 +204,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void removeFocusEventToSelectedDay(int index, int focusItemBoxId) {
     /// 获取FocusItem，引用减少一次
-    getFocusItemFromId(focusItemBoxId).minusReferences();
+    FocusItem focusItem = getFocusItemFromId(focusItemBoxId);
+    focusItem.minusReferences();
+    changeFocusItem(focusItem);
 
     /// 获取选中日期的FocusEvents列表，然后删除掉index位置的记录
     var selectedDayEvents = calendarMap.getFocusEventsFromSelectedDay();

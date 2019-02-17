@@ -137,16 +137,18 @@ class CalendarMap {
   }
   DateTime getSelectedDateFromIndex(int index) => everyDayIndex[index].date();
 
-  List<FocusEvent> getFocusEventsFromSelectedDay() {
-    if (everyDayIndex[selectedDateIndex].dailyEvents == null) {
-      everyDayIndex[selectedDateIndex].dailyEvents = DailyEvents(selectedDateIndex);
+  DailyRecord getDailyRecordFromSelectedDay() {
+    if (everyDayIndex[selectedDateIndex].dailyRecord == null) {
+      everyDayIndex[selectedDateIndex].dailyRecord = DailyRecord(selectedDateIndex);
     }
-    return everyDayIndex[selectedDateIndex].dailyEvents.focusEvents;
+    return everyDayIndex[selectedDateIndex].dailyRecord;
   }
 
-  DailyEvents getSelectedDayDailyEvents() {
-    return everyDayIndex[selectedDateIndex].dailyEvents;
-  }
+  List<FocusEvent> getFocusEventsFromSelectedDay() => getDailyRecordFromSelectedDay().focusEvents;
+
+//  DailyRecord getSelectedDayDailyEvents() {
+//    return everyDayIndex[selectedDateIndex].dailyRecord;
+//  }
 
 }
 
@@ -160,7 +162,7 @@ class WeekProperty {
 
 class DateProperty {
   int year, month, day;
-  DailyEvents dailyEvents;
+  DailyRecord dailyRecord;
 
   DateProperty(this.year, this.month, this.day);
 
