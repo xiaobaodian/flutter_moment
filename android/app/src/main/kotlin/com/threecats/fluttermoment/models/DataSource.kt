@@ -1,7 +1,6 @@
 package com.threecats.fluttermoment.models
 
 import android.content.Context
-import android.util.Log
 import com.google.gson.Gson
 import com.threecats.fluttermoment.MomentApplication
 import io.objectbox.Box
@@ -20,7 +19,7 @@ object DataSource {
     lateinit var focusItemBox:  Box<FocusItem>
     lateinit var personItemBox: Box<PersonItem>
     lateinit var placeItemBox:  Box<PlaceItem>
-    lateinit var dailyEventBox: Box<DailyEvent>
+    lateinit var dailyRecordBox: Box<DailyRecord>
     lateinit var focusEventBox: Box<FocusEvent>
 
     fun init(app: MomentApplication) {
@@ -29,7 +28,7 @@ object DataSource {
         focusItemBox = app.boxStore.boxFor()
         personItemBox = app.boxStore.boxFor()
         placeItemBox = app.boxStore.boxFor()
-        dailyEventBox = app.boxStore.boxFor()
+        dailyRecordBox = app.boxStore.boxFor()
         focusEventBox = app.boxStore.boxFor()
     }
 
@@ -54,15 +53,15 @@ object DataSource {
     fun putPlaceItem(item: PlaceItem): Long = placeItemBox.put(item)
     fun removePlaceItemFor(id: Long) = placeItemBox.remove(id)
 
-    // DailyEvent
+    // DailyRecord
 
-    fun getDailyEventsFromJson(): String = Gson().toJson(dailyEventBox.query().build().find())
-    fun getDailyEventFromJson(dayIndex: Long): DailyEvent? {
-        val dailyEventQuery = dailyEventBox.query()
+    fun getDailyRecordsFromJson(): String = Gson().toJson(dailyRecordBox.query().build().find())
+    fun getDailyRecordFromJson(dayIndex: Long): DailyRecord? {
+        val dailyEventQuery = dailyRecordBox.query()
         return dailyEventQuery.equal(DailyEvent_.dayIndex, dayIndex).build().findFirst()
     }
-    fun putDailyEvent(dailyEvent: DailyEvent): Long = dailyEventBox.put(dailyEvent)
-    fun removeDailyEventFor(id: Long) = dailyEventBox.remove(id)
+    fun putDailyRecord(dailyRecord: DailyRecord): Long = dailyRecordBox.put(dailyRecord)
+    fun removeDailyRecordFor(id: Long) = dailyRecordBox.remove(id)
 
     // FocusEvent
 

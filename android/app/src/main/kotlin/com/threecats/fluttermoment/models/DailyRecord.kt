@@ -14,13 +14,13 @@ import io.objectbox.annotation.Id
  */
 
 @Entity
-data class DailyEvent(
+data class DailyRecord(
         var dayIndex: Int = 0,
         var weather: String = ""
 ) {
     @Id
     var boxId: Long = 0
 
-    @Backlink(to = "dailyEvent")
+    @Backlink(to = "dailyRecord")
     lateinit var focusEvents: List<FocusEvent>
 }

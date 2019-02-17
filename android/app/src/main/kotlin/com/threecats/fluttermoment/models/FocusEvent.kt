@@ -10,10 +10,11 @@ import io.objectbox.relation.ToOne
 
 @Entity
 data class FocusEvent (
+        var dayIndex: Int = 0,
         var focusItemBoxId: Long = 0,
         var note: String = ""
 ) {
     @Id
     var boxId: Long = 0
-    lateinit var dailyEvent: ToOne<DailyEvent>
+    lateinit var dailyRecord: ToOne<DailyRecord>
 }

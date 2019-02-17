@@ -1,7 +1,6 @@
 package com.threecats.fluttermoment
 
 import android.content.Context
-import android.util.Log
 import com.google.gson.Gson
 import com.threecats.fluttermoment.models.*
 //import com.threecats.fluttermoment.models.DataSource.getDailyEvent
@@ -63,23 +62,27 @@ object DataSourcePlugin {
                     result.success(null)
                 }
 
-                "LoadDailyEvents" -> {
-                    result.success(DataSource.getDailyEventsFromJson())
+                "LoadDailyRecords" -> {
+                    result.success(DataSource.getDailyRecordsFromJson())
                 }
 
-                "PutDailyEvent" -> {
+                "PutDailyRecord" -> {
                     // 获取参数
                     val json = methodCall.arguments as String
-                    val dailyEvent = Gson().fromJson(json, DailyEvent::class.java)
+                    val dailyRecord = Gson().fromJson(json, DailyRecord::class.java)
                     //Log.d("android", p.name)
-                    result.success(DataSource.putDailyEvent(dailyEvent))
+                    result.success(DataSource.putDailyRecord(dailyRecord))
                 }
-                "GetDailyEvent" -> {
+                "GetDailyRecord" -> {
                     // 获取参数
-                    //val dayIndex = methodCall.arguments as Long
-                    //val dailyEvent = getDailyEvent(dayIndex)
+                    val dayIndex = methodCall.arguments as Long
+                    val dailyRecord = DataSource.getDailyRecordFromJson(dayIndex)
                     //Log.d("android", p.name)
-                    //result.success(dailyEvent)
+                    result.success(dailyRecord)
+                }
+                "RemoveDailyRecord" -> {
+                    val id = (methodCall.arguments as String).toLong()
+                    DataSource.removeDailyRecordFor(id)
                 }
                 else -> result.notImplemented()
             }
