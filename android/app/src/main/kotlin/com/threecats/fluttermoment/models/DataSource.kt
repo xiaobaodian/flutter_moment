@@ -61,14 +61,6 @@ object DataSource {
         val recordList = dailyRecordBox.query().build().find()
         recordList.forEach { record ->
             record.focusEvents = getFocusEventsFrom(record.dayIndex)
-
-            val s = Gson().toJson(record)
-            Log.d("android", "daily record of json: $s")
-
-            Log.d("android", "count: ${record.focusEvents.size}")
-            record.focusEvents.forEach{
-                Log.d("android", "msg: ${it.note}")
-            }
         }
 
         return Gson().toJson(recordList)

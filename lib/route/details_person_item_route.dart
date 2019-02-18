@@ -27,7 +27,7 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
   @override
   void initState() {
     super.initState();
-    _hideDeleteButton = widget._personItem.referencesIsNotNull ? true : false;
+    _hideDeleteButton = widget._personItem.isNotReferences ? true : false;
   }
 
   @override

@@ -7,26 +7,29 @@ import 'package:flutter_moment/models/enums.dart';
 
 mixin BuildImageMixin {
   Image _image;
-  String _source, _defaultDark, _defaultLight;
+  String _source = '', _defaultDark = '', _defaultLight = '';
 
-  void setImageSource(String source) {
-    _source = source;
+  bool hasImage() => _source.isNotEmpty;
+  String get mixinImage => _source;
+
+  void setMixinImageSource(String source) {
+    _source = (source == null) ? '' : source;
     _image = null;
   }
 
-  void setDarkSource(String dark) {
+  void setMixinDarkSource(String dark) {
     _defaultDark = dark;
   }
 
-  void setLightSource(String light) {
+  void setMixinLightSource(String light) {
     _defaultLight = light;
   }
 
-  Image buildImage(EImageMode mode) {
-    if (_source == null) {
-      if (mode == EImageMode.Dark && _defaultDark != null) {
+  Image buildMixinImage(EImageMode mode) {
+    if (_source.isEmpty) {
+      if (mode == EImageMode.Dark && _defaultDark.isNotEmpty) {
         return Image.asset(_defaultDark);
-      } else if (mode == EImageMode.Light && _defaultLight != null) {
+      } else if (mode == EImageMode.Light && _defaultLight.isNotEmpty) {
         return Image.asset(_defaultLight);
       }
       return null;
@@ -37,3 +40,4 @@ mixin BuildImageMixin {
     return _image;
   }
 }
+

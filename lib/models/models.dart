@@ -10,18 +10,16 @@ import 'package:flutter_moment/models/helper_chinese_string.dart';
 class BaseItem {
   int boxId = 0;
   int references = 0;
-  bool systemPresets = false;
-  bool internal = false;
+//  bool systemPresets = false;
+//  bool internal = false;
 
   BaseItem({
     this.boxId = 0,
     this.references = 0,
-    this.systemPresets = false,
-    this.internal = false,
   });
 
-  bool get referencesIsNull => references == 0;
-  bool get referencesIsNotNull => references > 0;
+  bool get isReferences => references == 0;
+  bool get isNotReferences => references > 0;
 
   void addReferences() {
     references++;
@@ -32,10 +30,11 @@ class BaseItem {
   }
 }
 
-class BasePhotoItem extends BaseItem {
-  String dir;
-  BasePhotoItem({
-    this.dir,
+class SystemBaseItem extends BaseItem {
+  bool systemPresets = false;
+  bool internal = false;
+
+  SystemBaseItem({
     boxId = 0,
     references = 0,
     systemPresets = false,
@@ -43,8 +42,6 @@ class BasePhotoItem extends BaseItem {
 }): super(
     boxId: boxId,
     references: references,
-    systemPresets: systemPresets,
-    internal: internal,
   );
 }
 
@@ -53,8 +50,7 @@ class BasePhotoItem extends BaseItem {
 //这个标注是告诉生成器，这个类是需要生成Model类的
 //@JsonSerializable()
 
-class FocusItem extends BaseItem {
-
+class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
   String title;
   String comment;
 
@@ -112,21 +108,21 @@ class PlaceItem extends BaseItem with BuildImageMixin {
     boxId = 0,
     references = 0,
   }): super(boxId: boxId, references: references) {
-    setImageSource(picture);
-    setDarkSource('assets/image/defaultPersonPhoto1.png');
-    setLightSource('assets/image/defaultPersonPhoto2.png');
+    setMixinImageSource(picture);
+    setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
+    setMixinLightSource('assets/image/defaultPersonPhoto2.png');
   }
 
   bool hasTitle() => title.length > 0;
   bool hasPicture() => picture != null;
 
   Image getImage({EImageMode mode = EImageMode.Dark}) {
-    return buildImage(mode);
+    return buildMixinImage(mode);
   }
 
   void updatePicture(String pic) {
     picture = pic;
-    setImageSource(picture);
+    setMixinImageSource(picture);
   }
 
   void copyWith(PlaceItem other) {
@@ -135,7 +131,7 @@ class PlaceItem extends BaseItem with BuildImageMixin {
     geography = other.geography;
     if (picture != other.picture) {
       picture = other.picture;
-      setImageSource(picture);
+      setMixinImageSource(picture);
     }
   }
 
@@ -164,7 +160,7 @@ class PlaceItem extends BaseItem with BuildImageMixin {
 ///
 class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMixin {
   String name;
-  String photo;
+  //String photo;
   int gender;
   DateTime birthday;
   double height;
@@ -174,25 +170,25 @@ class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMi
     this.name = '',
     this.gender = 2,
     this.birthday,
-    this.photo,
+    photo = '',
     boxId = 0,
     references = 0,
   }): super(boxId: boxId, references: references) {
-    setImageSource(photo);
-    setDarkSource('assets/image/defaultPersonPhoto1.png');
-    setLightSource('assets/image/defaultPersonPhoto2.png');
+    setMixinImageSource(photo);
+    setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
+    setMixinLightSource('assets/image/defaultPersonPhoto2.png');
   }
 
-  bool hasPhoto() => photo != null;
+  String get photo => mixinImage;
+  bool hasPhoto() => hasImage();
   bool hasBirthday() => birthday != null;
 
   Image getImage({EImageMode mode = EImageMode.Dark}) {
-    return buildImage(mode);
+    return buildMixinImage(mode);
   }
 
   void updatePhoto(String photo) {
-    this.photo = photo;
-    setImageSource(photo);
+    setMixinImageSource(photo);
   }
 
   String getGenderChineseTitle() {
@@ -209,9 +205,8 @@ class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMi
     birthday = other.birthday;
     height = other.height;
     weight = other.weight;
-    if (photo != other.photo) {
-      photo = other.photo;
-      setImageSource(photo);
+    if (mixinImage != other.mixinImage) {
+      setMixinImageSource(other.mixinImage);
     }
   }
 
@@ -231,7 +226,7 @@ class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMi
   Map<String, dynamic> toJson() => {
     'boxId': boxId,
     'name': name,
-    'photo': photo,
+    'photo': mixinImage,
     'gender': gender,
     'birthday': hasBirthday() ? birthday.toIso8601String() : '',
     'references': references,
@@ -261,6 +256,8 @@ class DailyRecord {
     var list = focusEventsOfJson as List;
     focusEvents = list.map((item) => FocusEvent.fromJson(item)).toList();
   }
+
+  bool get isNull => weather.isEmpty && focusEvents.isEmpty;
 
   factory DailyRecord.fromJson(Map<String, dynamic> json) {
     return DailyRecord.build(
@@ -313,4 +310,16 @@ class FocusEvent {
     'focusItemBoxId': focusItemBoxId,
     'note': note,
   };
+}
+
+mixin DetailsListMixin<T> {
+  List<T> detailsList = [];
+
+  void addDetailsItem(T item) {
+    detailsList.add(item);
+  }
+
+  void removeDetailsItem(T item) {
+    detailsList.remove(item);
+  }
 }

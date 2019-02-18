@@ -24,13 +24,14 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
   void initState() {
     super.initState();
     _hideEditButton = widget._focusItem.systemPresets ? true : false;
-    _hideDeleteButton = widget._focusItem.systemPresets || widget._focusItem.referencesIsNotNull ? true : false;
+    _hideDeleteButton = widget._focusItem.systemPresets || widget._focusItem.isNotReferences ? true : false;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
+    widget._focusItem.detailsList = _store.getFocusEventsFromFocusItemId(widget._focusItem.boxId);
   }
 
   @override
@@ -149,136 +150,22 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
           ),
         ],
       ),
-      body: ListView(
-        children: <Widget>[
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: buildBody(),
+    );
+  }
+
+  Widget buildBody() {
+    if (widget._focusItem.detailsList.length == 0) {
+      return Center(child: Text('还没有记录'));
+    }
+    return ListView.builder(
+      itemCount: widget._focusItem.detailsList.length,
+      itemBuilder: (context, index){
+        return ListTile(
+          title: Text(widget._focusItem.detailsList[index].note),
+          subtitle: Text(widget._focusItem.detailsList[index].dayIndex.toString()),
+        );
+      },
     );
   }
 

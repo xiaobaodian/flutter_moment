@@ -29,7 +29,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
   @override
   void initState() {
     super.initState();
-    _hideDeleteButton = widget._placeItem.referencesIsNotNull ? true : false;
+    _hideDeleteButton = widget._placeItem.isNotReferences ? true : false;
   }
 
   @override

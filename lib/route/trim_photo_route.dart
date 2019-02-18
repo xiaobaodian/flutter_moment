@@ -40,7 +40,7 @@ class _TrimPhotoState extends State<TrimPhoto> with TickerProviderStateMixin {
 
     // 这段时测试图片大小的，用于改进图片裁切算法
     var completer = Completer();
-    _imagePhoto.image.resolve(ImageConfiguration()).addListener((info, _) => completer.complete(info.image));
+    _imagePhoto.Image.resolve(ImageConfiguration()).addListener((info, _) => completer.complete(info.mixinImage));
     completer.future.then((img){
       debugPrint('img: $img');
     });

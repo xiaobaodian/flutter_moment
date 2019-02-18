@@ -86,6 +86,20 @@ class GlobalStoreState extends State<GlobalStore> {
   String getFocusTitleFrom(int id) => _focusItemMap[id]?.title;
   FocusItem getFocusItemFromId(int id) => _focusItemMap[id];
 
+  List<FocusEvent> getFocusEventsFromFocusItemId(int id){
+    List<FocusEvent> focusEvents = [];
+    calendarMap.everyDayIndex.forEach((day){
+      if (day.dailyRecord != null) {
+        day.dailyRecord.focusEvents.forEach((event){
+          if (event.focusItemBoxId == id) {
+            focusEvents.add(event);
+          }
+        });
+      }
+    });
+    return focusEvents;
+  }
+
   void putFocusItem(FocusItem focus) {
     focusItemList.add(focus);
     _platformDataSource.invokeMethod("PutFocusItem", json.encode(focus)).then((id) {
@@ -210,6 +224,12 @@ class GlobalStoreState extends State<GlobalStore> {
     var selectedDayEvents = calendarMap.getFocusEventsFromSelectedDay();
     removeFocusEvent(selectedDayEvents[index]);
     selectedDayEvents.removeAt(index);
+
+    var record = calendarMap.getDailyRecordFromSelectedDay();
+    if (record.isNull) {
+      removeDailyRecord(record);
+      calendarMap.clearDailyRecordOfSelectedDay();
+    }
 
     debugPrint('remove SelectedDay Events: ${json.encode(selectedDayEvents)}');
   }
