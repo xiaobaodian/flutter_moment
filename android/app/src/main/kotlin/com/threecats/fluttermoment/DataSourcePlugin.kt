@@ -90,6 +90,11 @@ object DataSourcePlugin {
                     val focusEvent = Gson().fromJson(json, FocusEvent::class.java)
                     result.success(DataSource.putFocusEvent(focusEvent))
                 }
+                "RemoveFocusEvent" -> {
+                    val id = (methodCall.arguments as String).toLong()
+                    DataSource.removeFocusEventFor(id)
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }

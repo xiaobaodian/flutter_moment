@@ -159,7 +159,6 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void removeDailyRecord(DailyRecord dailyEvens) {
-    // 删除关联数据（focusEvents）
     // 删除DailyEvents数据
     _platformDataSource.invokeMethod("RemoveDailyRecord", dailyEvens.boxId.toString());
     //dailyEventsMap
@@ -216,6 +215,7 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void putFocusEvent(FocusEvent focusEvent) {
+    assert(focusEvent.boxId == 0);
     _platformDataSource.invokeMethod("PutFocusEvent", json.encode(focusEvent)).then((id) {
       focusEvent.boxId = id;
     });
@@ -224,13 +224,16 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void changeFocusEvent(FocusEvent focusEvent) {
+    assert(focusEvent.boxId > 0);
+    _platformDataSource.invokeMethod("PutFocusEvent", json.encode(focusEvent));
     var test = json.encode(focusEvent);
-    print(test);
+    debugPrint('change Focus Event: $test');
   }
 
   void removeFocusEvent(FocusEvent focusEvent) {
+    _platformDataSource.invokeMethod("RemoveFocusEvent", focusEvent.boxId.toString());
     var test = json.encode(focusEvent);
-    print(test);
+    debugPrint('remove Focus Event: $test');
   }
 
 

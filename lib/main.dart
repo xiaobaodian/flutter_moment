@@ -58,16 +58,9 @@ class _HomeScreenState extends State<HomeScreen> {
   CalendarMap _calendarMap;
   bool hideGoTodayButton;
 
-  DemoData demoData = DemoData();
-  List<FocusItem> demoFocusList = [];
-  List<String> demoStringList = ['{"name":"diandian" , "age":"18"}','{"name":"heihei" , "age":"28"}'];
-
-
   //ScrollController _scrollController;
   PageController _pageController;
   PageStorageBucket _pageStorageBucket;
-
-  static const _platformDataSource = const MethodChannel('DataSource');
 
   @override
   void initState() {
@@ -76,9 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
     //SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
     //SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top, SystemUiOverlay.bottom]);
     hideGoTodayButton = true;
-
-    demoFocusList.add(FocusItem(title: 'test1', comment: 'note1'));
-    demoFocusList.add(FocusItem(title: 'test2', comment: 'note2'));
   }
 
   @override
@@ -256,13 +246,6 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ],
-        ),
-      ),
-      endDrawer: Drawer(
-        child: Container(
-          //color: Colors.red,
-          alignment: Alignment.center,
-          child: CalendarRoute(),
         ),
       ),
       appBar: AppBar(
@@ -514,13 +497,9 @@ Widget _getListView(BuildContext context, int dayIndex) {
               return EditerFocusEventRoute(dailyRecord.focusEvents[index]);
             })).then((resultItem) {
               if (resultItem is FocusEvent) {
-                //dailyEvents.focusEvents[index] = resultItem;
-                //store.changeFocusEvent(resultItem);
                 store.changeFocusEventToSelectedDay(resultItem, index);
               } else if (resultItem is int) {
                 store.removeFocusEventToSelectedDay(index, dailyRecord.focusEvents[index].focusItemBoxId);
-                //store.getFocusItemFromId(dailyEvents.focusEvents[index].boxId).minusReferences();
-                //dailyEvents.focusEvents.removeAt(index);
               }
             });
           },

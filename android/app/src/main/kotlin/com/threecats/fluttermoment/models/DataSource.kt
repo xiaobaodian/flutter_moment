@@ -89,6 +89,7 @@ object DataSource {
     }
 
     fun putFocusEvent(focusEvent: FocusEvent): Long = focusEventBox.put(focusEvent)
+    fun removeFocusEventFor(id: Long) = focusEventBox.remove(id)
 
     private fun initFocusList() {
         focusItemBox.put(FocusItem("天气与心情", "今天的天气状况与我的心情。", systemPresets = true))
