@@ -44,38 +44,51 @@ object DataSource {
 
     // PersonItem
 
-    fun getPersonItemsFromJson(): String = Gson().toJson(personItemBox.query().build().find())
+    fun getPersonItemsOfJson(): String = Gson().toJson(personItemBox.query().build().find())
     fun putPersonItem(item: PersonItem): Long = personItemBox.put(item)
     fun removePersonItemFor(id: Long) = personItemBox.remove(id)
 
     // PlaceItem
 
-    fun getPlaceItemsFromJson(): String = Gson().toJson(placeItemBox.query().build().find())
+    fun getPlaceItemsOfJson(): String = Gson().toJson(placeItemBox.query().build().find())
     fun putPlaceItem(item: PlaceItem): Long = placeItemBox.put(item)
     fun removePlaceItemFor(id: Long) = placeItemBox.remove(id)
 
     // DailyRecord
 
-    //fun getDailyRecordsFromJson(): String = Gson().toJson(dailyRecordBox.query().build().find())
-    fun getDailyRecordsFromJson(): String {
-        var recordList = dailyRecordBox.query().build().find()
+    //fun getDailyRecordsOfJson(): String = Gson().toJson(dailyRecordBox.query().build().find())
+    fun getDailyRecordsOfJson(): String {
+        val recordList = dailyRecordBox.query().build().find()
         recordList.forEach { record ->
+            record.focusEvents = getFocusEventsFrom(record.dayIndex)
+
+            val s = Gson().toJson(record)
+            Log.d("android", "daily record of json: $s")
+
             Log.d("android", "count: ${record.focusEvents.size}")
             record.focusEvents.forEach{
                 Log.d("android", "msg: ${it.note}")
             }
         }
+
         return Gson().toJson(recordList)
     }
-    fun getDailyRecordFromJson(dayIndex: Long): DailyRecord? {
-        val dailyEventQuery = dailyRecordBox.query()
-        return dailyEventQuery.equal(DailyRecord_.dayIndex, dayIndex).build().findFirst()
+    fun getDailyRecordFrom(dayIndex: Int): DailyRecord? {
+        val dailyRecord = dailyRecordBox.query().equal(DailyRecord_.dayIndex, dayIndex.toLong()).build().findFirst()
+        dailyRecord?.focusEvents = getFocusEventsFrom(dayIndex)
+        return dailyRecord
     }
     fun putDailyRecord(dailyRecord: DailyRecord): Long = dailyRecordBox.put(dailyRecord)
     fun removeDailyRecordFor(id: Long) = dailyRecordBox.remove(id)
 
     // FocusEvent
 
+    private fun getFocusEventsFrom(dayIndex: Int): List<FocusEvent> {
+        val focusEventQuery = focusEventBox.query()
+        return focusEventQuery.equal(FocusEvent_.dayIndex, dayIndex.toLong()).build().find()
+    }
+
+    fun putFocusEvent(focusEvent: FocusEvent): Long = focusEventBox.put(focusEvent)
 
     private fun initFocusList() {
         focusItemBox.put(FocusItem("天气与心情", "今天的天气状况与我的心情。", systemPresets = true))

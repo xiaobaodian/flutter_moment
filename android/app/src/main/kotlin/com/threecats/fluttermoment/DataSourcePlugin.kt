@@ -1,6 +1,7 @@
 package com.threecats.fluttermoment
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.threecats.fluttermoment.models.*
 //import com.threecats.fluttermoment.models.DataSource.getDailyEvent
@@ -40,7 +41,7 @@ object DataSourcePlugin {
                 }
 
                 "LoadPersonItems" -> {
-                    result.success(DataSource.getPersonItemsFromJson())
+                    result.success(DataSource.getPersonItemsOfJson())
                 }
                 "RemovePersonItem" -> {
                     val id = (methodCall.arguments as String).toLong()
@@ -49,7 +50,7 @@ object DataSourcePlugin {
                 }
 
                 "LoadPlaceItems" -> {
-                    result.success(DataSource.getPlaceItemsFromJson())
+                    result.success(DataSource.getPlaceItemsOfJson())
                 }
                 "PutPlaceItem" -> {
                     val json = methodCall.arguments as String
@@ -63,26 +64,31 @@ object DataSourcePlugin {
                 }
 
                 "LoadDailyRecords" -> {
-                    result.success(DataSource.getDailyRecordsFromJson())
+                    result.success(DataSource.getDailyRecordsOfJson())
                 }
 
                 "PutDailyRecord" -> {
                     // 获取参数
                     val json = methodCall.arguments as String
                     val dailyRecord = Gson().fromJson(json, DailyRecord::class.java)
-                    //Log.d("android", p.name)
+                    Log.d("android", "daily reocrd: $dailyRecord")
                     result.success(DataSource.putDailyRecord(dailyRecord))
                 }
                 "GetDailyRecord" -> {
                     // 获取参数
-                    val dayIndex = methodCall.arguments as Long
-                    val dailyRecord = DataSource.getDailyRecordFromJson(dayIndex)
+                    val dayIndex = methodCall.arguments as Int
+                    val dailyRecord = DataSource.getDailyRecordFrom(dayIndex)
                     //Log.d("android", p.name)
                     result.success(dailyRecord)
                 }
                 "RemoveDailyRecord" -> {
                     val id = (methodCall.arguments as String).toLong()
                     DataSource.removeDailyRecordFor(id)
+                }
+                "PutFocusEvent" -> {
+                    val json = methodCall.arguments as String
+                    val focusEvent = Gson().fromJson(json, FocusEvent::class.java)
+                    result.success(DataSource.putFocusEvent(focusEvent))
                 }
                 else -> result.notImplemented()
             }

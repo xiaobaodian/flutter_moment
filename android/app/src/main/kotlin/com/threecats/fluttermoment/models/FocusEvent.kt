@@ -16,5 +16,4 @@ data class FocusEvent (
 ) {
     @Id
     var boxId: Long = 0
-    lateinit var dailyRecord: ToOne<DailyRecord>
 }

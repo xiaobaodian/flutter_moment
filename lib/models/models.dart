@@ -254,9 +254,11 @@ class DailyRecord {
   DailyRecord.build({
     this.boxId,
     this.dayIndex,
-    var focusEventsFromJson,
+    this.weather,
+    var focusEventsOfJson,
   }) {
-    var list = focusEventsFromJson as List;
+    print(focusEventsOfJson);
+    var list = focusEventsOfJson as List;
     focusEvents = list.map((item) => FocusEvent.fromJson(item)).toList();
   }
 
@@ -264,14 +266,15 @@ class DailyRecord {
     return DailyRecord.build(
       boxId: json['boxId'],
       dayIndex: json['dayIndex'],
-      focusEventsFromJson: json['focusEvents'],
+      weather: json['weather'],
+      focusEventsOfJson: json['focusEvents'],
     );
   }
 
   Map<String, dynamic> toJson() => {
     'boxId': boxId,
     'dayIndex': dayIndex,
-    'focusEvents': focusEvents,
+    'weather': weather,
   };
 }
 

@@ -79,9 +79,6 @@ class GlobalStoreState extends State<GlobalStore> {
         calendarMap.everyDayIndex[dayIndex].dailyRecord = dailyRecord;
       });
     });
-
-    //placeItemList = FocusDateServices.getPlaceList();
-    //personItemList = FocusDateServices.getPersonList();
   }
 
   // FocusItem
@@ -149,7 +146,7 @@ class GlobalStoreState extends State<GlobalStore> {
     placeItemList.remove(place);
   }
 
-  // DilayRecords
+  // DailyRecords
 
   void putDailyRecord(DailyRecord dailyRecord) {
     _platformDataSource.invokeMethod("PutDailyRecord", json.encode(dailyRecord)).then((id) {
@@ -171,7 +168,7 @@ class GlobalStoreState extends State<GlobalStore> {
   // FocusEvent
 
   void addFocusEventToSelectedDay(FocusEvent focusEvent, int focusItemBoxId) {
-    /// 获取FocusItem，引用增加一次
+    /// 获取FocusItem，引用增加一次，保存到数据库
     FocusItem focusItem = getFocusItemFromId(focusItemBoxId);
     focusItem.addReferences();
     changeFocusItem(focusItem);
@@ -179,13 +176,15 @@ class GlobalStoreState extends State<GlobalStore> {
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = calendarMap.selectedDateIndex;
 
-    /// 获取选中日期的DailyRecord，如果还没有保存过就加入到数据库
+    /// 获取选中日期的DailyRecord，
     var dailyRecord = calendarMap.getDailyRecordFromSelectedDay();
+    debugPrint('保存时获取到的daily record : $dailyRecord');
+    dailyRecord.focusEvents.add(focusEvent);
+
+    /// 如果还没有保存过就加入到数据库
     if (dailyRecord.boxId == 0) {
       putDailyRecord(dailyRecord);
     }
-
-    dailyRecord.focusEvents.add(focusEvent);
     putFocusEvent(focusEvent);
     debugPrint('add SelectedDay Events: ${json.encode(dailyRecord.focusEvents)}');
   }
@@ -217,6 +216,9 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void putFocusEvent(FocusEvent focusEvent) {
+    _platformDataSource.invokeMethod("PutFocusEvent", json.encode(focusEvent)).then((id) {
+      focusEvent.boxId = id;
+    });
     var test = json.encode(focusEvent);
     debugPrint('Put Focus Event: $test');
   }
