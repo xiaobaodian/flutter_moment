@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
@@ -150,20 +151,41 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
           ),
         ],
       ),
-      body: buildBody(),
+      body: buildBody(context),
     );
   }
 
-  Widget buildBody() {
-    if (widget._focusItem.detailsList.length == 0) {
+  Widget buildBody(BuildContext context) {
+    if (widget._focusItem.detailsList.isEmpty) {
       return Center(child: Text('还没有记录'));
     }
+    var store = GlobalStore.of(context);
+    var detailsList = widget._focusItem.detailsList;
     return ListView.builder(
-      itemCount: widget._focusItem.detailsList.length,
+      itemCount: detailsList.length,
       itemBuilder: (context, index){
-        return ListTile(
-          title: Text(widget._focusItem.detailsList[index].note),
-          subtitle: Text(widget._focusItem.detailsList[index].dayIndex.toString()),
+        var date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
+        var str = DateTimeExt.chineseDateString(date);
+        return Card(
+          margin: EdgeInsets.all(6),
+          child: InkWell(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                    child: Text(str,
+                      style: TextStyle(fontSize: 12, color: Colors.black45),
+                    ),
+                  ),
+                  Text(detailsList[index].note),
+                ],
+              ),
+            ),
+            onTap: (){},
+          ),
         );
       },
     );

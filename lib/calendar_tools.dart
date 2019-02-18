@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 
 class DateTimeExt {
 
+  static String chineseDateString(DateTime date) {
+    return '${date.year}年${date.month}月${date.day}日';
+  }
   static String chineseMonthNumber(DateTime date) {
     const name = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
     return name[date.month - 1];

@@ -13,3 +13,4 @@ mixin GetPersonChineseStringMixin {
     return '${birthday.year}年${birthday.month}月${birthday.day}日';
   }
 }
+

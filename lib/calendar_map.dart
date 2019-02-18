@@ -135,7 +135,7 @@ class CalendarMap {
   void setSelectedDateFromIndex(int index) {
     selectedDate = everyDayIndex[index].date();
   }
-  DateTime getSelectedDateFromIndex(int index) => everyDayIndex[index].date();
+  DateTime getDateFromIndex(int index) => everyDayIndex[index].date();
 
   DailyRecord getDailyRecordFromSelectedDay() {
     if (everyDayIndex[selectedDateIndex].dailyRecord == null) {
