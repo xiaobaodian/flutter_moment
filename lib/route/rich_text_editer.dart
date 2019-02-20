@@ -3,6 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 
+enum RichLineType {
+  Task,             // 任务
+  Text,             // 标准文本
+  TextBold,         // 粗体文本
+  Reference,        // 引用
+  UnorderedList,    // 无序列表
+  OrderedLists,     // 有序列表
+  Image,            // 图片
+}
+
 class RichTextEditerRoute extends StatefulWidget {
 
   final String _focusEvent;
@@ -42,7 +52,7 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
     RichTextLine newLine;
     if (line.length > 1) {
       debugPrint('第二行字数：${line[1].length}');
-      richTextLine[index].editingController.text = line[0];
+      richTextLine[index].editingController.content = line[0];
       setState(() {
         newLine = RichTextLine(line[1]);
         richTextLine.insert(index+1, newLine);
@@ -65,6 +75,82 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
     var focusScopeNode = FocusScope.of(context);
     focusScopeNode.requestFocus(richTextLine[index].focusNode);
   }
+
+  Widget getRichLineWidget(RichLineType type, String text){
+    Widget lineWidget;
+    switch (type) {
+      case RichLineType.Text :
+        lineWidget = getTextLine(text);
+        break;
+      case RichLineType.TextBold :
+        lineWidget = getTextBoldLine(text);
+        break;
+      case RichLineType.Task :
+        lineWidget = Text('');
+        break;
+      case RichLineType.OrderedLists :
+        lineWidget = Text('');
+        break;
+      case RichLineType.UnorderedList :
+        lineWidget = getUnorderedListLine(text);
+        break;
+      case RichLineType.Reference :
+        lineWidget = Text('');
+        break;
+      case RichLineType.Image :
+        lineWidget = Text('');
+        break;
+    }
+    return lineWidget;
+  }
+
+  Widget getTextLine(String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Text(text,
+        style: TextStyle(fontSize: 14),
+      ),
+    );
+  }
+
+  Widget getTextBoldLine(String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Text(text,
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget getOrderedListsLine(String index, String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(
+            width: 60,
+            height: double.infinity,
+            child: Text(index, style: TextStyle(fontSize: 12)),
+          ),
+          Text(text, style: TextStyle(fontSize: 12),
+          ),
+        ]
+      ),
+    );
+  }
+
+  Widget getUnorderedListLine(String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Text(text,
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +195,10 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
             ),
             onKey: (RawKeyEvent event) {
               debugPrint('能够捕获按键码');
+              RawKeyEventDataAndroid key = event.data;
+              print('KeyCode: ${key.keyCode}, CodePoint: ${key.codePoint}, '
+                  'Flags: ${key.flags}, MetaState: ${key.metaState}, '
+                  'ScanCode: ${key.scanCode}');
               if (event is RawKeyDownEvent) {
                 RawKeyDownEvent rawKeyDownEvent = event;
                 RawKeyEventDataAndroid rawKeyEventDataAndroid = rawKeyDownEvent.data;
@@ -126,20 +216,92 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
 
 }
 
+/// 富文本的行
+/// {type} 是行的类型，{fontStyle}是行的显示字体风格，一般不用设定，自动设置为默认值
+/// (Leading)是列表类型的前导符号，目前不用设置。如果是有序列表，将由整理方法自动设置成
+/// 序号，如果是无序列表，将由整理方法设置成指定符号
+
 class RichTextLine {
+  RichTextLine({
+    @required this.type,
+    this.content,
+  });
 
-  bool canChanged = true;
+  RichLineType type;
+  TextStyle textStyle;
 
-  String fontStyle;
-  int lineStyle;
-  var editingController = TextEditingController();
-  final focusNode = FocusNode();
+  String leading;
 
-  RichTextLine(String text) {
-//    editingController.addListener((){
-//    });
-    editingController.text = text;
+  /// line的数据内容，都以String的形式保存，图片也是
+  String content;
+
+  void buildStyle() {
+    getDefaultTextStyle(type);
   }
+
+}
+
+TextStyle getDefaultTextStyle(RichLineType type) {
+  TextStyle textStyle;
+  switch (type) {
+    case RichLineType.Text :
+      textStyle = TextStyle(
+        fontSize: 14,
+        color: Colors.black87,
+        textBaseline: TextBaseline.ideographic,
+      );
+      break;
+    case RichLineType.TextBold :
+      textStyle = TextStyle(
+        fontSize: 14,
+        color: Colors.black87,
+        fontWeight: FontWeight.bold,
+        textBaseline: TextBaseline.ideographic,
+      );
+      break;
+    case RichLineType.Task :
+      textStyle = TextStyle(
+        color: Colors.black87,
+        fontSize: 14,
+        textBaseline: TextBaseline.ideographic,
+      );
+      break;
+    case RichLineType.OrderedLists :
+      textStyle = TextStyle(
+        fontSize: 12,
+        color: Colors.black87,
+        textBaseline: TextBaseline.ideographic,
+      );
+      break;
+    case RichLineType.UnorderedList :
+      textStyle = TextStyle(
+        fontSize: 12,
+        color: Colors.black87,
+        textBaseline: TextBaseline.ideographic,
+      );
+      break;
+    case RichLineType.Reference :
+      textStyle = TextStyle(
+        fontSize: 12,
+        color: Colors.black45,
+        textBaseline: TextBaseline.ideographic,
+      );
+      break;
+    case RichLineType.Image :
+      textStyle = TextStyle(
+        fontSize: 12,
+        color: Colors.black87,
+        textBaseline: TextBaseline.ideographic,
+      );
+      break;
+  }
+  return textStyle;
+}
+
+mixin RichLineMixin {
+  final editingController = TextEditingController();
+  final focusNode = FocusNode();
+  bool canChanged = true;
 
   void initText(String text) {
     editingController.text = text;

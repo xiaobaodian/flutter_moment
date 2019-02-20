@@ -25,7 +25,6 @@ class DailyFocusRoute extends StatefulWidget {
 
 class DailyFocusRouteState extends State<DailyFocusRoute>
     with SingleTickerProviderStateMixin {
-  static const _platformDataSource = const MethodChannel('DataSource');
   GlobalStoreState _store;
   //String _localDir;
   List<FocusItem> focusList;
@@ -33,7 +32,7 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
   List<PlaceItem> placeList;
   TabController _controller;
 
-  final List<String> tabLabel = ['关注', '人物', '位置', '图片', '标签'];
+  final List<String> tabLabel = ['焦点', '人物', '位置', '图片', '标签'];
 
   @override
   void initState() {
@@ -76,7 +75,7 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
                       return EditerFocusItemRoute(FocusItem());
                     })).then((resultItem) {
                       if (resultItem is FocusItem) {
-                        _store.putFocusItem(resultItem);
+                        _store.addFocusItem(resultItem);
                       }
                     });
                     break;
@@ -88,7 +87,7 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
                       return EditerPersonItemRoute(PersonItem());
                     })).then((resultItem) {
                       if (resultItem is PersonItem) {
-                        _store.putPersonItem(resultItem);
+                        _store.addPersonItem(resultItem);
                       }
                     });
                     break;
@@ -100,7 +99,7 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
                       return EditerPlaceItemRoute(PlaceItem());
                     })).then((resultItem) {
                       if (resultItem is PlaceItem) {
-                        _store.putPlaceItem(resultItem);
+                        _store.addPlaceItem(resultItem);
                       }
                     });
                     break;

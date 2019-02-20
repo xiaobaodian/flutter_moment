@@ -100,10 +100,12 @@ class GlobalStoreState extends State<GlobalStore> {
     return focusEvents;
   }
 
-  void putFocusItem(FocusItem focus) {
-    focusItemList.add(focus);
+  void addFocusItem(FocusItem focus) {
     _platformDataSource.invokeMethod("PutFocusItem", json.encode(focus)).then((id) {
+      print('新的焦点条目已加入，boxId: $id');
       focus.boxId = id;
+      focusItemList.add(focus);
+      _focusItemMap[id] = focus;
     });
   }
 
@@ -122,10 +124,11 @@ class GlobalStoreState extends State<GlobalStore> {
 
   PersonItem getPersonItemFromId(int id) => _personItemMap[id];
 
-  void putPersonItem(PersonItem person) {
-    personItemList.add(person);
+  void addPersonItem(PersonItem person) {
     _platformDataSource.invokeMethod("PutPersonItem", json.encode(person)).then((id) {
       person.boxId = id;
+      personItemList.add(person);
+      _personItemMap[id] = person;
     });
   }
 
@@ -143,10 +146,11 @@ class GlobalStoreState extends State<GlobalStore> {
 
   PlaceItem getPlaceItemFromId(int id) => _placeItemMap[id];
 
-  void putPlaceItem(PlaceItem place) {
-    placeItemList.add(place);
+  void addPlaceItem(PlaceItem place) {
     _platformDataSource.invokeMethod("PutPlaceItem", json.encode(place)).then((id) {
       place.boxId = id;
+      placeItemList.add(place);
+      _placeItemMap[id] = place;
     });
   }
 

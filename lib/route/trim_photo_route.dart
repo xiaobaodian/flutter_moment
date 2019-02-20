@@ -39,11 +39,11 @@ class _TrimPhotoState extends State<TrimPhoto> with TickerProviderStateMixin {
     _imagePhoto = Image.file(widget._imageFile);
 
     // 这段时测试图片大小的，用于改进图片裁切算法
-    var completer = Completer();
-    _imagePhoto.Image.resolve(ImageConfiguration()).addListener((info, _) => completer.complete(info.mixinImage));
-    completer.future.then((img){
-      debugPrint('img: $img');
-    });
+//    var completer = Completer();
+//    _imagePhoto.Image.resolve(ImageConfiguration()).addListener((info, _) => completer.complete(info.mixinImage));
+//    completer.future.then((img){
+//      debugPrint('img: $img');
+//    });
 
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 120));
     // Tween 将动画的 0 - 1 的值映射到我们设置的范围内

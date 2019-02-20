@@ -251,16 +251,16 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('今日时光'),
         actions: <Widget>[
-//          IconButton(
-//            icon: Icon(Icons.inbox),
-//            onPressed: () {
-//              debugPrint('inbox'); //RichTextEditerRoute
-//              Navigator.of(context)
-//                  .push(MaterialPageRoute(builder: (BuildContext context) {
-//                return RichTextEditerRoute('q');
-//              }));
-//            },
-//          ),
+          IconButton(
+            icon: Icon(Icons.inbox),
+            onPressed: () {
+              debugPrint('inbox'); //RichTextEditerRoute
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (BuildContext context) {
+                return RichTextEditerRoute('q');
+              }));
+            },
+          ),
           Offstage(
             offstage: hideGoTodayButton,
             child: IconButton(

@@ -252,7 +252,6 @@ class DailyRecord {
     this.weather,
     var focusEventsOfJson,
   }) {
-    print(focusEventsOfJson);
     var list = focusEventsOfJson as List;
     focusEvents = list.map((item) => FocusEvent.fromJson(item)).toList();
   }
