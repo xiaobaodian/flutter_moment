@@ -382,7 +382,7 @@ Widget getRichTextTaskLine(String text) {
 
 Widget getRichTextOrderedListsLine(String leading, String text) {
   return richLayoutList(
-    Text(leading, style: TextStyle(fontSize: 12)),
+    Text('$leading.', style: TextStyle(fontSize: 12)),
     Text(text, style: TextStyle(fontSize: 12))
   );
 }
@@ -450,7 +450,7 @@ Widget richLayoutList(Widget leading, Widget widget) {  // Reference
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(3, 0, 12, 0),
+            padding: const EdgeInsets.fromLTRB(3, 3, 12, 0),
             child: leading,
           ),
           widget,
@@ -462,8 +462,13 @@ Widget richLayoutList(Widget leading, Widget widget) {  // Reference
 Widget richLayoutReference(Widget widget) {
   return Container(
     child: widget,
+    margin: EdgeInsets.fromLTRB(16, 0, 12, 0),
+    padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
     decoration: BoxDecoration(
-      color: Colors.indigoAccent,
+      color: Colors.black12,
+      border: Border(
+          left: BorderSide(color: Colors.black26, width: 3.0)
+      ),
     ),
   );
 }
