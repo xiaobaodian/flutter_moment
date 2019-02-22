@@ -14,7 +14,7 @@ enum RichLineType {
   Image,            // 图片
 }
 
-class CCCatRichText extends StatelessWidget{
+class CCCatRichText extends StatefulWidget{
   CCCatRichText({
     this.segmentSpacing = 6.0,
     this.listLineSpacing = 3.0,
@@ -32,10 +32,19 @@ class CCCatRichText extends StatelessWidget{
   final double listLineSpacing;
   final String leadingSymbols;
 
+  @override
+  CCCatRichTextState createState() {
+    return new CCCatRichTextState();
+  }
+}
+
+class CCCatRichTextState extends State<CCCatRichText> {
   final List<RichTextItem> contentList = [];
 
+  @override
   void dispose() {
-    if (isEditable) {
+    super.dispose();
+    if (widget.isEditable) {
       contentList.forEach((content) {
         content.dispose();
       });
@@ -44,222 +53,123 @@ class CCCatRichText extends StatelessWidget{
 
   void setContent(List<RichTextLine> content) {
     content.forEach((it){
-      contentList.add(RichTextItem(line: it));
+      contentList.add(RichTextItem(type: it.type, leading: it.leading, content: it.content));
     });
-  }
-
-  Widget getTitleLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Text(item.line.content,
-        style: TextStyle(fontSize: 16),
-      ),
-    );
-  }
-
-  Widget getSubTitleLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Text(item.line.content,
-        style: TextStyle(fontSize: 12),
-      ),
-    );
-  }
-
-  Widget getTextLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Text(item.line.content,
-        style: TextStyle(fontSize: 14),
-      ),
-    );
-  }
-
-  Widget getTextBoldLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Text(item.line.content,
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget getTaskLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 60,
-              height: double.infinity,
-              child: Text('task', style: TextStyle(fontSize: 12)),
-            ),
-            Text(item.line.content, style: TextStyle(fontSize: 12),
-            ),
-          ]
-      ),
-    );
-  }
-
-  Widget getOrderedListsLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 60,
-              height: double.infinity,
-              child: Text(item.line.leading, style: TextStyle(fontSize: 12)),
-            ),
-            Text(item.line.content, style: TextStyle(fontSize: 12),
-            ),
-          ]
-      ),
-    );
-  }
-
-  Widget getUnorderedListLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 60,
-              height: double.infinity,
-              child: Text(leadingSymbols, style: TextStyle(fontSize: 12)),
-            ),
-            Text(item.line.content, style: TextStyle(fontSize: 12),
-            ),
-          ]
-      ),
-    );
-  }
-
-  Widget getReferenceLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 60,
-              height: double.infinity,
-              child: Text(leadingSymbols, style: TextStyle(fontSize: 12)),
-            ),
-            Text(item.line.content, style: TextStyle(fontSize: 12),
-            ),
-          ]
-      ),
-    );
-  }
-
-  Widget getImageLine(RichTextItem item) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 60,
-              height: double.infinity,
-              child: Text(leadingSymbols, style: TextStyle(fontSize: 12)),
-            ),
-            Text(item.line.content, style: TextStyle(fontSize: 12),
-            ),
-          ]
-      ),
-    );
   }
 
   Widget getRichLineWidget(RichTextItem item){
     Widget lineWidget;
-    switch (item.line.type) {
+    switch (item.type) {
       case RichLineType.Title :
-        lineWidget = getTitleLine(item);
+        lineWidget = getRichTextTitleLine(item.content);
         break;
       case RichLineType.SubTitle :
-        lineWidget = getSubTitleLine(item);
+        lineWidget = getRichTextSubTitleLine(item.content);
         break;
       case RichLineType.Text :
-        lineWidget = getTextLine(item);
+        lineWidget = getRichTextTextLine(item.content);
         break;
       case RichLineType.TextBold :
-        lineWidget = getTextBoldLine(item);
+        lineWidget = getRichTextTextBoldLine(item.content);
         break;
       case RichLineType.Task :
-        lineWidget = getTaskLine(item);
+        lineWidget = getRichTextTaskLine(item.content);
         break;
       case RichLineType.OrderedLists :
-        lineWidget = getOrderedListsLine(item);
+        lineWidget = getRichTextOrderedListsLine(item.leading, item.content);
         break;
       case RichLineType.UnorderedList :
-        lineWidget = getUnorderedListLine(item);
+        lineWidget = getRichTextUnorderedListLine(item.leading, item.content);
         break;
       case RichLineType.Reference :
-        lineWidget = getReferenceLine(item);
+        lineWidget = getRichTextReferenceLine(item.content);
         break;
       case RichLineType.Image :
-        lineWidget = getImageLine(item);
+        lineWidget = getRichTextImageLine(item.content);
         break;
     }
     return lineWidget;
   }
 
-  void splitLine(BuildContext context, int index, List<String> lines) {
-    RichTextLine newLine;
+  Widget getRichItemWidget(RichTextItem item){
+    Widget lineWidget;
+    switch (item.type) {
+      case RichLineType.Title :
+        lineWidget = getRichTextTitleLine(item.content);
+        break;
+      case RichLineType.SubTitle :
+        lineWidget = getRichTextSubTitleLine(item.content);
+        break;
+      case RichLineType.Text :
+        lineWidget = getRichTextTextLine(item.content);
+        break;
+      case RichLineType.TextBold :
+        lineWidget = getRichTextTextBoldLine(item.content);
+        break;
+      case RichLineType.Task :
+        lineWidget = getRichTextTaskLine(item.content);
+        break;
+      case RichLineType.OrderedLists :
+        lineWidget = getRichTextOrderedListsLine(item.leading, item.content);
+        break;
+      case RichLineType.UnorderedList :
+        lineWidget = getRichTextUnorderedListLine(item.leading, item.content);
+        break;
+      case RichLineType.Reference :
+        lineWidget = getRichTextReferenceLine(item.content);
+        break;
+      case RichLineType.Image :
+        lineWidget = getRichTextImageLine(item.content);
+        break;
+    }
+    return lineWidget;
+  }
+
+  void splitLine(int index, List<String> lines) {
+    RichTextItem oldItem = contentList[index];
+    RichTextItem newItem;
     if (lines.length > 1) {
       debugPrint('第二行字数：${lines[1].length}');
-      contentList[index].editingController.text = lines[0];
-//      setState(() {
-//        newLine = RichTextLine(lines[1]);
-//        richTextLine.insert(index+1, newLine);
-//      });
-      newLine = RichTextLine(type: contentList[index].line.type, content: lines[1]);
-      var newItem = RichTextItem(line: newLine);
-      contentList.insert(index + 1, newItem);
+      oldItem.controller.text = lines[0];
+      setState(() {
+        newItem = RichTextItem(type: oldItem.type, leading: oldItem.leading, content: lines[1]);
+        contentList.insert(index + 1, newItem);
+      });
       Future.delayed(const Duration(milliseconds: 200), () {
         var focusScopeNode = FocusScope.of(context);
-        focusScopeNode.requestFocus(newItem.focusNode);
+        focusScopeNode.requestFocus(newItem?.node);
       });
     }
   }
 
-  void gotoNextLine(BuildContext context, int index) {
+  void gotoNextLine(int index) {
     if (index < contentList.length - 1) {
       var focusScopeNode = FocusScope.of(context);
-      focusScopeNode.requestFocus(contentList[index+1].focusNode);
+      focusScopeNode.requestFocus(contentList[index+1].node);
     }
   }
 
-  void gotoLine(BuildContext context, int index) {
+  void gotoLine(int index) {
     var focusScopeNode = FocusScope.of(context);
-    focusScopeNode.requestFocus(contentList[index].focusNode);
+    focusScopeNode.requestFocus(contentList[index].node);
   }
 
   Widget geTextField(BuildContext context, int index) {
     var item = contentList[index];
-    assert(item.editingController != null);
-    assert(item.focusNode != null);
+    assert(item.controller != null);
+    assert(item.node != null);
     return RawKeyboardListener(
-      focusNode: item.focusNode,
+      focusNode: item.node,
       child: TextField(
         maxLines: null,
         //maxLength: 300,
         inputFormatters: [ LengthLimitingTextInputFormatter(300), ],
         autofocus: true,
         textAlign: TextAlign.justify,
-        style: getDefaultTextStyle(item.line.type),
+        style: getDefaultTextStyle(item.type),
         textInputAction: TextInputAction.newline,
-        focusNode: item.focusNode,
-        controller: item.editingController,
+        focusNode: item.node,
+        controller: item.controller,
         decoration: InputDecoration(
             border: InputBorder.none,
             contentPadding: EdgeInsets.all(2)
@@ -275,7 +185,7 @@ class CCCatRichText extends StatelessWidget{
           if (item.canChanged) {
             item.canChanged = false;
             var line = text.split('\n');
-            splitLine(context, index, line);
+            splitLine(index, line);
           } else {
             item.canChanged = true;
           }
@@ -303,7 +213,7 @@ class CCCatRichText extends StatelessWidget{
     // TODO: implement build
     return ListView.separated(
       itemBuilder: (context, index){
-        return getRichLineWidget(contentList[index]);
+        return getRichItemWidget(contentList[index]);
       },
       separatorBuilder: (context, index){},
       itemCount: contentList.length,
@@ -322,7 +232,7 @@ class RichTextLine {
   });
 
   RichLineType type;
-  String leading;
+  String leading = '•';
 
   /// line的数据内容，都以String的形式保存，图片也是。
   String content;
@@ -330,26 +240,244 @@ class RichTextLine {
 
 class RichTextItem {
   RichTextItem({
-    this.line,
-  });
-
-  final RichTextLine line;
-  TextEditingController editingController;
-  FocusNode focusNode;
-  bool canChanged = true;
-
-  void init() {
-    editingController = TextEditingController();
-    focusNode = FocusNode();
+    this.type,
+    this.leading,
+    String content,
+  }) {
+    if (type != RichLineType.Image) {
+      controller = TextEditingController();
+      node = FocusNode();
+      controller.text = content;
+    } else {
+      image = content;
+    }
   }
 
+  RichLineType type;
+  String leading;
+  String image;
+  TextEditingController controller;
+  FocusNode node;
+  bool canChanged = true;
+
+  String get content => type == RichLineType.Image ? image : controller.text;
+
   void dispose() {
-    editingController?.dispose();
-    focusNode?.dispose();
+    controller?.dispose();
+    node?.dispose();
   }
 
 }
 
+///
+
+Widget getRichLineWidget(RichTextLine item){
+  Widget lineWidget;
+  switch (item.type) {
+    case RichLineType.Title :
+      lineWidget = getRichTextTitleLine(item.content);
+      break;
+    case RichLineType.SubTitle :
+      lineWidget = getRichTextSubTitleLine(item.content);
+      break;
+    case RichLineType.Text :
+      lineWidget = getRichTextTextLine(item.content);
+      break;
+    case RichLineType.TextBold :
+      lineWidget = getRichTextTextBoldLine(item.content);
+      break;
+    case RichLineType.Task :
+      lineWidget = getRichTextTaskLine(item.content);
+      break;
+    case RichLineType.OrderedLists :
+      lineWidget = getRichTextOrderedListsLine(item.leading, item.content);
+      break;
+    case RichLineType.UnorderedList :
+      lineWidget = getRichTextUnorderedListLine(item.leading, item.content);
+      break;
+    case RichLineType.Reference :
+      lineWidget = getRichTextReferenceLine(item.content);
+      break;
+    case RichLineType.Image :
+      lineWidget = getRichTextImageLine(item.content);
+      break;
+  }
+  return lineWidget;
+}
+
+///
+
+double getRichsegmentSpacing(RichLineType type){
+  switch (type) {
+    case RichLineType.Title :
+      return 6.0;
+      break;
+    case RichLineType.SubTitle :
+      return 6.0;
+      break;
+    case RichLineType.Text :
+      return 6.0;
+      break;
+    case RichLineType.TextBold :
+      return 6.0;
+      break;
+    case RichLineType.Task :
+      return 6.0;
+      break;
+    case RichLineType.OrderedLists :
+      return 3.0;
+      break;
+    case RichLineType.UnorderedList :
+      return 3.0;
+      break;
+    case RichLineType.Reference :
+      return 6.0;
+      break;
+    case RichLineType.Image :
+      return 6.0;
+      break;
+  }
+  return 6.0;
+}
+
+///
+
+Widget getRichTextTitleLine(String title) {
+  return richLayoutText(
+    Text(title,
+      style: TextStyle(fontSize: 18),
+    )
+  );
+}
+
+Widget getRichTextSubTitleLine(String subtitle) {
+  return richLayoutText(
+      Text(subtitle,
+        style: TextStyle(fontSize: 16),
+      )
+  );
+}
+
+Widget getRichTextTextLine(String text) {
+  return richLayoutText(
+      Text(text,
+        style: TextStyle(fontSize: 14),
+      )
+  );
+}
+
+Widget getRichTextTextBoldLine(String text) {
+  return richLayoutText(
+      Text(text,
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      )
+  );
+}
+
+Widget getRichTextTaskLine(String text) {
+  return richLayoutTask(
+    Text(text, style: TextStyle(fontSize: 12))
+  );
+}
+
+Widget getRichTextOrderedListsLine(String leading, String text) {
+  return richLayoutList(
+    Text(leading, style: TextStyle(fontSize: 12)),
+    Text(text, style: TextStyle(fontSize: 12))
+  );
+}
+
+Widget getRichTextUnorderedListLine(String leading, String text) {
+  return richLayoutList(
+      Text(leading, style: TextStyle(fontSize: 12)),
+      Text(text, style: TextStyle(fontSize: 12))
+  );
+}
+
+Widget getRichTextReferenceLine(String text) {
+  return richLayoutReference(
+    Text(text, style: TextStyle(fontSize: 12))
+  );
+}
+
+Widget getRichTextImageLine(String image) {
+  return richLayoutImage(
+    Text('这里是图片', style: TextStyle(fontSize: 12), ),
+  );
+}
+
+
+/// 下面是RichText的基本排版风格布局文件
+
+Widget richLayoutText(Widget widget) {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+    child: widget,
+  );
+}
+
+Widget richLayoutTask(Widget widget) {
+//  CheckboxListTile(
+//
+//  );
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+    child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(
+            width: 60,
+            height: double.infinity,
+            child: Checkbox(
+              value: false,
+              onChanged: (isSelected){
+
+              },
+            ),
+          ),
+          widget,
+        ]
+    ),
+  );
+}
+
+Widget richLayoutList(Widget leading, Widget widget) {  // Reference
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+    child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(3, 0, 12, 0),
+            child: leading,
+          ),
+          widget,
+        ]
+    ),
+  );
+}
+
+Widget richLayoutReference(Widget widget) {
+  return Container(
+    child: widget,
+    decoration: BoxDecoration(
+      color: Colors.indigoAccent,
+    ),
+  );
+}
+
+Widget richLayoutImage(Widget widget) {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+    child: widget,
+  );
+}
+
+///
+/// 风格设置
+///
 TextStyle getDefaultTextStyle(RichLineType type) {
   TextStyle textStyle;
   switch (type) {
