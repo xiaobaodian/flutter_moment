@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_moment/richtext/cat_richtext.dart';
+import 'package:flutter_moment/richtext/cccat_rich_text.dart';
+
+enum RichLineType {
+  Title,            // 标题
+  SubTitle,         // 子标题
+  Task,             // 任务
+  Text,             // 标准文本
+  TextBold,         // 粗体文本
+  Reference,        // 引用
+  UnorderedList,    // 无序列表
+  OrderedLists,     // 有序列表
+  Image,            // 图片
+}
 
 class RichTextLayout {
   RichTextLayout(
@@ -41,16 +53,22 @@ class RichTextLayout {
   Widget richLayoutTask(Widget widget) {
     return Row(
         mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(3, 3, 12, 0),
-              child: Checkbox(
-                value: false,
-                onChanged: (isSelected) {},
+            padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+              child: SizedBox(
+                height: 32,
+                width: 32,
+                child: Checkbox(
+                  value: true,
+                  onChanged: (isSelected) {
+                    isSelected = !isSelected;
+                  },
+                ),
               ),
           ),
-          widget,
+          Expanded(child: widget),
         ]);
   }
 
@@ -132,7 +150,7 @@ class RichTextLayout {
 
   Widget getTaskLayout(String text) {
     var effectiveSytle = taskStyle == null
-        ? TextStyle(fontSize: 12)
+        ? TextStyle(fontSize: 14)
         : taskStyle;
     return richLayoutTask(Text(text, style: effectiveSytle));
   }
@@ -205,4 +223,39 @@ class RichTextLayout {
     return lineWidget;
   }
 
+}
+
+///
+
+double getRichsegmentSpacing(RichLineType type){
+  switch (type) {
+    case RichLineType.Title :
+      return 6.0;
+      break;
+    case RichLineType.SubTitle :
+      return 6.0;
+      break;
+    case RichLineType.Text :
+      return 6.0;
+      break;
+    case RichLineType.TextBold :
+      return 6.0;
+      break;
+    case RichLineType.Task :
+      return 6.0;
+      break;
+    case RichLineType.OrderedLists :
+      return 3.0;
+      break;
+    case RichLineType.UnorderedList :
+      return 3.0;
+      break;
+    case RichLineType.Reference :
+      return 6.0;
+      break;
+    case RichLineType.Image :
+      return 6.0;
+      break;
+  }
+  return 6.0;
 }
