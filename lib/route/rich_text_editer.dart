@@ -30,7 +30,7 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
     richTextLine.add(RichTextLine(type: RichLineType.SubTitle, content: '这是副标题'));
     richTextLine.add(RichTextLine(type: RichLineType.Text, content: '循礼门小龙坎火锅，这里是位置的地址'));
     richTextLine.add(RichTextLine(type: RichLineType.Task, content: '这是一个任务，去循礼门小龙坎火锅。'));
-    richTextLine.add(RichTextLine(type: RichLineType.Task, content: '这是第二个任务。去循礼门小龙坎火锅，这里是位置的地址，去循礼门小龙坎火锅，这里是位置的地址。'));
+//    richTextLine.add(RichTextLine(type: RichLineType.Task, content: '这是第二个任务。去循礼门小龙坎火锅，这里是位置的地址，去循礼门小龙坎火锅，这里是位置的地址。'));
     richTextLine.add(RichTextLine(type: RichLineType.UnorderedList, content: '这里是无序列表'));
     richTextLine.add(RichTextLine(type: RichLineType.UnorderedList, content: '这里是无序列表，这里是无序列表，这里是无序列表，这里是无序列表。'));
     richTextLine.add(RichTextLine(type: RichLineType.UnorderedList, content: '这里是无序列表'));
@@ -39,6 +39,7 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
     richTextLine.add(RichTextLine(type: RichLineType.OrderedLists, content: '这里是有序列表，这里是有序列表，这里是有序列表。这里是有序列表，这里是有序列表，这里是有序列表。'));
     richTextLine.add(RichTextLine(type: RichLineType.OrderedLists, content: '这里是有序列表'));
     richTextLine.add(RichTextLine(type: RichLineType.TextBold, content: '这是粗体文本演示'));
+    //richTextLine.add(RichTextLine(type: RichLineType.Image, content: '这是图片的说明'));
     richTextLine.add(RichTextLine(type: RichLineType.Reference, content: '这里是引用或需要特别说明的文本。这里是引用或需要特别说明的文本。这里是引用或需要特别说明的文本。'));
   }
 
@@ -69,8 +70,14 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
       appBar: AppBar(
         title: Text('RichTextEditer'),
       ),
-      body: CCCatRichText(
+      body: CCCatRichText.editable(
         content: richTextLine,
+        onTapLineEvent: (index) {
+          print('($index) ${richTextLine[index].content}');
+          setState(() {
+            richTextLine[index].type = RichLineType.OrderedLists;
+          });
+        },
       ),
     );
   }

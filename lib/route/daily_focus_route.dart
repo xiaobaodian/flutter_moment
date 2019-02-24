@@ -12,7 +12,7 @@ import 'package:flutter_moment/route/details_place_item_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_person_item_route.dart';
 import 'package:flutter_moment/route/editer_place_item_route.dart';
-import 'package:flutter_moment/widgets/cat_list_tile.dart';
+import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class DailyFocusRoute extends StatefulWidget {
   final int _initTab;
