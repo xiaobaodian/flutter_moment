@@ -237,7 +237,16 @@ class CCCatRichTextState extends State<CCCatRichText> {
       /// 这个调用很重要，不然会出现断言错误。
       //item.node.unfocus();
       setState(() {
-        item.type = type;
+        String str = item.controller.text;
+        RichTextItem newItem = RichTextItem(type: type, content: str);
+        lineList.removeAt(index);
+        lineList.insert(index, newItem);
+        //item.type = type;
+        //item.changeTypeTo(type);
+        //requestFocus(newItem.node);
+        Future.delayed(const Duration(milliseconds: 200), () {
+          requestFocus(newItem?.node);
+        });
       });
     }
   }
@@ -513,5 +522,10 @@ class RichTextItem extends RichTextLine {
   void dispose() {
     controller?.dispose();
     node?.dispose();
+  }
+
+  void changeTypeTo(RichLineType type) {
+    node = FocusNode();
+    this.type = type;
   }
 }

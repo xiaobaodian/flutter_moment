@@ -48,6 +48,28 @@ class RichTextLayout {
 
   /// 基础布局
 
+  Widget richBaseLayout() {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(''),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(''),
+                Text(''),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget richLayoutText(Widget widget) {
     return widget;
   }
