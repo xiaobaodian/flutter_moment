@@ -71,7 +71,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
     }
   }
 
-  Widget getLayoutWidget(int index) {
+  Widget getRichLineLayoutWidget(int index) {
     var item = lineList[index];
     Widget lineWidget;
     switch (item.type) {
@@ -200,6 +200,18 @@ class CCCatRichTextState extends State<CCCatRichText> {
     return lineWidget;
   }
 
+  int getCurrentLineIndex() {
+    int index = -1;
+    for (int i = 0; i < lineList.length; i++) {
+      RichTextItem item = (lineList[i]);
+      if (item.node.hasFocus) {
+        index = i;
+        break;
+      }
+    }
+    return index;
+  }
+
   void gotoNextLine(int index) {
     if (index < lineList.length - 1) {
       var focusScopeNode = FocusScope.of(context);
@@ -217,8 +229,17 @@ class CCCatRichTextState extends State<CCCatRichText> {
     focusScopeNode.requestFocus(node);
   }
 
-  void changedLineType(int index, RichLineType type) {
-    lineList[index].type = type;
+  void changeCurrentLineTypeTo(RichLineType type) {
+    int index = getCurrentLineIndex();
+    //int index = 1;
+    if (index > -1) {
+      RichTextItem item = lineList[index];
+      /// 这个调用很重要，不然会出现断言错误。
+      //item.node.unfocus();
+      setState(() {
+        item.type = type;
+      });
+    }
   }
 
   void calculationOrderedList() {
@@ -272,17 +293,17 @@ class CCCatRichTextState extends State<CCCatRichText> {
     return RawKeyboardListener(
       focusNode: item.node,
       child: TextField(
+        focusNode: item.node,
+        controller: item.controller,
         maxLines: null,
         //maxLength: 300,
         inputFormatters: [
           LengthLimitingTextInputFormatter(300),
         ],
         style: effectiveSytle,
-        autofocus: true,
+        //autofocus: true,
         textAlign: TextAlign.justify,
         textInputAction: TextInputAction.newline,
-        focusNode: item.node,
-        controller: item.controller,
         decoration: InputDecoration(
             border: InputBorder.none, contentPadding: EdgeInsets.all(0)),
         onEditingComplete: () {
@@ -298,7 +319,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
           if (t == '\u0000') {
             debugPrint('神奇字符');
           } else {
-            debugPrint('可以放心了');
+            debugPrint('找到解决方法了');
             if (index > 0) {
               setState(() {
                 var line = lineList[index - 1] as RichTextItem;
@@ -357,7 +378,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
             padding: EdgeInsets.all(16),
             itemBuilder: (context, index) {
               return InkWell(
-                child: getLayoutWidget(index),
+                child: getRichLineLayoutWidget(index),
                 onTap: () {
                   if (widget.onTapLineEvent != null) {
                     widget.onTapLineEvent(index);
@@ -396,7 +417,37 @@ class CCCatRichTextState extends State<CCCatRichText> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               IconButton(
-                icon: Icon(Icons.list),
+                icon: Icon(Icons.format_align_justify),
+                onPressed: (){
+                  changeCurrentLineTypeTo(RichLineType.Text);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.format_bold),
+                onPressed: (){
+                  changeCurrentLineTypeTo(RichLineType.TextBold);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.format_list_numbered),
+                onPressed: (){
+                  changeCurrentLineTypeTo(RichLineType.OrderedLists);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.format_list_bulleted),
+                onPressed: (){
+                  changeCurrentLineTypeTo(RichLineType.UnorderedList);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.aspect_ratio),
+                onPressed: (){
+                  changeCurrentLineTypeTo(RichLineType.Reference);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.check_box),
                 onPressed: (){},
               ),
               IconButton(
@@ -450,9 +501,11 @@ class RichTextItem extends RichTextLine {
   }
 
   String image;
+  bool canChanged = true;
+
   TextEditingController controller;
   FocusNode node;
-  bool canChanged = true;
+  Widget field;
 
   String get editContent =>
       type == RichLineType.Image ? image : controller.text;
