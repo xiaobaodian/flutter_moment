@@ -39,7 +39,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
       widget.content.forEach((it) {
         lineList.add(RichTextItem(
           type: it.type,
-          content: '\v' + it.content,
+          content: '\u0000' + it.content,
         ));
       });
     } else {
@@ -134,8 +134,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
               Text(
                 '9:20 - 10:00',
                 style: textTheme.caption,
-              )
-          );
+              ));
         } else {
           lineWidget = layout.richLayoutTask(
               Text(item.content, style: effectiveSytle),
@@ -152,8 +151,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
         if (widget.isEditable) {
           lineWidget = layout.richLayoutList(
               Text('${item.leading}.', style: effectiveSytle),
-              geTextField(index, effectiveSytle)
-          );
+              geTextField(index, effectiveSytle));
         } else {
           lineWidget = layout.richLayoutList(
               Text('${item.leading}.', style: effectiveSytle),
@@ -180,9 +178,8 @@ class CCCatRichTextState extends State<CCCatRichText> {
             ? textTheme.caption
             : layout.referenceStyle;
         if (widget.isEditable) {
-          lineWidget = layout.richLayoutReference(
-              geTextField(index, effectiveSytle)
-          );
+          lineWidget =
+              layout.richLayoutReference(geTextField(index, effectiveSytle));
         } else {
           lineWidget = layout
               .richLayoutReference(Text(item.content, style: effectiveSytle));
@@ -212,7 +209,12 @@ class CCCatRichTextState extends State<CCCatRichText> {
 
   void gotoLine(int index) {
     var focusScopeNode = FocusScope.of(context);
-    focusScopeNode.requestFocus((lineList[index + 1] as RichTextItem).node);
+    focusScopeNode.requestFocus((lineList[index] as RichTextItem).node);
+  }
+
+  void requestFocus(FocusNode node) {
+    var focusScopeNode = FocusScope.of(context);
+    focusScopeNode.requestFocus(node);
   }
 
   void changedLineType(int index, RichLineType type) {
@@ -234,16 +236,30 @@ class CCCatRichTextState extends State<CCCatRichText> {
   void splitLine(int index, List<String> lines) {
     RichTextItem oldItem = lineList[index];
     RichTextItem newItem;
+    RichLineType newType;
     if (lines.length > 1) {
       debugPrint('第二行字数：${lines[1].length}');
       oldItem.controller.text = lines[0];
+      if (oldItem.type == RichLineType.Title ||
+          oldItem.type == RichLineType.SubTitle ||
+          oldItem.type == RichLineType.Reference) {
+        newType = RichLineType.Text;
+      } else {
+        newType = oldItem.type;
+      }
       setState(() {
-        newItem = RichTextItem(type: oldItem.type, content: '\t'+lines[1]);
+        newItem = RichTextItem(type: newType, content: '\u0000' + lines[1]);
+        newItem.controller.selection = TextSelection.fromPosition(
+          TextPosition(
+            offset: 1,
+          )
+        );
         lineList.insert(index + 1, newItem);
       });
       Future.delayed(const Duration(milliseconds: 200), () {
-        var focusScopeNode = FocusScope.of(context);
-        focusScopeNode.requestFocus(newItem?.node);
+        //var focusScopeNode = FocusScope.of(context);
+        //focusScopeNode.requestFocus(newItem?.node);
+        requestFocus(newItem?.node);
         oldItem.canChanged = true;
       });
     }
@@ -278,11 +294,27 @@ class CCCatRichTextState extends State<CCCatRichText> {
         },
         onChanged: (text) {
           debugPrint('内容修改了：$text');
-          var t = text.substring(0,1);
-          if (t == '\v') {
+          var t = text.substring(0, 1);
+          if (t == '\u0000') {
             debugPrint('神奇字符');
           } else {
             debugPrint('可以放心了');
+            if (index > 0) {
+              setState(() {
+                var line = lineList[index - 1] as RichTextItem;
+                var posi = line.controller.text.length;
+                var newText = line.controller.text + text;
+                line.controller.text = newText;
+                line.controller.selection = TextSelection.fromPosition(
+                  TextPosition(
+                    affinity: TextAffinity.downstream,
+                    offset: posi,
+                  ),
+                );
+                lineList.removeAt(index);
+                requestFocus(line.node);
+              });
+            }
           }
           if (item.canChanged) {
             item.canChanged = false;
@@ -317,36 +349,64 @@ class CCCatRichTextState extends State<CCCatRichText> {
   @override
   Widget build(BuildContext context) {
     calculationOrderedList();
-    return ListView.separated(
-      padding: EdgeInsets.all(16),
-      itemBuilder: (context, index) {
-        return InkWell(
-          child: getLayoutWidget(index),
-          onTap: () {
-            if (widget.onTapLineEvent != null) {
-              widget.onTapLineEvent(index);
-            }
-          },
-        );
-      },
-      separatorBuilder: (context, index) {
-        if (lineList[index].type == RichLineType.Task) {
-          if (lineList[index + 1].type == RichLineType.Task) {
-            return SizedBox(height: layout.listLineSpacing);
-          }
-        } else if (lineList[index].type == RichLineType.OrderedLists ||
-            lineList[index].type == RichLineType.UnorderedList) {
-          if (lineList[index + 1].type == RichLineType.OrderedLists ||
-              lineList[index + 1].type == RichLineType.UnorderedList) {
-            return SizedBox(
-              height: layout.listLineSpacing,
-              width: double.infinity,
-            );
-          }
-        }
-        return SizedBox(height: layout.segmentSpacing);
-      },
-      itemCount: lineList.length,
+    return Column(
+      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Expanded(
+          child: ListView.separated(
+            padding: EdgeInsets.all(16),
+            itemBuilder: (context, index) {
+              return InkWell(
+                child: getLayoutWidget(index),
+                onTap: () {
+                  if (widget.onTapLineEvent != null) {
+                    widget.onTapLineEvent(index);
+                  }
+                },
+              );
+            },
+            separatorBuilder: (context, index) {
+              if (lineList[index].type == RichLineType.Task) {
+                if (lineList[index + 1].type == RichLineType.Task) {
+                  return SizedBox(height: layout.listLineSpacing);
+                }
+              } else if (lineList[index].type == RichLineType.OrderedLists ||
+                  lineList[index].type == RichLineType.UnorderedList) {
+                if (lineList[index + 1].type == RichLineType.OrderedLists ||
+                    lineList[index + 1].type == RichLineType.UnorderedList) {
+                  return SizedBox(
+                    height: layout.listLineSpacing,
+                    width: double.infinity,
+                  );
+                }
+              }
+              return SizedBox(height: layout.segmentSpacing);
+            },
+            itemCount: lineList.length,
+          ),
+        ),
+        Divider(
+          height: 1.0,
+        ),
+        Container(
+          //color: Colors.amber,
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(Icons.list),
+                onPressed: (){},
+              ),
+              IconButton(
+                icon: Icon(Icons.photo),
+                onPressed: (){},
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
