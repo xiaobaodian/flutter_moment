@@ -59,15 +59,11 @@ class RichTextLayout {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
-            child: SizedBox(
-              height: 32,
-              width: 32,
-              child: Checkbox(
-                value: true,
-                onChanged: (isSelected) {
-                  isSelected = !isSelected;
-                },
-              ),
+            child: Checkbox(
+              value: true,
+              onChanged: (isSelected) {
+                isSelected = !isSelected;
+              },
             ),
           ),
           Expanded(
