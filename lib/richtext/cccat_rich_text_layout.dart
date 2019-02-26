@@ -16,7 +16,7 @@ enum RichLineType {
 class RichTextLayout {
   RichTextLayout(
     BuildContext context, {
-    this.segmentSpacing = 12.0,
+    this.segmentSpacing = 8.0,
     this.listLineSpacing = 3.0,
     this.leadingSymbols = '•',
     this.titleStyle,
@@ -48,20 +48,20 @@ class RichTextLayout {
 
   /// 基础布局
 
-  Widget richBaseLayout() {
+  Widget richBaseLayout(Widget content, {Widget leading}) {
+    Widget effectiveLeading = leading == null ? Text('') : leading;
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(''),
+          effectiveLeading,
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(''),
-                Text(''),
+                content,
               ],
             ),
           ),
@@ -70,58 +70,174 @@ class RichTextLayout {
     );
   }
 
-  Widget richLayoutText(Widget widget) {
-    return widget;
-  }
-
-  Widget richLayoutTask(Widget task, Widget time) {
-    return Row(
+  Widget richLayoutText(Widget content) {
+    return Container(
+      padding: EdgeInsets.all(0.0),
+      decoration: BoxDecoration(),
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
-            child: Checkbox(
-              value: true,
-              onChanged: (isSelected) {
-                isSelected = !isSelected;
-              },
+          Offstage(
+            offstage: true,
+            child: Text(''),
+          ),
+          Offstage(
+            offstage: true,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+              child: Checkbox(
+                value: true,
+                onChanged: (isSelected) {},
+              ),
             ),
           ),
           Expanded(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              task,
-              time,
-            ],
-          )),
-        ]);
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                content,
+                Offstage(
+                  offstage: true,
+                  child: Text(''),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget richLayoutList(Widget leading, Widget widget) {
-    return Row(
+  Widget richLayoutTask(Widget task, Widget time) {
+    return Container(
+      padding: EdgeInsets.all(0.0),
+      decoration: BoxDecoration(),
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(3, 3, 12, 0),
-            child: leading,
+          Offstage(
+            offstage: true,
+            child: Text(''),
+          ),
+          Offstage(
+            offstage: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: Checkbox(
+                  value: true,
+                  onChanged: (isSelected) {
+                    isSelected = !isSelected;
+                  },
+                ),
+              ),
+            ),
           ),
           Expanded(
-            child: widget,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                task,
+                Offstage(
+                  offstage: false,
+                  child: time,
+                ),
+              ],
+            ),
           ),
-        ]);
+        ],
+      ),
+    );
   }
 
-  Widget richLayoutReference(Widget widget) {
+  Widget richLayoutList(Widget leading, Widget content) {
     return Container(
-      child: widget,
-      padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
+      padding: EdgeInsets.all(0.0),
+      decoration: BoxDecoration(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Offstage(
+            offstage: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(3, 1, 12, 0),
+              child: leading,
+            ),
+          ),
+          Offstage(
+            offstage: true,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+              child: Checkbox(
+                value: true,
+                onChanged: (isSelected) {  },
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                content,
+                Offstage(
+                  offstage: true,
+                  child: Text(''),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget richLayoutReference(Widget content) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(32, 12, 16, 12),
       decoration: BoxDecoration(
         color: Colors.black12,
         border: Border(left: BorderSide(color: Colors.black26, width: 5.0)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Offstage(
+            offstage: true,
+            child: Text(''),
+          ),
+          Offstage(
+            offstage: true,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+              child: Checkbox(
+                value: true,
+                onChanged: (isSelected) {},
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                content,
+                Offstage(
+                  offstage: true,
+                  child: Text(''),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

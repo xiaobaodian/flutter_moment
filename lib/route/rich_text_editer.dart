@@ -20,7 +20,6 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
   void initState() {
     super.initState();
     reassemble();
-    reassemble();
   }
 
   @override

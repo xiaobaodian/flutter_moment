@@ -36,12 +36,19 @@ class CCCatRichTextState extends State<CCCatRichText> {
     super.initState();
     layout = widget.richTextLayout;
     if (widget.isEditable) {
-      widget.content.forEach((it) {
+      if (widget.content.length == 0) {
         lineList.add(RichTextItem(
-          type: it.type,
-          content: '\u0000' + it.content,
+          type: RichLineType.Text,
+          content: '\u0000' + '',
         ));
-      });
+      } else {
+        widget.content.forEach((it) {
+          lineList.add(RichTextItem(
+            type: it.type,
+            content: '\u0000' + it.content,
+          ));
+        });
+      }
     } else {
       lineList = widget.content;
     }
@@ -69,6 +76,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
         }
       });
     }
+    lineList = null;
   }
 
   Widget getRichLineLayoutWidget(int index) {
@@ -79,7 +87,9 @@ class CCCatRichTextState extends State<CCCatRichText> {
         var effectiveSytle =
             layout.titleStyle == null ? textTheme.title : layout.titleStyle;
         if (widget.isEditable) {
-          lineWidget = geTextField(index, effectiveSytle);
+          //lineWidget = geTextField(index, effectiveSytle);
+          lineWidget =
+              layout.richLayoutText(geTextField(index, effectiveSytle));
         } else {
           lineWidget = Text(
             item.content,
@@ -92,7 +102,9 @@ class CCCatRichTextState extends State<CCCatRichText> {
             ? textTheme.subhead
             : layout.subTitleStyle;
         if (widget.isEditable) {
-          lineWidget = geTextField(index, effectiveSytle);
+          //lineWidget = geTextField(index, effectiveSytle);
+          lineWidget =
+              layout.richLayoutText(geTextField(index, effectiveSytle));
         } else {
           lineWidget = Text(
             item.content,
@@ -104,7 +116,9 @@ class CCCatRichTextState extends State<CCCatRichText> {
         var effectiveSytle =
             layout.contentStyle == null ? textTheme.body1 : layout.contentStyle;
         if (widget.isEditable) {
-          lineWidget = geTextField(index, effectiveSytle);
+          //lineWidget = geTextField(index, effectiveSytle);
+          lineWidget =
+              layout.richLayoutText(geTextField(index, effectiveSytle));
         } else {
           lineWidget = Text(
             item.content,
@@ -117,7 +131,9 @@ class CCCatRichTextState extends State<CCCatRichText> {
             ? textTheme.body1.merge(TextStyle(fontWeight: FontWeight.bold))
             : layout.contentBoldStyle;
         if (widget.isEditable) {
-          lineWidget = geTextField(index, effectiveSytle);
+          //lineWidget = geTextField(index, effectiveSytle);
+          lineWidget =
+              layout.richLayoutText(geTextField(index, effectiveSytle));
         } else {
           lineWidget = Text(
             item.content,
@@ -200,7 +216,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
     return lineWidget;
   }
 
-  int getCurrentLineIndex() {
+  int _getCurrentLineIndex() {
     int index = -1;
     for (int i = 0; i < lineList.length; i++) {
       RichTextItem item = (lineList[i]);
@@ -212,41 +228,53 @@ class CCCatRichTextState extends State<CCCatRichText> {
     return index;
   }
 
-  void gotoNextLine(int index) {
+  void _gotoNextLine(int index) {
     if (index < lineList.length - 1) {
       var focusScopeNode = FocusScope.of(context);
       focusScopeNode.requestFocus((lineList[index + 1] as RichTextItem).node);
     }
   }
 
-  void gotoLine(int index) {
+  void _gotoLine(int index) {
     var focusScopeNode = FocusScope.of(context);
     focusScopeNode.requestFocus((lineList[index] as RichTextItem).node);
   }
 
-  void requestFocus(FocusNode node) {
+  void _requestFocus(FocusNode node) {
     var focusScopeNode = FocusScope.of(context);
     focusScopeNode.requestFocus(node);
   }
 
+  void removeCurrentLine() {
+    int index = _getCurrentLineIndex();
+    if (index > -1) {
+      setState(() {
+        //requestFocus(item.node);
+        //item.node.unfocus();
+        lineList.removeAt(index);
+      });
+      Future.delayed(const Duration(milliseconds: 200), () {
+        RichTextItem item = lineList[index];
+        item.controller.selection = TextSelection.fromPosition(TextPosition(
+          affinity: TextAffinity.downstream,
+          offset: 1,
+        ));
+        _requestFocus(item?.node);
+      });
+    }
+  }
+
   void changeCurrentLineTypeTo(RichLineType type) {
-    int index = getCurrentLineIndex();
-    //int index = 1;
+    int index = _getCurrentLineIndex();
     if (index > -1) {
       RichTextItem item = lineList[index];
-      /// 这个调用很重要，不然会出现断言错误。
-      //item.node.unfocus();
       setState(() {
-        String str = item.controller.text;
-        RichTextItem newItem = RichTextItem(type: type, content: str);
-        lineList.removeAt(index);
-        lineList.insert(index, newItem);
-        //item.type = type;
-        //item.changeTypeTo(type);
-        //requestFocus(newItem.node);
-        Future.delayed(const Duration(milliseconds: 200), () {
-          requestFocus(newItem?.node);
-        });
+        //item.node.unfocus();
+        item.type = type;
+      });
+      Future.delayed(const Duration(milliseconds: 200), () {
+        //item.controller.selection;
+        _requestFocus(item?.node);
       });
     }
   }
@@ -263,12 +291,58 @@ class CCCatRichTextState extends State<CCCatRichText> {
     });
   }
 
+  void mergeUPLine(int index, String text) {
+    debugPrint('向上行合并');
+    RichTextItem tempLine = lineList[index];
+    if (index > 0) {
+      setState(() {
+        RichTextItem upLine = lineList[index - 1];
+        _requestFocus(upLine.node);
+        var p = upLine.controller.text.length;
+        var newText = upLine.controller.text + text;
+        //tempLine.controller.clear();
+        upLine.controller.text = newText;
+        upLine.controller.selection = TextSelection.fromPosition(
+          TextPosition(affinity: TextAffinity.downstream, offset: p),
+        );
+        lineList.removeAt(index);
+      });
+      Future.delayed(const Duration(milliseconds: 200), () {
+        tempLine.dispose();
+      });
+    }
+  }
+
   void splitLine(int index, List<String> lines) {
     RichTextItem oldItem = lineList[index];
     RichTextItem newItem;
     RichLineType newType;
-    if (lines.length > 1) {
-      debugPrint('第二行字数：${lines[1].length}');
+    if (lines.length < 2) return;
+    debugPrint('第一行字数：${lines[0].length}');
+    debugPrint('第二行字数：${lines[1].length}');
+
+    if (lines[0].length == 1 && lines[1].length == 0) {
+      if (index == 0) return;
+//      if (lineList[index - 1].type == RichLineType.OrderedLists ||
+//          lineList[index - 1].type == RichLineType.UnorderedList) {
+//        setState(() {
+//          RichTextItem item = lineList[index];
+//          item.type = RichLineType.Text;
+//          item.controller.text = '\u0000' + '';
+//          item.controller.selection = TextSelection.fromPosition(
+//              TextPosition(affinity: TextAffinity.downstream, offset: 1));
+//          item.canChanged = true;
+//        });
+//      }
+      setState(() {
+        RichTextItem item = lineList[index];
+        item.type = RichLineType.Text;
+        item.controller.text = '\u0000' + '';
+        item.controller.selection = TextSelection.fromPosition(
+            TextPosition(affinity: TextAffinity.downstream, offset: 1));
+        item.canChanged = true;
+      });
+    } else {
       oldItem.controller.text = lines[0];
       if (oldItem.type == RichLineType.Title ||
           oldItem.type == RichLineType.SubTitle ||
@@ -277,19 +351,19 @@ class CCCatRichTextState extends State<CCCatRichText> {
       } else {
         newType = oldItem.type;
       }
+      debugPrint('插入新行，类型是：${newType.toString()}');
       setState(() {
         newItem = RichTextItem(type: newType, content: '\u0000' + lines[1]);
-        newItem.controller.selection = TextSelection.fromPosition(
-          TextPosition(
-            offset: 1,
-          )
-        );
+        newItem.controller.selection = TextSelection.fromPosition(TextPosition(
+          affinity: TextAffinity.downstream,
+          offset: 1,
+        ));
         lineList.insert(index + 1, newItem);
       });
       Future.delayed(const Duration(milliseconds: 200), () {
         //var focusScopeNode = FocusScope.of(context);
         //focusScopeNode.requestFocus(newItem?.node);
-        requestFocus(newItem?.node);
+        _requestFocus(newItem?.node);
         oldItem.canChanged = true;
       });
     }
@@ -299,81 +373,69 @@ class CCCatRichTextState extends State<CCCatRichText> {
     var item = lineList[index] as RichTextItem;
     assert(item.controller != null);
     assert(item.node != null);
-    return RawKeyboardListener(
+    return TextField(
       focusNode: item.node,
-      child: TextField(
-        focusNode: item.node,
-        controller: item.controller,
-        maxLines: null,
-        //maxLength: 300,
-        inputFormatters: [
-          LengthLimitingTextInputFormatter(300),
-        ],
-        style: effectiveSytle,
-        //autofocus: true,
-        textAlign: TextAlign.justify,
-        textInputAction: TextInputAction.newline,
-        decoration: InputDecoration(
-            border: InputBorder.none, contentPadding: EdgeInsets.all(0)),
-        onEditingComplete: () {
-          //gotoNextLine(index);
-          debugPrint('onEditingComplete/是不是按了回车键');
-        },
-        onSubmitted: (text) {
-          debugPrint('onSubmitted/是不是按了回车键');
-        },
-        onChanged: (text) {
-          debugPrint('内容修改了：$text');
-          var t = text.substring(0, 1);
-          if (t == '\u0000') {
-            debugPrint('神奇字符');
-          } else {
-            debugPrint('找到解决方法了');
-            if (index > 0) {
-              setState(() {
-                var line = lineList[index - 1] as RichTextItem;
-                var posi = line.controller.text.length;
-                var newText = line.controller.text + text;
-                line.controller.text = newText;
-                line.controller.selection = TextSelection.fromPosition(
-                  TextPosition(
-                    affinity: TextAffinity.downstream,
-                    offset: posi,
-                  ),
-                );
-                lineList.removeAt(index);
-                requestFocus(line.node);
-              });
-            }
-          }
-          if (item.canChanged) {
-            item.canChanged = false;
-            var line = text.split('\n');
-            splitLine(index, line);
-          } else {
-            item.canChanged = true;
-          }
-        },
-      ),
-      onKey: (RawKeyEvent event) {
-        RawKeyEventDataAndroid key = event.data;
-        print('KeyCode: ${key.keyCode}, CodePoint: ${key.codePoint}, '
-            'Flags: ${key.flags}, MetaState: ${key.metaState}, '
-            'ScanCode: ${key.scanCode}');
-        if (key.keyCode == 66) {
-          var line = item.controller.text.split('\n');
-          splitLine(index, line);
-        }
+      controller: item.controller,
+      maxLines: null,
+      //maxLength: 300,
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(300),
+      ],
+      style: effectiveSytle,
+      autofocus: true,
+      textAlign: TextAlign.justify,
+      textInputAction: TextInputAction.newline,
+      decoration: InputDecoration(
+          border: InputBorder.none, contentPadding: EdgeInsets.all(0)),
+      onEditingComplete: () {
+        //gotoNextLine(index);
+        debugPrint('onEditingComplete/是不是按了回车键');
+      },
+      onSubmitted: (text) {
+        debugPrint('onSubmitted/是不是按了回车键');
+      },
+      onChanged: (text) {
+        debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
+        debugPrint('内容长度: ${text.length}');
 
-        if (event is RawKeyDownEvent) {
-          RawKeyDownEvent rawKeyDownEvent = event;
-          RawKeyEventDataAndroid rawKeyEventDataAndroid = rawKeyDownEvent.data;
-          print(rawKeyEventDataAndroid.keyCode);
-          switch (rawKeyEventDataAndroid.keyCode) {
+        if (text.length == 0) {
+          mergeUPLine(index, '');
+        } else {
+          //var t = text.substring(0, 1);
+          if (text.substring(0, 1) == '\u0000') {
+            debugPrint('包含神奇字符');
+            if (item.canChanged) {
+              item.canChanged = false;
+              var line = text.split('\n');
+              if (line.length > 1) {
+                splitLine(index, line);
+                debugPrint('处理拆分行');
+              }
+            } else {
+              item.canChanged = true;
+            }
+          } else {
+            mergeUPLine(index, text);
           }
         }
       },
     );
+  }
+
+  List<RichTextLine> getContentList() {
+    List<RichTextLine> list = [];
+    if (!widget.isEditable) return list;
+    lineList.forEach((line) {
+      RichTextItem item = line;
+      list.add(RichTextLine(
+        type: item.type,
+        content: item.controller.text,
+        beginTime: item.beginTime,
+        endTime: item.endTime,
+        checkState: item.checkState,
+      ));
+    });
+    return list;
   }
 
   @override
@@ -426,42 +488,50 @@ class CCCatRichTextState extends State<CCCatRichText> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               IconButton(
-                icon: Icon(Icons.format_align_justify),
-                onPressed: (){
+                icon: Icon(Icons.clear_all),
+                onPressed: () {
+                  removeCurrentLine();
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.reorder),
+                onPressed: () {
                   changeCurrentLineTypeTo(RichLineType.Text);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_bold),
-                onPressed: (){
+                onPressed: () {
                   changeCurrentLineTypeTo(RichLineType.TextBold);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_list_numbered),
-                onPressed: (){
+                onPressed: () {
                   changeCurrentLineTypeTo(RichLineType.OrderedLists);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_list_bulleted),
-                onPressed: (){
+                onPressed: () {
                   changeCurrentLineTypeTo(RichLineType.UnorderedList);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.aspect_ratio),
-                onPressed: (){
+                onPressed: () {
                   changeCurrentLineTypeTo(RichLineType.Reference);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.check_box),
-                onPressed: (){},
+                onPressed: () {
+                  changeCurrentLineTypeTo(RichLineType.Task);
+                },
               ),
               IconButton(
                 icon: Icon(Icons.photo),
-                onPressed: (){},
+                onPressed: () {},
               ),
             ],
           ),
@@ -479,7 +549,8 @@ class RichTextLine {
   RichTextLine({
     @required this.type,
     this.content,
-    this.time,
+    this.beginTime,
+    this.endTime,
     this.checkState,
   });
 
@@ -489,20 +560,49 @@ class RichTextLine {
   /// line的数据内容，都以String的形式保存，图片也是。
   String content;
 
-  String time;
+  DateTime beginTime, endTime;
   bool checkState;
+
+  factory RichTextLine.fromJson(Map<String, dynamic> json) {
+    return RichTextLine(
+      type: json['type'],
+      content: json['content'],
+      beginTime: json['beginTime'],
+      endTime: json['endTime'],
+      checkState: json['checkState'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'content': content,
+        'beginTime': beginTime,
+        'endTime': endTime,
+        'checkState': checkState,
+      };
 }
 
 class RichTextItem extends RichTextLine {
   RichTextItem({
     RichLineType type,
     String content,
-    String time,
+    beginTime,
+    endTime,
     bool checkState,
-  }) : super(type: type, content: content, time: time, checkState: checkState) {
+  }) : super(
+            type: type,
+            content: content,
+            beginTime: beginTime,
+            endTime: endTime,
+            checkState: checkState) {
     if (type != RichLineType.Image) {
       controller = TextEditingController();
       node = FocusNode();
+      node.addListener((){
+        if (node.hasFocus) {
+          canChanged = true;
+        }
+      });
       controller.text = content;
     } else {
       image = content;
@@ -514,7 +614,6 @@ class RichTextItem extends RichTextLine {
 
   TextEditingController controller;
   FocusNode node;
-  Widget field;
 
   String get editContent =>
       type == RichLineType.Image ? image : controller.text;
@@ -522,10 +621,5 @@ class RichTextItem extends RichTextLine {
   void dispose() {
     controller?.dispose();
     node?.dispose();
-  }
-
-  void changeTypeTo(RichLineType type) {
-    node = FocusNode();
-    this.type = type;
   }
 }
