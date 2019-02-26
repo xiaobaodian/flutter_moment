@@ -201,7 +201,7 @@ class RichTextLayout {
 
   Widget richLayoutReference(Widget content) {
     return Container(
-      padding: EdgeInsets.fromLTRB(32, 12, 16, 12),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
         color: Colors.black12,
         border: Border(left: BorderSide(color: Colors.black26, width: 5.0)),

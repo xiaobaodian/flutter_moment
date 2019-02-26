@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_moment/models/enums.dart';
 import 'package:flutter_moment/models/helper_image.dart';
 import 'package:flutter_moment/models/helper_chinese_string.dart';
+import 'package:flutter_moment/richtext/cccat_rich_text.dart';
 
 class BaseItem {
   int boxId = 0;
@@ -243,6 +244,7 @@ class DailyRecord {
   //DateTime date;
   String weather;
   List<FocusEvent> focusEvents = [];
+  List<RichTextLine> richLineList = [];
 
   DailyRecord(this.dayIndex);
 

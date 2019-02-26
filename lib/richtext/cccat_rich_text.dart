@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,23 +37,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
   void initState() {
     super.initState();
     layout = widget.richTextLayout;
-    if (widget.isEditable) {
-      if (widget.content.length == 0) {
-        lineList.add(RichTextItem(
-          type: RichLineType.Text,
-          content: '\u0000' + '',
-        ));
-      } else {
-        widget.content.forEach((it) {
-          lineList.add(RichTextItem(
-            type: it.type,
-            content: '\u0000' + it.content,
-          ));
-        });
-      }
-    } else {
-      lineList = widget.content;
-    }
+    initEditable(widget.content);
   }
 
   @override
@@ -77,6 +63,72 @@ class CCCatRichTextState extends State<CCCatRichText> {
       });
     }
     lineList = null;
+  }
+
+  void initEditable(List<RichTextLine> source) {
+    if (widget.isEditable) {
+      if (source.length == 0) {
+        lineList.add(RichTextItem(
+          type: RichLineType.Text,
+          content: '\u0000' + '',
+        ));
+      } else {
+        source.forEach((it) {
+          lineList.add(RichTextItem(
+            type: it.type,
+            content: '\u0000' + it.content,
+          ));
+        });
+      }
+    } else {
+      lineList = source;
+    }
+  }
+
+  List<RichTextLine> getContentList() {
+    List<RichTextLine> list = [];
+    if (!widget.isEditable) return list;
+    lineList.forEach((line) {
+      RichTextItem item = line;
+      list.add(RichTextLine(
+        type: item.type,
+        content: item.controller.text.replaceFirst('\u0000', ''),
+        beginTime: item.beginTime,
+        endTime: item.endTime,
+        //checkState: item.checkState,
+      ));
+    });
+//    debugPrint('list length: ${list.length}');
+//    debugPrint('list[0]: ${list[0].content.length}');
+//    debugPrint('RichTextLine: ${list[0].toString()}');
+//    RichTextLine line = list[0];
+//    String d = json.encode(list);
+//    //var d = list[0].toJson();
+//    debugPrint('json: $d');
+    return list;
+  }
+
+  void testthis(){
+    String data = getContentJsonString();
+    setState(() {
+      lineList.clear();
+    });
+    Future.delayed(const Duration(milliseconds: 3000), () {
+      loadContentListFromJson(data);
+      setState(() {
+
+      });
+    });
+  }
+
+  String getContentJsonString(){
+    return json.encode(getContentList());
+  }
+
+  void loadContentListFromJson(String jsonString) {
+    List<dynamic> resultJson = json.decode(jsonString) as List;
+    List<RichTextLine> source = resultJson.map((item) => RichTextLine.fromJson(item)).toList();
+    initEditable(source);
   }
 
   Widget getRichLineLayoutWidget(int index) {
@@ -191,7 +243,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
         break;
       case RichLineType.Reference:
         var effectiveSytle = layout.referenceStyle == null
-            ? textTheme.caption
+            ? textTheme.body1
             : layout.referenceStyle;
         if (widget.isEditable) {
           lineWidget =
@@ -323,17 +375,6 @@ class CCCatRichTextState extends State<CCCatRichText> {
 
     if (lines[0].length == 1 && lines[1].length == 0) {
       if (index == 0) return;
-//      if (lineList[index - 1].type == RichLineType.OrderedLists ||
-//          lineList[index - 1].type == RichLineType.UnorderedList) {
-//        setState(() {
-//          RichTextItem item = lineList[index];
-//          item.type = RichLineType.Text;
-//          item.controller.text = '\u0000' + '';
-//          item.controller.selection = TextSelection.fromPosition(
-//              TextPosition(affinity: TextAffinity.downstream, offset: 1));
-//          item.canChanged = true;
-//        });
-//      }
       setState(() {
         RichTextItem item = lineList[index];
         item.type = RichLineType.Text;
@@ -420,22 +461,6 @@ class CCCatRichTextState extends State<CCCatRichText> {
         }
       },
     );
-  }
-
-  List<RichTextLine> getContentList() {
-    List<RichTextLine> list = [];
-    if (!widget.isEditable) return list;
-    lineList.forEach((line) {
-      RichTextItem item = line;
-      list.add(RichTextLine(
-        type: item.type,
-        content: item.controller.text,
-        beginTime: item.beginTime,
-        endTime: item.endTime,
-        checkState: item.checkState,
-      ));
-    });
-    return list;
   }
 
   @override
@@ -531,7 +556,10 @@ class CCCatRichTextState extends State<CCCatRichText> {
               ),
               IconButton(
                 icon: Icon(Icons.photo),
-                onPressed: () {},
+                onPressed: () {
+                  //getContentList();
+                  testthis();
+                },
               ),
             ],
           ),
@@ -548,24 +576,27 @@ class CCCatRichTextState extends State<CCCatRichText> {
 class RichTextLine {
   RichTextLine({
     @required this.type,
-    this.content,
+    this.focusEventId = 0,
+    this.content = '',
     this.beginTime,
     this.endTime,
-    this.checkState,
+    this.checkState = 0,
   });
 
+  int focusEventId;
   RichLineType type;
   String leading = '';
 
   /// line的数据内容，都以String的形式保存，图片也是。
   String content;
 
-  DateTime beginTime, endTime;
-  bool checkState;
+  String beginTime, endTime;
+  int checkState;
 
   factory RichTextLine.fromJson(Map<String, dynamic> json) {
     return RichTextLine(
-      type: json['type'],
+      type: RichLineType.values[json['type']],
+      focusEventId: json['focusEventId'],
       content: json['content'],
       beginTime: json['beginTime'],
       endTime: json['endTime'],
@@ -574,23 +605,26 @@ class RichTextLine {
   }
 
   Map<String, dynamic> toJson() => {
-        'type': type,
-        'content': content,
-        'beginTime': beginTime,
-        'endTime': endTime,
-        'checkState': checkState,
-      };
+    'type': type.index,
+    'focusEventId': focusEventId,
+    'content': content,
+    'beginTime': '9:00',
+    'endTime': '11:00',
+    'checkState': checkState,
+  };
 }
 
 class RichTextItem extends RichTextLine {
   RichTextItem({
     RichLineType type,
+    int focusEventId,
     String content,
     beginTime,
     endTime,
-    bool checkState,
+    int checkState,
   }) : super(
             type: type,
+            focusEventId: focusEventId,
             content: content,
             beginTime: beginTime,
             endTime: endTime,
