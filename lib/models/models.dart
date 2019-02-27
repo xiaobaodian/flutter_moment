@@ -3,10 +3,13 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/enums.dart';
 import 'package:flutter_moment/models/helper_image.dart';
 import 'package:flutter_moment/models/helper_chinese_string.dart';
-import 'package:flutter_moment/richtext/cccat_rich_text.dart';
+import 'package:flutter_moment/richtext/cccat_rich_note_data.dart';
+import 'package:flutter_moment/richtext/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/richtext/cccat_rich_note_layout.dart';
 
 class BaseItem {
   int boxId = 0;
@@ -239,26 +242,44 @@ class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMi
 ///
 
 class DailyRecord {
-  int boxId = 0;
-  int dayIndex;
-  //DateTime date;
-  String weather;
-  List<FocusEvent> focusEvents = [];
-  List<RichTextLine> richLineList = [];
-
   DailyRecord(this.dayIndex);
 
   DailyRecord.build({
     this.boxId,
     this.dayIndex,
-    this.weather,
+    this.weather = '',
     var focusEventsOfJson,
   }) {
     var list = focusEventsOfJson as List;
     focusEvents = list.map((item) => FocusEvent.fromJson(item)).toList();
   }
 
-  bool get isNull => weather.isEmpty && focusEvents.isEmpty;
+  int boxId = 0;
+  int dayIndex = -1;
+  //DateTime date;
+  String weather = '';
+  List<FocusEvent> focusEvents = [];
+  List<RichLine> richLines = [];
+
+  bool get isNull {
+    if (focusEvents == null) focusEvents = [];
+    return weather.isEmpty && focusEvents.length == 0;
+  }
+
+  void buildRichList(GlobalStoreState store){
+    richLines.clear();
+    focusEvents.forEach((event){
+      richLines.add(
+        RichLine(
+          type: RichLineType.Title,
+          content: store.getFocusTitleFrom(event.focusItemBoxId),
+          focusEventId: event.boxId,
+        )
+      );
+      List<RichLine> lines = RichSource.getRichLinesFromJson(event.note);
+      richLines.addAll(lines);
+    });
+  }
 
   factory DailyRecord.fromJson(Map<String, dynamic> json) {
     return DailyRecord.build(

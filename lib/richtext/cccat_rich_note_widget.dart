@@ -3,48 +3,59 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_moment/richtext/cccat_rich_text_layout.dart';
+import 'package:flutter_moment/richtext/cccat_rich_note_data.dart';
+import 'package:flutter_moment/richtext/cccat_rich_note_layout.dart';
 
-class CCCatRichText extends StatefulWidget {
-  CCCatRichText({
-    this.content,
+class RichNote extends StatefulWidget {
+  RichNote({
+    this.richSource,
     this.richTextLayout,
     this.onTapLineEvent,
-  }) : isEditable = false;
+  }): isEditable = false {
+    richSource.richNote = this;
+  }
 
-  CCCatRichText.editable(
-      {this.content, this.richTextLayout, this.onTapLineEvent})
-      : isEditable = true;
+  RichNote.editable({
+    this.richSource,
+    this.richTextLayout,
+    this.onTapLineEvent
+  }): isEditable = true  {
+    richSource.richNote = this;
+    debugPrint('RichNote.editable 模式初始化');
+    richSource.markToEditer();
+  }
 
-  final ValueChanged<int> onTapLineEvent;
-  final RichTextLayout richTextLayout;
   final bool isEditable;
-  final List<RichTextLine> content;
+  final ValueChanged<int> onTapLineEvent;
+  final RichNoteLayout richTextLayout;
+  final RichSource richSource;
 
   @override
-  CCCatRichTextState createState() {
-    return new CCCatRichTextState();
+  RichNoteState createState() {
+    return new RichNoteState();
   }
 }
 
-class CCCatRichTextState extends State<CCCatRichText> {
+class RichNoteState extends State<RichNote> {
   TextTheme textTheme;
-  RichTextLayout layout;
-  List<RichTextLine> lineList = [];
+  RichNoteLayout layout;
+  RichSource source;
+  //List<RichLine> paragraphList;
   //List<RichTextItem> itemList;
 
   @override
   void initState() {
     super.initState();
     layout = widget.richTextLayout;
-    initEditable(widget.content);
+    source = widget.richSource;
+    //paragraphList = widget.richSource.paragraphList;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (layout == null) {
-      layout = RichTextLayout(
+      layout = RichNoteLayout(
         context,
         titleStyle: TextStyle(fontSize: 20, color: Colors.red),
       );
@@ -56,94 +67,27 @@ class CCCatRichTextState extends State<CCCatRichText> {
   void dispose() {
     super.dispose();
     if (widget.isEditable) {
-      lineList.forEach((item) {
-        if (item is RichTextItem) {
+      source.paragraphList.forEach((item) {
+        if (item is RichItem) {
           item.dispose();
         }
       });
     }
-    lineList = null;
+    source.paragraphList = null;
   }
 
-  void initEditable(List<RichTextLine> source) {
-    if (widget.isEditable) {
-      if (source.length == 0) {
-        lineList.add(RichTextItem(
-          type: RichLineType.Text,
-          content: '\u0000' + '',
-        ));
-      } else {
-        source.forEach((it) {
-          lineList.add(RichTextItem(
-            type: it.type,
-            content: '\u0000' + it.content,
-          ));
-        });
-      }
-    } else {
-      lineList = source;
-    }
-  }
-
-  List<RichTextLine> getContentList() {
-    List<RichTextLine> list = [];
-    if (!widget.isEditable) return list;
-    lineList.forEach((line) {
-      RichTextItem item = line;
-      list.add(RichTextLine(
-        type: item.type,
-        content: item.controller.text.replaceFirst('\u0000', ''),
-        beginTime: item.beginTime,
-        endTime: item.endTime,
-        //checkState: item.checkState,
-      ));
-    });
-//    debugPrint('list length: ${list.length}');
-//    debugPrint('list[0]: ${list[0].content.length}');
-//    debugPrint('RichTextLine: ${list[0].toString()}');
-//    RichTextLine line = list[0];
-//    String d = json.encode(list);
-//    //var d = list[0].toJson();
-//    debugPrint('json: $d');
-    return list;
-  }
-
-  void testthis(){
-    String data = getContentJsonString();
-    setState(() {
-      lineList.clear();
-    });
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      loadContentListFromJson(data);
-      setState(() {
-
-      });
-    });
-  }
-
-  String getContentJsonString(){
-    return json.encode(getContentList());
-  }
-
-  void loadContentListFromJson(String jsonString) {
-    List<dynamic> resultJson = json.decode(jsonString) as List;
-    List<RichTextLine> source = resultJson.map((item) => RichTextLine.fromJson(item)).toList();
-    initEditable(source);
-  }
-
-  Widget getRichLineLayoutWidget(int index) {
-    var item = lineList[index];
-    Widget lineWidget;
+  Widget buildParagraphLayoutWidget(int index) {
+    var item = source.paragraphList[index];
+    Widget paragraphWidget;
     switch (item.type) {
       case RichLineType.Title:
         var effectiveSytle =
             layout.titleStyle == null ? textTheme.title : layout.titleStyle;
         if (widget.isEditable) {
-          //lineWidget = geTextField(index, effectiveSytle);
-          lineWidget =
-              layout.richLayoutText(geTextField(index, effectiveSytle));
+          paragraphWidget =
+              layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
-          lineWidget = Text(
+          paragraphWidget = Text(
             item.content,
             style: effectiveSytle,
           );
@@ -155,10 +99,10 @@ class CCCatRichTextState extends State<CCCatRichText> {
             : layout.subTitleStyle;
         if (widget.isEditable) {
           //lineWidget = geTextField(index, effectiveSytle);
-          lineWidget =
-              layout.richLayoutText(geTextField(index, effectiveSytle));
+          paragraphWidget =
+              layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
-          lineWidget = Text(
+          paragraphWidget = Text(
             item.content,
             style: effectiveSytle,
           );
@@ -169,10 +113,10 @@ class CCCatRichTextState extends State<CCCatRichText> {
             layout.contentStyle == null ? textTheme.body1 : layout.contentStyle;
         if (widget.isEditable) {
           //lineWidget = geTextField(index, effectiveSytle);
-          lineWidget =
-              layout.richLayoutText(geTextField(index, effectiveSytle));
+          paragraphWidget =
+              layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
-          lineWidget = Text(
+          paragraphWidget = Text(
             item.content,
             style: effectiveSytle,
           );
@@ -184,10 +128,10 @@ class CCCatRichTextState extends State<CCCatRichText> {
             : layout.contentBoldStyle;
         if (widget.isEditable) {
           //lineWidget = geTextField(index, effectiveSytle);
-          lineWidget =
-              layout.richLayoutText(geTextField(index, effectiveSytle));
+          paragraphWidget =
+              layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
-          lineWidget = Text(
+          paragraphWidget = Text(
             item.content,
             style: effectiveSytle,
           );
@@ -197,14 +141,14 @@ class CCCatRichTextState extends State<CCCatRichText> {
         var effectiveSytle =
             layout.taskStyle == null ? textTheme.body1 : layout.taskStyle;
         if (widget.isEditable) {
-          lineWidget = layout.richLayoutTask(
-              geTextField(index, effectiveSytle),
+          paragraphWidget = layout.richLayoutTask(
+              buildTextField(index, effectiveSytle),
               Text(
                 '9:20 - 10:00',
                 style: textTheme.caption,
               ));
         } else {
-          lineWidget = layout.richLayoutTask(
+          paragraphWidget = layout.richLayoutTask(
               Text(item.content, style: effectiveSytle),
               Text(
                 '9:20 - 10:00',
@@ -217,11 +161,11 @@ class CCCatRichTextState extends State<CCCatRichText> {
             ? textTheme.body1
             : layout.orderedListsStyle;
         if (widget.isEditable) {
-          lineWidget = layout.richLayoutList(
+          paragraphWidget = layout.richLayoutList(
               Text('${item.leading}.', style: effectiveSytle),
-              geTextField(index, effectiveSytle));
+              buildTextField(index, effectiveSytle));
         } else {
-          lineWidget = layout.richLayoutList(
+          paragraphWidget = layout.richLayoutList(
               Text('${item.leading}.', style: effectiveSytle),
               Text(item.content, style: effectiveSytle));
         }
@@ -231,12 +175,12 @@ class CCCatRichTextState extends State<CCCatRichText> {
             ? textTheme.body1
             : layout.unorderedListStyle;
         if (widget.isEditable) {
-          lineWidget = layout.richLayoutList(
+          paragraphWidget = layout.richLayoutList(
             Text(layout.leadingSymbols, style: effectiveSytle),
-            geTextField(index, effectiveSytle),
+            buildTextField(index, effectiveSytle),
           );
         } else {
-          lineWidget = layout.richLayoutList(
+          paragraphWidget = layout.richLayoutList(
               Text(layout.leadingSymbols, style: effectiveSytle),
               Text(item.content, style: effectiveSytle));
         }
@@ -246,17 +190,17 @@ class CCCatRichTextState extends State<CCCatRichText> {
             ? textTheme.body1
             : layout.referenceStyle;
         if (widget.isEditable) {
-          lineWidget =
-              layout.richLayoutReference(geTextField(index, effectiveSytle));
+          paragraphWidget =
+              layout.richLayoutReference(buildTextField(index, effectiveSytle));
         } else {
-          lineWidget = layout
+          paragraphWidget = layout
               .richLayoutReference(Text(item.content, style: effectiveSytle));
         }
         break;
       case RichLineType.Image:
         if (widget.isEditable) {
         } else {
-          lineWidget = layout.richLayoutImage(
+          paragraphWidget = layout.richLayoutImage(
             Text(
               '这里是图片',
               style: TextStyle(fontSize: 12),
@@ -265,13 +209,13 @@ class CCCatRichTextState extends State<CCCatRichText> {
         }
         break;
     }
-    return lineWidget;
+    return paragraphWidget;
   }
 
   int _getCurrentLineIndex() {
     int index = -1;
-    for (int i = 0; i < lineList.length; i++) {
-      RichTextItem item = (lineList[i]);
+    for (int i = 0; i < source.paragraphList.length; i++) {
+      RichItem item = (source.paragraphList[i]);
       if (item.node.hasFocus) {
         index = i;
         break;
@@ -281,15 +225,15 @@ class CCCatRichTextState extends State<CCCatRichText> {
   }
 
   void _gotoNextLine(int index) {
-    if (index < lineList.length - 1) {
+    if (index < source.paragraphList.length - 1) {
       var focusScopeNode = FocusScope.of(context);
-      focusScopeNode.requestFocus((lineList[index + 1] as RichTextItem).node);
+      focusScopeNode.requestFocus((source.paragraphList[index + 1] as RichItem).node);
     }
   }
 
   void _gotoLine(int index) {
     var focusScopeNode = FocusScope.of(context);
-    focusScopeNode.requestFocus((lineList[index] as RichTextItem).node);
+    focusScopeNode.requestFocus((source.paragraphList[index] as RichItem).node);
   }
 
   void _requestFocus(FocusNode node) {
@@ -298,15 +242,20 @@ class CCCatRichTextState extends State<CCCatRichText> {
   }
 
   void removeCurrentLine() {
+    if (source.paragraphList.length == 0) return;
     int index = _getCurrentLineIndex();
     if (index > -1) {
+      RichItem tempItem = source.paragraphList[index];
       setState(() {
         //requestFocus(item.node);
         //item.node.unfocus();
-        lineList.removeAt(index);
+        source.paragraphList.removeAt(index);
       });
       Future.delayed(const Duration(milliseconds: 200), () {
-        RichTextItem item = lineList[index];
+        tempItem.dispose();
+      });
+      Future.delayed(const Duration(milliseconds: 200), () {
+        RichItem item = source.paragraphList[index];
         item.controller.selection = TextSelection.fromPosition(TextPosition(
           affinity: TextAffinity.downstream,
           offset: 1,
@@ -319,7 +268,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
   void changeCurrentLineTypeTo(RichLineType type) {
     int index = _getCurrentLineIndex();
     if (index > -1) {
-      RichTextItem item = lineList[index];
+      RichItem item = source.paragraphList[index];
       setState(() {
         //item.node.unfocus();
         item.type = type;
@@ -333,7 +282,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
 
   void calculationOrderedList() {
     int bh = 1;
-    lineList.forEach((line) {
+    source.paragraphList.forEach((line) {
       if (line.type == RichLineType.OrderedLists) {
         line.leading = bh.toString();
         bh++;
@@ -345,10 +294,10 @@ class CCCatRichTextState extends State<CCCatRichText> {
 
   void mergeUPLine(int index, String text) {
     debugPrint('向上行合并');
-    RichTextItem tempLine = lineList[index];
+    RichItem tempLine = source.paragraphList[index];
     if (index > 0) {
       setState(() {
-        RichTextItem upLine = lineList[index - 1];
+        RichItem upLine = source.paragraphList[index - 1];
         _requestFocus(upLine.node);
         var p = upLine.controller.text.length;
         var newText = upLine.controller.text + text;
@@ -357,7 +306,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
         upLine.controller.selection = TextSelection.fromPosition(
           TextPosition(affinity: TextAffinity.downstream, offset: p),
         );
-        lineList.removeAt(index);
+        source.paragraphList.removeAt(index);
       });
       Future.delayed(const Duration(milliseconds: 200), () {
         tempLine.dispose();
@@ -366,8 +315,8 @@ class CCCatRichTextState extends State<CCCatRichText> {
   }
 
   void splitLine(int index, List<String> lines) {
-    RichTextItem oldItem = lineList[index];
-    RichTextItem newItem;
+    RichItem oldItem = source.paragraphList[index];
+    RichItem newItem;
     RichLineType newType;
     if (lines.length < 2) return;
     debugPrint('第一行字数：${lines[0].length}');
@@ -376,7 +325,7 @@ class CCCatRichTextState extends State<CCCatRichText> {
     if (lines[0].length == 1 && lines[1].length == 0) {
       if (index == 0) return;
       setState(() {
-        RichTextItem item = lineList[index];
+        RichItem item = source.paragraphList[index];
         item.type = RichLineType.Text;
         item.controller.text = '\u0000' + '';
         item.controller.selection = TextSelection.fromPosition(
@@ -394,12 +343,12 @@ class CCCatRichTextState extends State<CCCatRichText> {
       }
       debugPrint('插入新行，类型是：${newType.toString()}');
       setState(() {
-        newItem = RichTextItem(type: newType, content: '\u0000' + lines[1]);
+        newItem = RichItem(type: newType, content: '\u0000' + lines[1]);
         newItem.controller.selection = TextSelection.fromPosition(TextPosition(
           affinity: TextAffinity.downstream,
           offset: 1,
         ));
-        lineList.insert(index + 1, newItem);
+        source.paragraphList.insert(index + 1, newItem);
       });
       Future.delayed(const Duration(milliseconds: 200), () {
         //var focusScopeNode = FocusScope.of(context);
@@ -410,15 +359,14 @@ class CCCatRichTextState extends State<CCCatRichText> {
     }
   }
 
-  Widget geTextField(int index, TextStyle effectiveSytle) {
-    var item = lineList[index] as RichTextItem;
+  Widget buildTextField(int index, TextStyle effectiveSytle) {
+    var item = source.paragraphList[index] as RichItem;
     assert(item.controller != null);
     assert(item.node != null);
     return TextField(
       focusNode: item.node,
       controller: item.controller,
       maxLines: null,
-      //maxLength: 300,
       inputFormatters: [
         LengthLimitingTextInputFormatter(300),
       ],
@@ -439,42 +387,31 @@ class CCCatRichTextState extends State<CCCatRichText> {
         debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
         debugPrint('内容长度: ${text.length}');
 
-        if (text.length == 0) {
-          mergeUPLine(index, '');
+        if (text.length == 0 || (text.substring(0, 1) != '\u0000')) {
+          item.canChanged = true;
+          var content = text == null ? '' : text;
+          mergeUPLine(index, content);
+        } else if (item.canChanged) {
+          item.canChanged = false;
+          var line = text.split('\n');
+          splitLine(index, line);
+          debugPrint('处理拆分行');
         } else {
-          //var t = text.substring(0, 1);
-          if (text.substring(0, 1) == '\u0000') {
-            debugPrint('包含神奇字符');
-            if (item.canChanged) {
-              item.canChanged = false;
-              var line = text.split('\n');
-              if (line.length > 1) {
-                splitLine(index, line);
-                debugPrint('处理拆分行');
-              }
-            } else {
-              item.canChanged = true;
-            }
-          } else {
-            mergeUPLine(index, text);
-          }
+          item.canChanged = true;
         }
       },
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    calculationOrderedList();
-    return Column(
-      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
+  List<Widget> buildBody(){
+    List<Widget> bodyItems = [];
+    bodyItems.add(
         Expanded(
           child: ListView.separated(
             padding: EdgeInsets.all(16),
             itemBuilder: (context, index) {
               return InkWell(
-                child: getRichLineLayoutWidget(index),
+                child: buildParagraphLayoutWidget(index),
                 onTap: () {
                   if (widget.onTapLineEvent != null) {
                     widget.onTapLineEvent(index);
@@ -483,14 +420,14 @@ class CCCatRichTextState extends State<CCCatRichText> {
               );
             },
             separatorBuilder: (context, index) {
-              if (lineList[index].type == RichLineType.Task) {
-                if (lineList[index + 1].type == RichLineType.Task) {
+              if (source.paragraphList[index].type == RichLineType.Task) {
+                if (source.paragraphList[index + 1].type == RichLineType.Task) {
                   return SizedBox(height: layout.listLineSpacing);
                 }
-              } else if (lineList[index].type == RichLineType.OrderedLists ||
-                  lineList[index].type == RichLineType.UnorderedList) {
-                if (lineList[index + 1].type == RichLineType.OrderedLists ||
-                    lineList[index + 1].type == RichLineType.UnorderedList) {
+              } else if (source.paragraphList[index].type == RichLineType.OrderedLists ||
+                  source.paragraphList[index].type == RichLineType.UnorderedList) {
+                if (source.paragraphList[index + 1].type == RichLineType.OrderedLists ||
+                    source.paragraphList[index + 1].type == RichLineType.UnorderedList) {
                   return SizedBox(
                     height: layout.listLineSpacing,
                     width: double.infinity,
@@ -499,21 +436,26 @@ class CCCatRichTextState extends State<CCCatRichText> {
               }
               return SizedBox(height: layout.segmentSpacing);
             },
-            itemCount: lineList.length,
+            itemCount: source.paragraphList.length,
           ),
-        ),
+        )
+    );
+    if (widget.isEditable) {
+      bodyItems.add(
         Divider(
           height: 1.0,
-        ),
-        Container(
-          //color: Colors.amber,
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
+        )
+      );
+      bodyItems.add(
+        SizedBox(
+          height: 48,
+          width: double.infinity,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
             children: <Widget>[
               IconButton(
                 icon: Icon(Icons.clear_all),
+                tooltip: '删除当前段落文本',
                 onPressed: () {
                   removeCurrentLine();
                 },
@@ -558,102 +500,32 @@ class CCCatRichTextState extends State<CCCatRichText> {
                 icon: Icon(Icons.photo),
                 onPressed: () {
                   //getContentList();
-                  testthis();
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.photo),
+                onPressed: () {
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.photo),
+                onPressed: () {
                 },
               ),
             ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-/// 富文本的行
-/// {type} 是行的类型，{fontStyle}是行的显示字体风格，一般不用设定，自动设置为默认值
-/// (Leading)是列表类型的前导符号，目前不用设置。如果是有序列表，将由整理方法自动设置成
-/// 序号，如果是无序列表，将由整理方法设置成指定符号
-class RichTextLine {
-  RichTextLine({
-    @required this.type,
-    this.focusEventId = 0,
-    this.content = '',
-    this.beginTime,
-    this.endTime,
-    this.checkState = 0,
-  });
-
-  int focusEventId;
-  RichLineType type;
-  String leading = '';
-
-  /// line的数据内容，都以String的形式保存，图片也是。
-  String content;
-
-  String beginTime, endTime;
-  int checkState;
-
-  factory RichTextLine.fromJson(Map<String, dynamic> json) {
-    return RichTextLine(
-      type: RichLineType.values[json['type']],
-      focusEventId: json['focusEventId'],
-      content: json['content'],
-      beginTime: json['beginTime'],
-      endTime: json['endTime'],
-      checkState: json['checkState'],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'type': type.index,
-    'focusEventId': focusEventId,
-    'content': content,
-    'beginTime': '9:00',
-    'endTime': '11:00',
-    'checkState': checkState,
-  };
-}
-
-class RichTextItem extends RichTextLine {
-  RichTextItem({
-    RichLineType type,
-    int focusEventId,
-    String content,
-    beginTime,
-    endTime,
-    int checkState,
-  }) : super(
-            type: type,
-            focusEventId: focusEventId,
-            content: content,
-            beginTime: beginTime,
-            endTime: endTime,
-            checkState: checkState) {
-    if (type != RichLineType.Image) {
-      controller = TextEditingController();
-      node = FocusNode();
-      node.addListener((){
-        if (node.hasFocus) {
-          canChanged = true;
-        }
-      });
-      controller.text = content;
-    } else {
-      image = content;
+      );
     }
+    return bodyItems;
   }
 
-  String image;
-  bool canChanged = true;
-
-  TextEditingController controller;
-  FocusNode node;
-
-  String get editContent =>
-      type == RichLineType.Image ? image : controller.text;
-
-  void dispose() {
-    controller?.dispose();
-    node?.dispose();
+  @override
+  Widget build(BuildContext context) {
+    calculationOrderedList();
+    return Column(
+      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: buildBody(),
+    );
   }
 }

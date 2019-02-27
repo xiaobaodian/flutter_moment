@@ -1,20 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_moment/richtext/cccat_rich_text.dart';
+import 'package:flutter_moment/richtext/cccat_rich_note_widget.dart';
 
-enum RichLineType {
-  Title, // 标题
-  SubTitle, // 子标题
-  Task, // 任务
-  Text, // 标准文本
-  TextBold, // 粗体文本
-  Reference, // 引用
-  UnorderedList, // 无序列表
-  OrderedLists, // 有序列表
-  Image, // 图片
-}
-
-class RichTextLayout {
-  RichTextLayout(
+class RichNoteLayout {
+  RichNoteLayout(
     BuildContext context, {
     this.segmentSpacing = 8.0,
     this.listLineSpacing = 3.0,
