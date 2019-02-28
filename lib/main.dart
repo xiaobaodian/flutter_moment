@@ -8,6 +8,8 @@ import 'package:flutter_moment/calendar_map.dart';
 import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/calendar_route.dart';
 import 'package:flutter_moment/demo_data.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
@@ -235,14 +237,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 18),
               ),
               trailing: Icon(Icons.arrow_right),
-              onTap: () {  //TrimPicture
+              onTap: () {
+                //TrimPicture
                 Navigator.of(context).pop();
                 showDialog(
-                  context: context,
-                  builder: (context) {
-                    return TrimPictureDialog();
-                  }
-                );
+                    context: context,
+                    builder: (context) {
+                      return TrimPictureDialog();
+                    });
               },
             ),
           ],
@@ -311,13 +313,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          var selectedDayEvents = _store.calendarMap.getFocusEventsFromSelectedDay();
+          var selectedDayEvents =
+              _store.calendarMap.getFocusEventsFromSelectedDay();
           var list = List<FocusItem>();
           if (selectedDayEvents.length == 0) {
             list.addAll(_store.focusItemList);
           } else {
             _store.focusItemList.forEach((focus) {
-              if (!selectedDayEvents.any((event) => event.focusItemBoxId == focus.boxId)) {
+              if (!selectedDayEvents
+                  .any((event) => event.focusItemBoxId == focus.boxId)) {
                 list.add(focus);
               }
             });
@@ -392,7 +396,8 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
   );
 }
 
-Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList) {
+Widget _buildFocusModelSheet(
+    GlobalStoreState store, List<FocusItem> usableList) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
@@ -414,10 +419,12 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
                 Navigator.of(context).pop();
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return EditerFocusEventRoute(FocusEvent(focusItemBoxId: usableList[index].boxId));
+                  return EditerFocusEventRoute(
+                      FocusEvent(focusItemBoxId: usableList[index].boxId));
                 })).then((resultItem) {
                   if (resultItem is FocusEvent) {
-                    store.addFocusEventToSelectedDay(resultItem, usableList[index].boxId);
+                    store.addFocusEventToSelectedDay(
+                        resultItem, usableList[index].boxId);
                     //usableList[index].addReferences();
                   }
                 });
@@ -458,54 +465,74 @@ class SliverPanel extends SliverPersistentHeaderDelegate {
 Widget _getListView(BuildContext context, int dayIndex) {
   var store = GlobalStore.of(context);
   var dailyRecord = store.calendarMap.everyDayIndex[dayIndex].dailyRecord;
-
   if (dailyRecord == null) {
     return Center(
       child: Text('还没有数据'),
     );
   } else {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) {
-        return InkWell(
-          child: Container(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                  child: Text(
-                    store.getFocusTitleFrom(dailyRecord.focusEvents[index].focusItemBoxId),
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).accentColor,
-                    ),
-                  ),
-                ),
-                Text(
-                  dailyRecord.focusEvents[index].note,
-                  style: TextStyle(fontSize: 16, color: Colors.black87),
-                ),
-              ],
-            ),
-          ),
-          onTap: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (BuildContext context) {
-              return EditerFocusEventRoute(dailyRecord.focusEvents[index]);
-            })).then((resultItem) {
-              if (resultItem is FocusEvent) {
-                store.changeFocusEventToSelectedDay(resultItem, index);
-              } else if (resultItem is int) {
-                store.removeFocusEventToSelectedDay(index, dailyRecord.focusEvents[index].focusItemBoxId);
-              }
-            });
-          },
-        );
+    dailyRecord.buildRichList(store);
+    RichSource richSource = RichSource(dailyRecord.richLines);
+    RichNote richNote = RichNote(
+      richSource: richSource,
+      onTapLineEvent: (index) {
+        FocusEvent event = dailyRecord.richLines[index].note;
+        int position = dailyRecord.focusEvents.indexOf(event);
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (BuildContext context) {
+          return EditerFocusEventRoute(event);
+        })).then((resultItem) {
+          if (resultItem is FocusEvent) {
+            store.changeFocusEventToSelectedDay(resultItem, position);
+          } else if (resultItem is int) {
+            store.removeFocusEventToSelectedDay(
+                position, dailyRecord.focusEvents[position].focusItemBoxId);
+          }
+        });
       },
-      itemCount: dailyRecord.focusEvents.length,
     );
+    return richNote;
+//    ListView.builder(
+//      shrinkWrap: true,
+//      itemBuilder: (BuildContext context, int index) {
+//        return InkWell(
+//          child: Container(
+//            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+//            child: Column(
+//              mainAxisAlignment: MainAxisAlignment.center,
+//              crossAxisAlignment: CrossAxisAlignment.start,
+//              children: <Widget>[
+//                Padding(
+//                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+//                  child: Text(
+//                    store.getFocusTitleFrom(dailyRecord.focusEvents[index].focusItemBoxId),
+//                    style: TextStyle(
+//                      fontSize: 16,
+//                      color: Theme.of(context).accentColor,
+//                    ),
+//                  ),
+//                ),
+//                Text(
+//                  dailyRecord.focusEvents[index].note,
+//                  style: TextStyle(fontSize: 16, color: Colors.black87),
+//                ),
+//              ],
+//            ),
+//          ),
+//          onTap: () {
+//            Navigator.of(context)
+//                .push(MaterialPageRoute(builder: (BuildContext context) {
+//              return EditerFocusEventRoute(dailyRecord.focusEvents[index]);
+//            })).then((resultItem) {
+//              if (resultItem is FocusEvent) {
+//                store.changeFocusEventToSelectedDay(resultItem, index);
+//              } else if (resultItem is int) {
+//                store.removeFocusEventToSelectedDay(index, dailyRecord.focusEvents[index].focusItemBoxId);
+//              }
+//            });
+//          },
+//        );
+//      },
+//      itemCount: dailyRecord.focusEvents.length,
+//    );
   }
 }

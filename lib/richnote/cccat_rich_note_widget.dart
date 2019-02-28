@@ -10,7 +10,7 @@ import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 class RichNote extends StatefulWidget {
   RichNote({
     this.richSource,
-    this.richTextLayout,
+    this.richNoteLayout,
     this.onTapLineEvent,
   }): isEditable = false {
     richSource.richNote = this;
@@ -18,7 +18,7 @@ class RichNote extends StatefulWidget {
 
   RichNote.editable({
     this.richSource,
-    this.richTextLayout,
+    this.richNoteLayout,
     this.onTapLineEvent
   }): isEditable = true  {
     richSource.richNote = this;
@@ -28,7 +28,7 @@ class RichNote extends StatefulWidget {
 
   final bool isEditable;
   final ValueChanged<int> onTapLineEvent;
-  final RichNoteLayout richTextLayout;
+  final RichNoteLayout richNoteLayout;
   final RichSource richSource;
 
   @override
@@ -47,7 +47,7 @@ class RichNoteState extends State<RichNote> {
   @override
   void initState() {
     super.initState();
-    layout = widget.richTextLayout;
+    layout = widget.richNoteLayout;
     source = widget.richSource;
     //paragraphList = widget.richSource.paragraphList;
   }
@@ -55,13 +55,13 @@ class RichNoteState extends State<RichNote> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    textTheme = Theme.of(context).textTheme;
     if (layout == null) {
       layout = RichNoteLayout(
         context,
-        titleStyle: TextStyle(fontSize: 20, color: Colors.red),
+        titleStyle: textTheme.title.merge(TextStyle(color: Theme.of(context).primaryColor)),
       );
     }
-    textTheme = Theme.of(context).textTheme;
   }
 
   @override
@@ -225,18 +225,6 @@ class RichNoteState extends State<RichNote> {
     return index;
   }
 
-  void _gotoNextLine(int index) {
-    if (index < source.paragraphList.length - 1) {
-      var focusScopeNode = FocusScope.of(context);
-      focusScopeNode.requestFocus((source.paragraphList[index + 1] as RichItem).node);
-    }
-  }
-
-  void _gotoLine(int index) {
-    var focusScopeNode = FocusScope.of(context);
-    focusScopeNode.requestFocus((source.paragraphList[index] as RichItem).node);
-  }
-
   void _requestFocus(FocusNode node) {
     var focusScopeNode = FocusScope.of(context);
     focusScopeNode.requestFocus(node);
@@ -271,11 +259,9 @@ class RichNoteState extends State<RichNote> {
     if (index > -1) {
       RichItem item = source.paragraphList[index];
       setState(() {
-        //item.node.unfocus();
         item.type = type;
       });
-      Future.delayed(const Duration(milliseconds: 200), () {
-        //item.controller.selection;
+      Future.delayed(const Duration(milliseconds: 100), () {
         _requestFocus(item?.node);
       });
     }
@@ -389,11 +375,10 @@ class RichNoteState extends State<RichNote> {
       onChanged: (text) {
         debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
         debugPrint('内容长度: ${text.length}');
-        int ent = text.indexOf('\n');
-        debugPrint('回车位置: $ent');
         if (text.length == 0 || (text.substring(0, 1) != '\u0000')) {
           mergeUPLine(index, text ?? '');
         } else if (item.canChanged) {
+          debugPrint('回车位置: ${text.indexOf('\n')}');
           if (text.indexOf('\n') > 0) splitLine(index, text.split('\n'));
         } else {
           item.canChanged = true;
@@ -432,6 +417,9 @@ class RichNoteState extends State<RichNote> {
                     width: double.infinity,
                   );
                 }
+              } else if (source.paragraphList[index].type == RichLineType.Title ||
+                  source.paragraphList[index + 1].type == RichLineType.Title) {
+                return SizedBox(height: 12);
               }
               return SizedBox(height: layout.segmentSpacing);
             },
@@ -499,16 +487,6 @@ class RichNoteState extends State<RichNote> {
                 icon: Icon(Icons.photo),
                 onPressed: () {
                   //getContentList();
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.photo),
-                onPressed: () {
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.photo),
-                onPressed: () {
                 },
               ),
             ],

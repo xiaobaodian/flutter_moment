@@ -273,10 +273,13 @@ class DailyRecord {
         RichLine(
           type: RichLineType.Title,
           content: store.getFocusTitleFrom(event.focusItemBoxId),
-          focusEventId: event.boxId,
+          note: event,
         )
       );
       List<RichLine> lines = RichSource.getRichLinesFromJson(event.note);
+      lines.forEach((line){
+        line.note = event;
+      });
       richLines.addAll(lines);
     });
   }

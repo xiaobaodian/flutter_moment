@@ -97,7 +97,9 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
                       return EditerPlaceItemRoute(PlaceItem());
                     })).then((resultItem) {
                       if (resultItem is PlaceItem) {
-                        _store.addPlaceItem(resultItem);
+                        Future.delayed(const Duration(milliseconds: 200), () {
+                          _store.addPlaceItem(resultItem);
+                        });
                       }
                     });
                     break;

@@ -25,14 +25,14 @@ enum RichLineType {
 class RichLine {
   RichLine({
     @required this.type,
-    this.focusEventId = 0,
+    this.note = 0,
     this.content = '',
-    this.beginTime,
-    this.endTime,
+    this.beginTime = '',
+    this.endTime = '',
     this.checkState = 0,
   });
 
-  int focusEventId;
+  Object note;
   RichLineType type;
   String leading = '';
 
@@ -44,22 +44,20 @@ class RichLine {
 
   factory RichLine.fromJson(Map<String, dynamic> json) {
     return RichLine(
-      type: RichLineType.values[json['type']],
-      focusEventId: json['focusEventId'],
-      content: json['content'],
-      beginTime: json['beginTime'],
-      endTime: json['endTime'],
-      checkState: json['checkState'],
+      type: RichLineType.values[json['tp']],
+      content: json['txt'],
+      beginTime: json['bt'],
+      endTime: json['et'],
+      checkState: json['cs'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'type': type.index,
-    'focusEventId': focusEventId,
-    'content': content,
-    'beginTime': '9:00',
-    'endTime': '11:00',
-    'checkState': checkState,
+    'tp': type.index,
+    'txt': content,
+    'bt': '9:00',
+    'et': '11:00',
+    'cs': checkState,
   };
 }
 
@@ -74,7 +72,7 @@ class RichItem extends RichLine {
     int checkState,
   }) : super(
     type: type,
-    focusEventId: focusEventId,
+    note: focusEventId,
     content: content,
     beginTime: beginTime,
     endTime: endTime,
@@ -168,7 +166,7 @@ class RichSource {
       RichItem item = line;
       tempList.add(RichLine(
         type: item.type,
-        focusEventId: item.focusEventId,
+        note: item.note,
         content: item.controller.text.replaceAll('\u0000', ''),
         beginTime: item.beginTime,
         endTime: item.endTime,

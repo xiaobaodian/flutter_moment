@@ -61,7 +61,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.done),
+            icon: Icon(Icons.save),
             onPressed: (){
               if (richSource.hasNote()) {
                 FocusEvent focus = FocusEvent();
