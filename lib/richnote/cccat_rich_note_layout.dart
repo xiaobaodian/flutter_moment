@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 
 class RichNoteLayout {
   RichNoteLayout(

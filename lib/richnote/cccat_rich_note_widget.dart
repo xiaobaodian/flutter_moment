@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_data.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_layout.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 
 class RichNote extends StatefulWidget {
   RichNote({
@@ -242,7 +243,7 @@ class RichNoteState extends State<RichNote> {
   }
 
   void removeCurrentLine() {
-    if (source.paragraphList.length == 0) return;
+    if (source.paragraphList.length == 1) return;
     int index = _getCurrentLineIndex();
     if (index > -1) {
       RichItem tempItem = source.paragraphList[index];
@@ -301,7 +302,7 @@ class RichNoteState extends State<RichNote> {
         _requestFocus(upLine.node);
         var p = upLine.controller.text.length;
         var newText = upLine.controller.text + text;
-        //tempLine.controller.clear();
+        upLine.canChanged = false;
         upLine.controller.text = newText;
         upLine.controller.selection = TextSelection.fromPosition(
           TextPosition(affinity: TextAffinity.downstream, offset: p),
@@ -315,25 +316,34 @@ class RichNoteState extends State<RichNote> {
   }
 
   void splitLine(int index, List<String> lines) {
+    if (lines.length < 2) return;
+
     RichItem oldItem = source.paragraphList[index];
     RichItem newItem;
     RichLineType newType;
-    if (lines.length < 2) return;
     debugPrint('第一行字数：${lines[0].length}');
     debugPrint('第二行字数：${lines[1].length}');
 
-    if (lines[0].length == 1 && lines[1].length == 0) {
+    var upTxt = lines[0].replaceAll('\u0000', '');
+
+    if (upTxt.length == 0 && lines[1].length == 0) {
       if (index == 0) return;
       setState(() {
         RichItem item = source.paragraphList[index];
+        item.canChanged = false;
         item.type = RichLineType.Text;
         item.controller.text = '\u0000' + '';
         item.controller.selection = TextSelection.fromPosition(
             TextPosition(affinity: TextAffinity.downstream, offset: 1));
-        item.canChanged = true;
+        //item.canChanged = true;
       });
     } else {
+      oldItem.canChanged = false;
       oldItem.controller.text = lines[0];
+      oldItem.controller.selection = TextSelection.fromPosition(TextPosition(
+        affinity: TextAffinity.downstream,
+        offset: lines[0].length,
+      ));
       if (oldItem.type == RichLineType.Title ||
           oldItem.type == RichLineType.SubTitle ||
           oldItem.type == RichLineType.Reference) {
@@ -344,18 +354,17 @@ class RichNoteState extends State<RichNote> {
       debugPrint('插入新行，类型是：${newType.toString()}');
       setState(() {
         newItem = RichItem(type: newType, content: '\u0000' + lines[1]);
+        newItem.canChanged = false;
         newItem.controller.selection = TextSelection.fromPosition(TextPosition(
           affinity: TextAffinity.downstream,
           offset: 1,
         ));
         source.paragraphList.insert(index + 1, newItem);
+        Future.delayed(const Duration(milliseconds: 50), () {
+          _requestFocus(newItem?.node);
+        });
       });
-      Future.delayed(const Duration(milliseconds: 200), () {
-        //var focusScopeNode = FocusScope.of(context);
-        //focusScopeNode.requestFocus(newItem?.node);
-        _requestFocus(newItem?.node);
-        oldItem.canChanged = true;
-      });
+
     }
   }
 
@@ -364,6 +373,7 @@ class RichNoteState extends State<RichNote> {
     assert(item.controller != null);
     assert(item.node != null);
     return TextField(
+      key: item.key,
       focusNode: item.node,
       controller: item.controller,
       maxLines: null,
@@ -376,26 +386,15 @@ class RichNoteState extends State<RichNote> {
       textInputAction: TextInputAction.newline,
       decoration: InputDecoration(
           border: InputBorder.none, contentPadding: EdgeInsets.all(0)),
-      onEditingComplete: () {
-        //gotoNextLine(index);
-        debugPrint('onEditingComplete/是不是按了回车键');
-      },
-      onSubmitted: (text) {
-        debugPrint('onSubmitted/是不是按了回车键');
-      },
       onChanged: (text) {
         debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
         debugPrint('内容长度: ${text.length}');
-
+        int ent = text.indexOf('\n');
+        debugPrint('回车位置: $ent');
         if (text.length == 0 || (text.substring(0, 1) != '\u0000')) {
-          item.canChanged = true;
-          var content = text == null ? '' : text;
-          mergeUPLine(index, content);
+          mergeUPLine(index, text ?? '');
         } else if (item.canChanged) {
-          item.canChanged = false;
-          var line = text.split('\n');
-          splitLine(index, line);
-          debugPrint('处理拆分行');
+          if (text.indexOf('\n') > 0) splitLine(index, text.split('\n'));
         } else {
           item.canChanged = true;
         }

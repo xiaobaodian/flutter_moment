@@ -7,9 +7,9 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/enums.dart';
 import 'package:flutter_moment/models/helper_image.dart';
 import 'package:flutter_moment/models/helper_chinese_string.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_data.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_widget.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_layout.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 
 class BaseItem {
   int boxId = 0;

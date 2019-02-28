@@ -28,7 +28,6 @@ class EditerPersonItemRoute extends StatefulWidget {
 /// 只有将需要编辑的类成员数据需要在State<>中复制到变量（或TextEditingController）中，才能
 /// 有效保留编辑的数据
 class EditerPersonItemRouteState extends State<EditerPersonItemRoute> {
-  String _localDir;
   final _nameController = TextEditingController();
   final _focusNode = FocusNode();
   PersonItem _editerPerson;
@@ -48,7 +47,6 @@ class EditerPersonItemRouteState extends State<EditerPersonItemRoute> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _localDir = GlobalStore.of(context).localDir;
   }
 
   @override

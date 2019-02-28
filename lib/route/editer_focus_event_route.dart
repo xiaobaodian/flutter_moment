@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_data.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 
 class EditerFocusEventRoute extends StatefulWidget {
 

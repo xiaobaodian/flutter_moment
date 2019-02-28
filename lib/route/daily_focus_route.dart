@@ -68,8 +68,7 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
             icon: Icon(Icons.add_circle_outline),
             onPressed: () {
               switch (_controller.index) {
-                case 0:
-                  {
+                case 0: {
                     Navigator.of(context).push(
                         MaterialPageRoute(builder: (BuildContext context) {
                       return EditerFocusItemRoute(FocusItem());
@@ -80,8 +79,7 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
                     });
                     break;
                   }
-                case 1:
-                  {
+                case 1: {
                     Navigator.of(context).push(
                         MaterialPageRoute(builder: (BuildContext context) {
                       return EditerPersonItemRoute(PersonItem());

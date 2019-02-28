@@ -3,7 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_moment/richtext/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:meta/meta.dart';
 
 enum RichLineType {
@@ -81,6 +81,7 @@ class RichItem extends RichLine {
     checkState: checkState
   ) {
     if (type != RichLineType.Image) {
+      key = GlobalKey();
       controller = TextEditingController();
       node = FocusNode();
       node.addListener((){
@@ -97,6 +98,7 @@ class RichItem extends RichLine {
   String image;
   bool canChanged = true;
 
+  Key key;
   TextEditingController controller;
   FocusNode node;
 
