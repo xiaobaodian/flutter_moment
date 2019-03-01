@@ -182,13 +182,12 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
                       style: TextStyle(fontSize: 12, color: Colors.black45),
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: RichNote(
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    //child: Text('qqqq'),
+                      child: RichNote.fixed(
                         richSource: RichSource.fromJson(detailsList[index].note),
                       ),
-                    ),
                   ),
                   //Text(detailsList[index].note),
                 ],

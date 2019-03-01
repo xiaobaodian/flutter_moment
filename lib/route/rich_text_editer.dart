@@ -62,7 +62,7 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
       ),
       body: RichNote.editable(
         richSource: richSource,
-        onTapLineEvent: (index) {
+        onTapLine: (index) {
           print('($index) ${richTextLine[index].content}');
         },
       ),

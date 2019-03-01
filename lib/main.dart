@@ -111,6 +111,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  int buildDailyEventNote(DailyRecord dailyRecord){
+    dailyRecord.buildRichList(_store);
+    return dailyRecord.richLines.length;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -292,6 +298,16 @@ class _HomeScreenState extends State<HomeScreen> {
         child: PageView.builder(
           controller: _pageController,
           itemBuilder: (context, index) {
+            var dailyRecord = _store.calendarMap.getDailyRecordFromIndex(index);
+            if (dailyRecord != null) {
+              if (dailyRecord.richLines == null || dailyRecord.richLines.length ==0) {
+                Future(() => buildDailyEventNote(dailyRecord)).then((length){
+                  setState(() {
+                    debugPrint('延迟生成daily record rich list 完成...');
+                  });
+                });
+              }
+            }
             return getDayNote(context, index);
           },
           itemCount: _calendarMap.daysTotal,
@@ -465,16 +481,16 @@ class SliverPanel extends SliverPersistentHeaderDelegate {
 Widget _getListView(BuildContext context, int dayIndex) {
   var store = GlobalStore.of(context);
   var dailyRecord = store.calendarMap.everyDayIndex[dayIndex].dailyRecord;
+
   if (dailyRecord == null) {
     return Center(
       child: Text('还没有数据'),
     );
   } else {
-    dailyRecord.buildRichList(store);
     RichSource richSource = RichSource(dailyRecord.richLines);
     RichNote richNote = RichNote(
       richSource: richSource,
-      onTapLineEvent: (index) {
+      onTapLine: (index) {
         FocusEvent event = dailyRecord.richLines[index].note;
         int position = dailyRecord.focusEvents.indexOf(event);
         Navigator.of(context)
@@ -482,8 +498,10 @@ Widget _getListView(BuildContext context, int dayIndex) {
           return EditerFocusEventRoute(event);
         })).then((resultItem) {
           if (resultItem is FocusEvent) {
+            dailyRecord.richLines.clear();
             store.changeFocusEventToSelectedDay(resultItem, position);
           } else if (resultItem is int) {
+            dailyRecord.richLines.clear();
             store.removeFocusEventToSelectedDay(
                 position, dailyRecord.focusEvents[position].focusItemBoxId);
           }

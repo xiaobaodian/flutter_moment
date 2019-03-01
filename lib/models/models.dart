@@ -267,8 +267,12 @@ class DailyRecord {
   }
 
   void buildRichList(GlobalStoreState store){
-    richLines.clear();
-    focusEvents.forEach((event){
+    if (richLines == null) {
+      richLines = List<RichLine>();
+    } else {
+      richLines.clear();
+    }
+    focusEvents?.forEach((event){
       richLines.add(
         RichLine(
           type: RichLineType.Title,
@@ -277,7 +281,7 @@ class DailyRecord {
         )
       );
       List<RichLine> lines = RichSource.getRichLinesFromJson(event.note);
-      lines.forEach((line){
+      lines?.forEach((line){
         line.note = event;
       });
       richLines.addAll(lines);

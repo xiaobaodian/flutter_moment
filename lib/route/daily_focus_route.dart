@@ -85,7 +85,15 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
                       return EditerPersonItemRoute(PersonItem());
                     })).then((resultItem) {
                       if (resultItem is PersonItem) {
-                        _store.addPersonItem(resultItem);
+                        Future(() => _store.addPersonItem(resultItem)).then((v){
+                          setState(() {
+
+                          });
+                        });
+                        //_store.addPersonItem(resultItem);
+                        Future.delayed(const Duration(milliseconds: 200), () {
+
+                        });
                       }
                     });
                     break;
@@ -97,9 +105,7 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
                       return EditerPlaceItemRoute(PlaceItem());
                     })).then((resultItem) {
                       if (resultItem is PlaceItem) {
-                        Future.delayed(const Duration(milliseconds: 200), () {
-                          _store.addPlaceItem(resultItem);
-                        });
+                        _store.addPlaceItem(resultItem);
                       }
                     });
                     break;
@@ -134,13 +140,10 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
           ),
           ListView.separated(
             itemBuilder: (context, index) {
+              debugPrint('personList length: ${personList.length}');
               return getPersonListViewItem(context, index);
             },
-            separatorBuilder: (context, index) {
-              return Divider(
-                indent: 70,
-              );
-            },
+            separatorBuilder: (context, index) => Divider(indent: 70,),
             itemCount: personList.length,
           ),
           ListView.separated(
@@ -208,6 +211,9 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
   }
 
   Widget getPersonListViewItem(BuildContext context, int index) {
+
+    debugPrint('person item: $index');
+
     var personItem = personList[index];
     var subTitle =
         personItem.references == 0 ? '未关注' : '相逢 ${personItem.references} 次';

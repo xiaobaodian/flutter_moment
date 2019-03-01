@@ -11,23 +11,31 @@ class RichNote extends StatefulWidget {
   RichNote({
     this.richSource,
     this.richNoteLayout,
-    this.onTapLineEvent,
-  }): isEditable = false {
+    this.onTapLine,
+  }): isEditable = false, isFixed = false,
+  assert(richSource.paragraphList != null) {
     richSource.richNote = this;
   }
 
   RichNote.editable({
     this.richSource,
     this.richNoteLayout,
-    this.onTapLineEvent
-  }): isEditable = true  {
+    this.onTapLine
+  }): isEditable = true, isFixed = false {
     richSource.richNote = this;
     debugPrint('RichNote.editable 模式初始化');
     richSource.markToEditer();
   }
 
+  RichNote.fixed({
+    this.richSource,
+    this.richNoteLayout,
+    this.onTapLine
+  }): isFixed = true, isEditable = false;
+
   final bool isEditable;
-  final ValueChanged<int> onTapLineEvent;
+  final bool isFixed;
+  final ValueChanged<int> onTapLine;
   final RichNoteLayout richNoteLayout;
   final RichSource richSource;
 
@@ -73,8 +81,8 @@ class RichNoteState extends State<RichNote> {
           item.dispose();
         }
       });
+      source.paragraphList = null;
     }
-    source.paragraphList = null;
   }
 
   Widget buildParagraphLayoutWidget(int index) {
@@ -213,6 +221,27 @@ class RichNoteState extends State<RichNote> {
     return paragraphWidget;
   }
 
+  Widget buildSeparatorWidget(int index) {
+    if (source.paragraphList[index].type == RichLineType.Task) {
+      if (source.paragraphList[index + 1].type == RichLineType.Task) {
+        return SizedBox(height: layout.listLineSpacing);
+      }
+    } else if (source.paragraphList[index].type == RichLineType.OrderedLists ||
+        source.paragraphList[index].type == RichLineType.UnorderedList) {
+      if (source.paragraphList[index + 1].type == RichLineType.OrderedLists ||
+          source.paragraphList[index + 1].type == RichLineType.UnorderedList) {
+        return SizedBox(
+          height: layout.listLineSpacing,
+          width: double.infinity,
+        );
+      }
+    } else if (source.paragraphList[index].type == RichLineType.Title ||
+        source.paragraphList[index + 1].type == RichLineType.Title) {
+      return SizedBox(height: 12);
+    }
+    return SizedBox(height: layout.segmentSpacing);
+  }
+
   int _getCurrentLineIndex() {
     int index = -1;
     for (int i = 0; i < source.paragraphList.length; i++) {
@@ -269,7 +298,7 @@ class RichNoteState extends State<RichNote> {
 
   void calculationOrderedList() {
     int bh = 1;
-    source.paragraphList.forEach((line) {
+    source.paragraphList?.forEach((line) {
       if (line.type == RichLineType.OrderedLists) {
         line.leading = bh.toString();
         bh++;
@@ -387,6 +416,17 @@ class RichNoteState extends State<RichNote> {
     );
   }
 
+  List<Widget> buildFixedBody(){
+    List<Widget> bodyItems = [];
+    int listLength = source.paragraphList.length;
+    for (int index = 0; index < listLength; index++) {
+      bodyItems.add(buildParagraphLayoutWidget(index));
+      if (index < listLength -1)
+        bodyItems.add(buildSeparatorWidget(index));
+    }
+    return bodyItems;
+  }
+
   List<Widget> buildBody(){
     List<Widget> bodyItems = [];
     bodyItems.add(
@@ -397,31 +437,14 @@ class RichNoteState extends State<RichNote> {
               return InkWell(
                 child: buildParagraphLayoutWidget(index),
                 onTap: () {
-                  if (widget.onTapLineEvent != null) {
-                    widget.onTapLineEvent(index);
+                  if (widget.onTapLine != null) {
+                    widget.onTapLine(index);
                   }
                 },
               );
             },
             separatorBuilder: (context, index) {
-              if (source.paragraphList[index].type == RichLineType.Task) {
-                if (source.paragraphList[index + 1].type == RichLineType.Task) {
-                  return SizedBox(height: layout.listLineSpacing);
-                }
-              } else if (source.paragraphList[index].type == RichLineType.OrderedLists ||
-                  source.paragraphList[index].type == RichLineType.UnorderedList) {
-                if (source.paragraphList[index + 1].type == RichLineType.OrderedLists ||
-                    source.paragraphList[index + 1].type == RichLineType.UnorderedList) {
-                  return SizedBox(
-                    height: layout.listLineSpacing,
-                    width: double.infinity,
-                  );
-                }
-              } else if (source.paragraphList[index].type == RichLineType.Title ||
-                  source.paragraphList[index + 1].type == RichLineType.Title) {
-                return SizedBox(height: 12);
-              }
-              return SizedBox(height: layout.segmentSpacing);
+              return buildSeparatorWidget(index);
             },
             itemCount: source.paragraphList.length,
           ),
@@ -500,6 +523,12 @@ class RichNoteState extends State<RichNote> {
   @override
   Widget build(BuildContext context) {
     calculationOrderedList();
+    if (widget.isFixed) {
+      return Column(
+        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: buildFixedBody(),
+      );
+    }
     return Column(
       //mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: buildBody(),

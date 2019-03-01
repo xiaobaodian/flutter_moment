@@ -111,13 +111,15 @@ class RichItem extends RichLine {
 
 class RichSource {
   RichSource(
-    this.paragraphList,
-  );
+    paragraphList,
+  ): assert(paragraphList != null) {
+    this.paragraphList = paragraphList ?? [];
+  }
 
   RichSource.fromJson(
     String jsonString,
-  ) {
-    paragraphList = RichSource.getRichLinesFromJson(jsonString);
+  ): assert(jsonString != null) {
+    this.paragraphList = RichSource.getRichLinesFromJson(jsonString) ?? [];
   }
 
   static List<RichLine> getRichLinesFromJson(String jsonString) {
