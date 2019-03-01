@@ -412,8 +412,8 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
   );
 }
 
-Widget _buildFocusModelSheet(
-    GlobalStoreState store, List<FocusItem> usableList) {
+Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList) {
+  final dailyRecord = store.calendarMap.getDailyRecordFromSelectedDay();
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
@@ -439,6 +439,7 @@ Widget _buildFocusModelSheet(
                       FocusEvent(focusItemBoxId: usableList[index].boxId));
                 })).then((resultItem) {
                   if (resultItem is FocusEvent) {
+                    dailyRecord.richLines.clear();
                     store.addFocusEventToSelectedDay(
                         resultItem, usableList[index].boxId);
                     //usableList[index].addReferences();
@@ -480,7 +481,7 @@ class SliverPanel extends SliverPersistentHeaderDelegate {
 
 Widget _getListView(BuildContext context, int dayIndex) {
   var store = GlobalStore.of(context);
-  var dailyRecord = store.calendarMap.everyDayIndex[dayIndex].dailyRecord;
+  var dailyRecord = store.calendarMap.getDailyRecordFromIndex(dayIndex);
 
   if (dailyRecord == null) {
     return Center(
