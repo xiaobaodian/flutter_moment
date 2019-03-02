@@ -28,21 +28,21 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
   @override
   void reassemble() {
     super.reassemble();
-    richTextLine.add(RichLine(type: RichLineType.Title, content: '这是标题'));
-    richTextLine.add(RichLine(type: RichLineType.SubTitle, content: '这是副标题'));
-    richTextLine.add(RichLine(type: RichLineType.Text, content: '循礼门小龙坎火锅，这里是位置的地址'));
-    richTextLine.add(RichLine(type: RichLineType.Task, content: '这是一个任务，去循礼门小龙坎火锅。'));
+    richTextLine.add(RichLine(type: RichType.Title, content: '这是标题'));
+    richTextLine.add(RichLine(type: RichType.SubTitle, content: '这是副标题'));
+    richTextLine.add(RichLine(type: RichType.Text, content: '循礼门小龙坎火锅，这里是位置的地址'));
+    richTextLine.add(RichLine(type: RichType.Task, content: '这是一个任务，去循礼门小龙坎火锅。'));
 //    richTextLine.add(RichTextLine(type: RichLineType.Task, content: '这是第二个任务。去循礼门小龙坎火锅，这里是位置的地址，去循礼门小龙坎火锅，这里是位置的地址。'));
-    richTextLine.add(RichLine(type: RichLineType.UnorderedList, content: '这里是无序列表'));
-    richTextLine.add(RichLine(type: RichLineType.UnorderedList, content: '这里是无序列表，这里是无序列表，这里是无序列表，这里是无序列表。'));
-    richTextLine.add(RichLine(type: RichLineType.UnorderedList, content: '这里是无序列表'));
-    richTextLine.add(RichLine(type: RichLineType.Text, content: '这里是普通的文本，用于对事物的描述。这里是普通的文本，用于对事物的描述。这里是普通的文本，用于对事物的描述。这里是普通的文本，用于对事物的描述。'));
-    richTextLine.add(RichLine(type: RichLineType.OrderedLists, content: '这里是有序列表'));
-    richTextLine.add(RichLine(type: RichLineType.OrderedLists, content: '这里是有序列表，这里是有序列表，这里是有序列表。这里是有序列表，这里是有序列表，这里是有序列表。'));
-    richTextLine.add(RichLine(type: RichLineType.OrderedLists, content: '这里是有序列表'));
-    richTextLine.add(RichLine(type: RichLineType.TextBold, content: '这是粗体文本演示'));
+    richTextLine.add(RichLine(type: RichType.UnorderedList, content: '这里是无序列表'));
+    richTextLine.add(RichLine(type: RichType.UnorderedList, content: '这里是无序列表，这里是无序列表，这里是无序列表，这里是无序列表。'));
+    richTextLine.add(RichLine(type: RichType.UnorderedList, content: '这里是无序列表'));
+    richTextLine.add(RichLine(type: RichType.Text, content: '这里是普通的文本，用于对事物的描述。这里是普通的文本，用于对事物的描述。这里是普通的文本，用于对事物的描述。这里是普通的文本，用于对事物的描述。'));
+    richTextLine.add(RichLine(type: RichType.OrderedLists, content: '这里是有序列表'));
+    richTextLine.add(RichLine(type: RichType.OrderedLists, content: '这里是有序列表，这里是有序列表，这里是有序列表。这里是有序列表，这里是有序列表，这里是有序列表。'));
+    richTextLine.add(RichLine(type: RichType.OrderedLists, content: '这里是有序列表'));
+    richTextLine.add(RichLine(type: RichType.TextBold, content: '这是粗体文本演示'));
     //richTextLine.add(RichTextLine(type: RichLineType.Image, content: '这是图片的说明'));
-    richTextLine.add(RichLine(type: RichLineType.Reference, content: '这里是引用或需要特别说明的文本。这里是引用或需要特别说明的文本。这里是引用或需要特别说明的文本。'));
+    richTextLine.add(RichLine(type: RichType.Reference, content: '这里是引用或需要特别说明的文本。这里是引用或需要特别说明的文本。这里是引用或需要特别说明的文本。'));
   }
 
   @override

@@ -62,128 +62,74 @@ class RichNoteLayout {
     return Container(
       padding: EdgeInsets.all(0.0),
       decoration: BoxDecoration(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Offstage(
-            offstage: true,
-            child: Text(''),
-          ),
-          Offstage(
-            offstage: true,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
-              child: Checkbox(
-                value: true,
-                onChanged: (isSelected) {},
-              ),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                content,
-                Offstage(
-                  offstage: true,
-                  child: Text(''),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      child: content,
     );
   }
 
   Widget richLayoutTask(Widget task, Widget time) {
-    return Container(
-      padding: EdgeInsets.all(0.0),
-      decoration: BoxDecoration(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Offstage(
-            offstage: true,
-            child: Text(''),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+          child: SizedBox(
+            width: 32,
+            height: 32,
+            child: Checkbox(
+              value: true,
+              onChanged: (isSelected) {
+                isSelected = !isSelected;
+              },
+            ),
           ),
-          Offstage(
-            offstage: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: Checkbox(
-                  value: true,
-                  onChanged: (isSelected) {
-                    isSelected = !isSelected;
-                  },
-                ),
+        ),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              task,
+              Offstage(
+                offstage: false,
+                child: time,
               ),
-            ),
+            ],
           ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                task,
-                Offstage(
-                  offstage: false,
-                  child: time,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget richLayoutList(Widget leading, Widget content) {
-    return Container(
-      padding: EdgeInsets.all(0.0),
-      decoration: BoxDecoration(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Offstage(
-            offstage: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(3, 1, 12, 0),
-              child: leading,
-            ),
-          ),
-          Offstage(
-            offstage: true,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
-              child: Checkbox(
-                value: true,
-                onChanged: (isSelected) {  },
-              ),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                content,
-                Offstage(
-                  offstage: true,
-                  child: Text(''),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(3, 1, 12, 0),
+          child: leading,
+        ),
+        Expanded(
+          child: content,
+        ),
+      ],
+    );
+  }
+
+  Widget richLayoutSubList(Widget leading, Widget content) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 1, 12, 0),
+          child: leading,
+        ),
+        Expanded(
+          child: content,
+        ),
+      ],
     );
   }
 
@@ -227,6 +173,17 @@ class RichNoteLayout {
           ),
         ],
       ),
+    );
+  }
+
+  Widget richLayoutComment(Widget content) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey,
+        border: Border(left: BorderSide(color: Colors. blue, width: 5.0)),
+      ),
+      child: content,
     );
   }
 

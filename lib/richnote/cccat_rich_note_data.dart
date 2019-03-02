@@ -6,16 +6,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:meta/meta.dart';
 
-enum RichLineType {
-  Title, // 标题
-  SubTitle, // 子标题
-  Task, // 任务
-  Text, // 标准文本
-  TextBold, // 粗体文本
-  Reference, // 引用
-  UnorderedList, // 无序列表
-  OrderedLists, // 有序列表
-  Image, // 图片
+enum RichType {
+  Title,              // 标题
+  SubTitle,           // 子标题
+  Task,               // 任务
+  Text,               // 标准文本
+  TextBold,           // 粗体文本
+  Reference,          // 引用
+  UnorderedList,      // 无序列表
+  OrderedLists,       // 有序列表
+  SubUnorderedList,   // 无序列表
+  SubOrderedLists,    // 有序列表
+  Image,              // 图片
+  FocusTitle,         // 焦点标题
+}
+
+enum RichStyle {
+  Normal,
+  Bold,
+  Italic,
 }
 
 /// 富文本的行
@@ -33,8 +42,10 @@ class RichLine {
   });
 
   Object note;
-  RichLineType type;
+  RichType type;
   String leading = '';
+
+  TextStyle d = TextStyle(fontWeight: FontWeight.bold,fontStyle: FontStyle.italic);
 
   /// line的数据内容，都以String的形式保存，图片也是。
   String content;
@@ -44,7 +55,7 @@ class RichLine {
 
   factory RichLine.fromJson(Map<String, dynamic> json) {
     return RichLine(
-      type: RichLineType.values[json['tp']],
+      type: RichType.values[json['tp']],
       content: json['txt'],
       beginTime: json['bt'],
       endTime: json['et'],
@@ -64,7 +75,7 @@ class RichLine {
 /// 编辑器使用的line数据，里面包含了文本输入与焦点控制
 class RichItem extends RichLine {
   RichItem({
-    RichLineType type,
+    RichType type,
     int focusEventId,
     String content,
     beginTime,
@@ -78,7 +89,7 @@ class RichItem extends RichLine {
     endTime: endTime,
     checkState: checkState
   ) {
-    if (type != RichLineType.Image) {
+    if (type != RichType.Image) {
       key = GlobalKey();
       controller = TextEditingController();
       node = FocusNode();
@@ -101,7 +112,7 @@ class RichItem extends RichLine {
   FocusNode node;
 
   String get editContent =>
-      type == RichLineType.Image ? image : controller.text;
+      type == RichType.Image ? image : controller.text;
 
   void dispose() {
     controller?.dispose();
@@ -146,7 +157,7 @@ class RichSource {
       List<RichLine> tempList = [];
       if (paragraphList.length == 0) {
         tempList.add(RichItem(
-          type: RichLineType.Text,
+          type: RichType.Text,
           content: '\u0000' + '',
         ));
       } else {

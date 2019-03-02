@@ -89,7 +89,20 @@ class RichNoteState extends State<RichNote> {
     var item = source.paragraphList[index];
     Widget paragraphWidget;
     switch (item.type) {
-      case RichLineType.Title:
+      case RichType.FocusTitle:
+        var effectiveSytle =
+        layout.titleStyle == null ? textTheme.title : layout.titleStyle;
+        if (widget.isEditable) {
+          paragraphWidget =
+              layout.richLayoutText(buildTextField(index, effectiveSytle));
+        } else {
+          paragraphWidget = Text(
+            item.content,
+            style: effectiveSytle,
+          );
+        }
+        break;
+      case RichType.Title:
         var effectiveSytle =
             layout.titleStyle == null ? textTheme.title : layout.titleStyle;
         if (widget.isEditable) {
@@ -102,7 +115,7 @@ class RichNoteState extends State<RichNote> {
           );
         }
         break;
-      case RichLineType.SubTitle:
+      case RichType.SubTitle:
         var effectiveSytle = layout.subTitleStyle == null
             ? textTheme.subhead
             : layout.subTitleStyle;
@@ -117,7 +130,7 @@ class RichNoteState extends State<RichNote> {
           );
         }
         break;
-      case RichLineType.Text:
+      case RichType.Text:
         var effectiveSytle =
             layout.contentStyle == null ? textTheme.body1 : layout.contentStyle;
         if (widget.isEditable) {
@@ -131,7 +144,7 @@ class RichNoteState extends State<RichNote> {
           );
         }
         break;
-      case RichLineType.TextBold:
+      case RichType.TextBold:
         var effectiveSytle = layout.contentBoldStyle == null
             ? textTheme.body1.merge(TextStyle(fontWeight: FontWeight.bold))
             : layout.contentBoldStyle;
@@ -146,7 +159,7 @@ class RichNoteState extends State<RichNote> {
           );
         }
         break;
-      case RichLineType.Task:
+      case RichType.Task:
         var effectiveSytle =
             layout.taskStyle == null ? textTheme.body1 : layout.taskStyle;
         if (widget.isEditable) {
@@ -165,7 +178,8 @@ class RichNoteState extends State<RichNote> {
               ));
         }
         break;
-      case RichLineType.OrderedLists:
+      case RichType.SubOrderedLists:
+      case RichType.OrderedLists:
         var effectiveSytle = layout.orderedListsStyle == null
             ? textTheme.body1
             : layout.orderedListsStyle;
@@ -179,7 +193,8 @@ class RichNoteState extends State<RichNote> {
               Text(item.content, style: effectiveSytle));
         }
         break;
-      case RichLineType.UnorderedList:
+      case RichType.SubUnorderedList:
+      case RichType.UnorderedList:
         var effectiveSytle = layout.unorderedListStyle == null
             ? textTheme.body1
             : layout.unorderedListStyle;
@@ -194,19 +209,19 @@ class RichNoteState extends State<RichNote> {
               Text(item.content, style: effectiveSytle));
         }
         break;
-      case RichLineType.Reference:
+      case RichType.Reference:
         var effectiveSytle = layout.referenceStyle == null
             ? textTheme.body1
             : layout.referenceStyle;
         if (widget.isEditable) {
           paragraphWidget =
-              layout.richLayoutReference(buildTextField(index, effectiveSytle));
+              layout.richLayoutReference(buildTextField(index, effectiveSytle));  //richLayoutReference
         } else {
           paragraphWidget = layout
               .richLayoutReference(Text(item.content, style: effectiveSytle));
         }
         break;
-      case RichLineType.Image:
+      case RichType.Image:
         if (widget.isEditable) {
         } else {
           paragraphWidget = layout.richLayoutImage(
@@ -222,21 +237,21 @@ class RichNoteState extends State<RichNote> {
   }
 
   Widget buildSeparatorWidget(int index) {
-    if (source.paragraphList[index].type == RichLineType.Task) {
-      if (source.paragraphList[index + 1].type == RichLineType.Task) {
+    if (source.paragraphList[index].type == RichType.Task) {
+      if (source.paragraphList[index + 1].type == RichType.Task) {
         return SizedBox(height: layout.listLineSpacing);
       }
-    } else if (source.paragraphList[index].type == RichLineType.OrderedLists ||
-        source.paragraphList[index].type == RichLineType.UnorderedList) {
-      if (source.paragraphList[index + 1].type == RichLineType.OrderedLists ||
-          source.paragraphList[index + 1].type == RichLineType.UnorderedList) {
+    } else if (source.paragraphList[index].type == RichType.OrderedLists ||
+        source.paragraphList[index].type == RichType.UnorderedList) {
+      if (source.paragraphList[index + 1].type == RichType.OrderedLists ||
+          source.paragraphList[index + 1].type == RichType.UnorderedList) {
         return SizedBox(
           height: layout.listLineSpacing,
           width: double.infinity,
         );
       }
-    } else if (source.paragraphList[index].type == RichLineType.Title ||
-        source.paragraphList[index + 1].type == RichLineType.Title) {
+    } else if (source.paragraphList[index].type == RichType.Title ||
+        source.paragraphList[index + 1].type == RichType.Title) {
       return SizedBox(height: 12);
     }
     return SizedBox(height: layout.segmentSpacing);
@@ -283,7 +298,7 @@ class RichNoteState extends State<RichNote> {
     }
   }
 
-  void changeCurrentLineTypeTo(RichLineType type) {
+  void changeCurrentLineTypeTo(RichType type) {
     int index = _getCurrentLineIndex();
     if (index > -1) {
       RichItem item = source.paragraphList[index];
@@ -299,7 +314,7 @@ class RichNoteState extends State<RichNote> {
   void calculationOrderedList() {
     int bh = 1;
     source.paragraphList?.forEach((line) {
-      if (line.type == RichLineType.OrderedLists) {
+      if (line.type == RichType.OrderedLists) {
         line.leading = bh.toString();
         bh++;
       } else if (bh > 1) {
@@ -335,7 +350,7 @@ class RichNoteState extends State<RichNote> {
 
     RichItem oldItem = source.paragraphList[index];
     RichItem newItem;
-    RichLineType newType;
+    RichType newType;
     debugPrint('第一行字数：${lines[0].length}');
     debugPrint('第二行字数：${lines[1].length}');
 
@@ -346,7 +361,7 @@ class RichNoteState extends State<RichNote> {
       setState(() {
         RichItem item = source.paragraphList[index];
         item.canChanged = false;
-        item.type = RichLineType.Text;
+        item.type = RichType.Text;
         item.controller.text = '\u0000' + '';
         item.controller.selection = TextSelection.fromPosition(
             TextPosition(affinity: TextAffinity.downstream, offset: 1));
@@ -359,10 +374,10 @@ class RichNoteState extends State<RichNote> {
         affinity: TextAffinity.downstream,
         offset: lines[0].length,
       ));
-      if (oldItem.type == RichLineType.Title ||
-          oldItem.type == RichLineType.SubTitle ||
-          oldItem.type == RichLineType.Reference) {
-        newType = RichLineType.Text;
+      if (oldItem.type == RichType.Title ||
+          oldItem.type == RichType.SubTitle ||
+          oldItem.type == RichType.Reference) {
+        newType = RichType.Text;
       } else {
         newType = oldItem.type;
       }
@@ -473,37 +488,37 @@ class RichNoteState extends State<RichNote> {
               IconButton(
                 icon: Icon(Icons.reorder),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichLineType.Text);
+                  changeCurrentLineTypeTo(RichType.Text);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_bold),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichLineType.TextBold);
+                  changeCurrentLineTypeTo(RichType.TextBold);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_list_numbered),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichLineType.OrderedLists);
+                  changeCurrentLineTypeTo(RichType.OrderedLists);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_list_bulleted),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichLineType.UnorderedList);
+                  changeCurrentLineTypeTo(RichType.UnorderedList);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.aspect_ratio),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichLineType.Reference);
+                  changeCurrentLineTypeTo(RichType.Reference);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.check_box),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichLineType.Task);
+                  changeCurrentLineTypeTo(RichType.Task);
                 },
               ),
               IconButton(
