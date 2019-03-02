@@ -120,7 +120,6 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.subhead
             : layout.subTitleStyle;
         if (widget.isEditable) {
-          //lineWidget = geTextField(index, effectiveSytle);
           paragraphWidget =
               layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
@@ -134,7 +133,6 @@ class RichNoteState extends State<RichNote> {
         var effectiveSytle =
             layout.contentStyle == null ? textTheme.body1 : layout.contentStyle;
         if (widget.isEditable) {
-          //lineWidget = geTextField(index, effectiveSytle);
           paragraphWidget =
               layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
@@ -149,7 +147,6 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.body1.merge(TextStyle(fontWeight: FontWeight.bold))
             : layout.contentBoldStyle;
         if (widget.isEditable) {
-          //lineWidget = geTextField(index, effectiveSytle);
           paragraphWidget =
               layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
@@ -178,7 +175,6 @@ class RichNoteState extends State<RichNote> {
               ));
         }
         break;
-      case RichType.SubOrderedLists:
       case RichType.OrderedLists:
         var effectiveSytle = layout.orderedListsStyle == null
             ? textTheme.body1
@@ -193,7 +189,20 @@ class RichNoteState extends State<RichNote> {
               Text(item.content, style: effectiveSytle));
         }
         break;
-      case RichType.SubUnorderedList:
+      case RichType.SubOrderedLists:
+        var effectiveSytle = layout.orderedListsStyle == null
+            ? textTheme.body1
+            : layout.orderedListsStyle;
+        if (widget.isEditable) {
+          paragraphWidget = layout.richLayoutSubList(
+              Text('${item.leading}.', style: effectiveSytle),
+              buildTextField(index, effectiveSytle));
+        } else {
+          paragraphWidget = layout.richLayoutSubList(
+              Text('${item.leading}.', style: effectiveSytle),
+              Text(item.content, style: effectiveSytle));
+        }
+        break;
       case RichType.UnorderedList:
         var effectiveSytle = layout.unorderedListStyle == null
             ? textTheme.body1
@@ -205,6 +214,21 @@ class RichNoteState extends State<RichNote> {
           );
         } else {
           paragraphWidget = layout.richLayoutList(
+              Text(layout.leadingSymbols, style: effectiveSytle),
+              Text(item.content, style: effectiveSytle));
+        }
+        break;
+      case RichType.SubUnorderedList:
+        var effectiveSytle = layout.unorderedListStyle == null
+            ? textTheme.body1
+            : layout.unorderedListStyle;
+        if (widget.isEditable) {
+          paragraphWidget = layout.richLayoutSubList(
+            Text(layout.leadingSymbols, style: effectiveSytle),
+            buildTextField(index, effectiveSytle),
+          );
+        } else {
+          paragraphWidget = layout.richLayoutSubList(
               Text(layout.leadingSymbols, style: effectiveSytle),
               Text(item.content, style: effectiveSytle));
         }
@@ -298,7 +322,17 @@ class RichNoteState extends State<RichNote> {
     }
   }
 
-  void changeCurrentLineTypeTo(RichType type) {
+  RichType getCurrentRichType() {
+    RichType type;
+    int index = _getCurrentLineIndex();
+    if (index > -1) {
+      RichItem item = source.paragraphList[index];
+      type = item.type;
+    }
+    return type;
+  }
+
+  void changeParagraphTypeTo(RichType type) {
     int index = _getCurrentLineIndex();
     if (index > -1) {
       RichItem item = source.paragraphList[index];
@@ -312,13 +346,18 @@ class RichNoteState extends State<RichNote> {
   }
 
   void calculationOrderedList() {
-    int bh = 1;
+    int ybh = 1, ebh = 1;
     source.paragraphList?.forEach((line) {
       if (line.type == RichType.OrderedLists) {
-        line.leading = bh.toString();
-        bh++;
-      } else if (bh > 1) {
-        bh = 1;
+        line.leading = ybh.toString();
+        ybh++;
+        ebh = 1;
+      } else if (line.type == RichType.SubOrderedLists) {
+        line.leading = ebh.toString();
+        ebh++;
+      } else {
+        ybh = 1;
+        ebh = 1;
       }
     });
   }
@@ -488,37 +527,59 @@ class RichNoteState extends State<RichNote> {
               IconButton(
                 icon: Icon(Icons.reorder),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichType.Text);
+                  changeParagraphTypeTo(RichType.Text);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_bold),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichType.TextBold);
+                  changeParagraphTypeTo(RichType.TextBold);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_list_numbered),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichType.OrderedLists);
+                  changeParagraphTypeTo(RichType.OrderedLists);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_list_bulleted),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichType.UnorderedList);
+                  changeParagraphTypeTo(RichType.UnorderedList);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.format_indent_increase),
+                onPressed: () {
+                  RichType type = getCurrentRichType();
+                  if (type == RichType.OrderedLists) {
+                    changeParagraphTypeTo(RichType.SubOrderedLists);
+                  } else if (type == RichType.UnorderedList) {
+                    changeParagraphTypeTo(RichType.SubUnorderedList);
+                  }
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.format_indent_decrease),
+                onPressed: () {
+                  RichType type = getCurrentRichType();
+                  if (type == RichType.SubOrderedLists) {
+                    changeParagraphTypeTo(RichType.OrderedLists);
+                  } else if (type == RichType.SubUnorderedList) {
+                    changeParagraphTypeTo(RichType.UnorderedList);
+                  }
                 },
               ),
               IconButton(
                 icon: Icon(Icons.aspect_ratio),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichType.Reference);
+                  changeParagraphTypeTo(RichType.Reference);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.check_box),
                 onPressed: () {
-                  changeCurrentLineTypeTo(RichType.Task);
+                  changeParagraphTypeTo(RichType.Task);
                 },
               ),
               IconButton(
