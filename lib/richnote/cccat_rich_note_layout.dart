@@ -34,35 +34,13 @@ class RichNoteLayout {
   final TextStyle referenceStyle;
   final TextStyle imageTextStyle;
 
-  /// 基础布局
-
-  Widget richBaseLayout(Widget content, {Widget leading}) {
-    Widget effectiveLeading = leading == null ? Text('') : leading;
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          effectiveLeading,
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                content,
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget richLayoutText(Widget content) {
-    return Container(
-      padding: EdgeInsets.all(0.0),
-      decoration: BoxDecoration(),
-      child: content,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(child: content),
+      ],
     );
   }
 
@@ -108,7 +86,7 @@ class RichNoteLayout {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.fromLTRB(3, 1, 12, 0),
-          child: leading,
+          child: Center(child: leading),
         ),
         Expanded(
           child: content,
@@ -123,7 +101,7 @@ class RichNoteLayout {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 1, 12, 0),
+          padding: const EdgeInsets.fromLTRB(28, 1, 12, 0),
           child: leading,
         ),
         Expanded(

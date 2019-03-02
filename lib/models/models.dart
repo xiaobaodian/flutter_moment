@@ -275,8 +275,8 @@ class DailyRecord {
     focusEvents?.forEach((event){
       richLines.add(
         RichLine(
-          type: RichType.Title,
-          content: store.getFocusTitleFrom(event.focusItemBoxId),
+          type: RichType.FocusTitle,
+          content: event.focusItemBoxId.toString(),
           note: event,
         )
       );

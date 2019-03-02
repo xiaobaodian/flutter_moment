@@ -259,16 +259,6 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('今日时光'),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.inbox),
-            onPressed: () {
-              debugPrint('inbox'); //RichTextEditerRoute
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (BuildContext context) {
-                return RichTextEditerRoute('q');
-              }));
-            },
-          ),
           Offstage(
             offstage: hideGoTodayButton,
             child: IconButton(
@@ -491,6 +481,7 @@ Widget _getListView(BuildContext context, int dayIndex) {
     RichSource richSource = RichSource(dailyRecord.richLines);
     RichNote richNote = RichNote(
       richSource: richSource,
+      store: store,
       onTapLine: (index) {
         FocusEvent event = dailyRecord.richLines[index].note;
         int position = dailyRecord.focusEvents.indexOf(event);
