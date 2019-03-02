@@ -501,48 +501,5 @@ Widget _getListView(BuildContext context, int dayIndex) {
       },
     );
     return richNote;
-//    ListView.builder(
-//      shrinkWrap: true,
-//      itemBuilder: (BuildContext context, int index) {
-//        return InkWell(
-//          child: Container(
-//            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-//            child: Column(
-//              mainAxisAlignment: MainAxisAlignment.center,
-//              crossAxisAlignment: CrossAxisAlignment.start,
-//              children: <Widget>[
-//                Padding(
-//                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-//                  child: Text(
-//                    store.getFocusTitleFrom(dailyRecord.focusEvents[index].focusItemBoxId),
-//                    style: TextStyle(
-//                      fontSize: 16,
-//                      color: Theme.of(context).accentColor,
-//                    ),
-//                  ),
-//                ),
-//                Text(
-//                  dailyRecord.focusEvents[index].note,
-//                  style: TextStyle(fontSize: 16, color: Colors.black87),
-//                ),
-//              ],
-//            ),
-//          ),
-//          onTap: () {
-//            Navigator.of(context)
-//                .push(MaterialPageRoute(builder: (BuildContext context) {
-//              return EditerFocusEventRoute(dailyRecord.focusEvents[index]);
-//            })).then((resultItem) {
-//              if (resultItem is FocusEvent) {
-//                store.changeFocusEventToSelectedDay(resultItem, index);
-//              } else if (resultItem is int) {
-//                store.removeFocusEventToSelectedDay(index, dailyRecord.focusEvents[index].focusItemBoxId);
-//              }
-//            });
-//          },
-//        );
-//      },
-//      itemCount: dailyRecord.focusEvents.length,
-//    );
   }
 }

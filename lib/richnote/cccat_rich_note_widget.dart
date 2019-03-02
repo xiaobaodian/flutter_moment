@@ -25,8 +25,7 @@ class RichNote extends StatefulWidget {
     this.richNoteLayout,
     this.onTapLine,
     this.store,
-  })
-      : isEditable = true,
+  })  : isEditable = true,
         isFixed = false {
     richSource.richNote = this;
     debugPrint('RichNote.editable 模式初始化');
@@ -38,8 +37,7 @@ class RichNote extends StatefulWidget {
     this.richNoteLayout,
     this.onTapLine,
     this.store,
-  })
-      : isFixed = true,
+  })  : isFixed = true,
         isEditable = false;
 
   final bool isEditable;
@@ -152,7 +150,7 @@ class RichNoteState extends State<RichNote> {
             style: effectiveSytle,
           );
           paragraphWidget =
-              layout.richLayoutText(Text(item.content,style: effectiveSytle));
+              layout.richLayoutText(Text(item.content, style: effectiveSytle));
         }
         break;
       case RichType.TextBold:
@@ -164,7 +162,7 @@ class RichNoteState extends State<RichNote> {
               layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget =
-              layout.richLayoutText(Text(item.content,style: effectiveSytle));
+              layout.richLayoutText(Text(item.content, style: effectiveSytle));
         }
         break;
       case RichType.Task:
@@ -372,11 +370,11 @@ class RichNoteState extends State<RichNote> {
         line.leading = '$ebh.';
         ebh++;
       } else if (line.type == RichType.UnorderedList) {
-        line.leading = '▪';
+        line.leading = '●'; // •
         ybh = 1;
         ebh = 1;
       } else if (line.type == RichType.SubUnorderedList) {
-        line.leading = '▫';
+        line.leading = '▪';   //▪
       } else {
         ybh = 1;
         ebh = 1;
