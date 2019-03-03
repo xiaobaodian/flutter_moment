@@ -89,7 +89,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
   List<FocusEvent> getFocusEventsFromFocusItemId(int id){
     List<FocusEvent> focusEvents = [];
-    calendarMap.everyDayIndex.forEach((day){
+    var everyDay = calendarMap.everyDayIndex;
+    for (int i = everyDay.length - 1; i > 0; i--) {
+      var day = everyDay[i];
       if (day.dailyRecord != null) {
         day.dailyRecord.focusEvents.forEach((event){
           if (event.focusItemBoxId == id) {
@@ -97,7 +99,7 @@ class GlobalStoreState extends State<GlobalStore> {
           }
         });
       }
-    });
+    }
     return focusEvents;
   }
 

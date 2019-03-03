@@ -278,18 +278,14 @@ class RichNoteState extends State<RichNote> {
       RichType.SubOrderedLists,
       RichType.SubUnorderedList
     ];
-    if (current.type == RichType.Task) {
-      if (next.type == RichType.Task) {
-        return SizedBox(height: layout.listLineSpacing);
-      }
-    } else if (listType.indexOf(current.type) > -1) {
-      if (listType.indexOf(next.type) > -1) {
-        return SizedBox(
-          height: layout.listLineSpacing,
-          width: double.infinity,
-        );
-      }
-    } else if (current.type == RichType.Title || next.type == RichType.Title) {
+    if (current.type == RichType.Task && next.type == RichType.Task) {
+      return SizedBox(height: layout.listLineSpacing);
+    } else if (listType.indexOf(current.type) > -1 && listType.indexOf(next.type) > -1) {
+      return SizedBox(
+        height: layout.listLineSpacing,
+        width: double.infinity,
+      );
+    } else if (current.type == RichType.FocusTitle || next.type == RichType.FocusTitle) {
       return SizedBox(height: 12);
     }
     return SizedBox(height: layout.segmentSpacing);
@@ -370,11 +366,11 @@ class RichNoteState extends State<RichNote> {
         line.leading = '$ebh.';
         ebh++;
       } else if (line.type == RichType.UnorderedList) {
-        line.leading = '●'; // •
+        line.leading = '▪'; // •
         ybh = 1;
         ebh = 1;
       } else if (line.type == RichType.SubUnorderedList) {
-        line.leading = '▪';   //▪
+        line.leading = '•';   //▪ ●
       } else {
         ybh = 1;
         ebh = 1;
