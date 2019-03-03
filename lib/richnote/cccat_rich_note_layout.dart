@@ -4,8 +4,8 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 class RichNoteLayout {
   RichNoteLayout(
     BuildContext context, {
-    this.segmentSpacing = 8.0,
-    this.listLineSpacing = 3.0,
+    this.segmentSpacing = 9.0,
+    this.listLineSpacing = 5.0,
     this.leadingSymbols = '•',
     this.titleStyle,
     this.subTitleStyle,
@@ -33,6 +33,16 @@ class RichNoteLayout {
   final TextStyle unorderedListStyle;
   final TextStyle referenceStyle;
   final TextStyle imageTextStyle;
+
+  Widget richLayoutTitle(Widget content) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        content,
+      ],
+    );
+  }
 
   Widget richLayoutText(Widget content) {
     return Row(
@@ -86,7 +96,7 @@ class RichNoteLayout {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.fromLTRB(3, 1, 12, 0),
-          child: Center(child: leading),
+          child: leading,
         ),
         Expanded(
           child: content,

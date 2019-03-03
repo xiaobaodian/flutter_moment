@@ -46,9 +46,9 @@ class DailyFocusRouteState extends State<DailyFocusRoute>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
-    focusList = GlobalStore.of(context).focusItemList;
-    personList = GlobalStore.of(context).personItemList;
-    placeList = GlobalStore.of(context).placeItemList;
+    focusList = _store.focusItemList;
+    personList = _store.personItemList;
+    placeList = _store.placeItemList;
   }
 
   @override

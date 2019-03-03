@@ -105,10 +105,9 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget =
               layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
-          paragraphWidget = Text(
-            widget.store.getFocusTitleFrom(int.parse(item.content)),
-            style: effectiveSytle,
-          );
+          paragraphWidget = layout.richLayoutTitle(Text(
+              widget.store.getFocusTitleFrom(int.parse(item.content)),
+              style: effectiveSytle));
         }
         break;
       case RichType.Title:
@@ -145,10 +144,6 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget =
               layout.richLayoutText(buildTextField(index, effectiveSytle));
         } else {
-          paragraphWidget = Text(
-            item.content,
-            style: effectiveSytle,
-          );
           paragraphWidget =
               layout.richLayoutText(Text(item.content, style: effectiveSytle));
         }
@@ -280,13 +275,21 @@ class RichNoteState extends State<RichNote> {
     ];
     if (current.type == RichType.Task && next.type == RichType.Task) {
       return SizedBox(height: layout.listLineSpacing);
-    } else if (listType.indexOf(current.type) > -1 && listType.indexOf(next.type) > -1) {
+    } else if (listType.indexOf(current.type) > -1 &&
+        listType.indexOf(next.type) > -1) {
       return SizedBox(
         height: layout.listLineSpacing,
         width: double.infinity,
       );
-    } else if (current.type == RichType.FocusTitle || next.type == RichType.FocusTitle) {
+    } else if (current.type == RichType.FocusTitle) {
       return SizedBox(height: 12);
+    } else if (next.type == RichType.FocusTitle) {
+      return Column(
+        children: <Widget>[
+          SizedBox(height: 12),
+          Divider(),
+        ],
+      );
     }
     return SizedBox(height: layout.segmentSpacing);
   }
@@ -366,11 +369,11 @@ class RichNoteState extends State<RichNote> {
         line.leading = '$ebh.';
         ebh++;
       } else if (line.type == RichType.UnorderedList) {
-        line.leading = '▪'; // •
+        line.leading = '-'; // •
         ybh = 1;
         ebh = 1;
       } else if (line.type == RichType.SubUnorderedList) {
-        line.leading = '•';   //▪ ●
+        line.leading = '•'; //▪ ●
       } else {
         ybh = 1;
         ebh = 1;
