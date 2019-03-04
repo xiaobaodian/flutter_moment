@@ -131,6 +131,9 @@ class RichSource {
     String jsonString,
   ): assert(jsonString != null) {
     this.paragraphList = RichSource.getRichLinesFromJson(jsonString) ?? [];
+    paragraphList.forEach((item){
+      debugPrint('---> ${item.content}');
+    });
   }
 
   static List<RichLine> getRichLinesFromJson(String jsonString) {

@@ -12,6 +12,7 @@ import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/calendar_route.dart';
 import 'package:flutter_moment/demo_data.dart';
+import 'package:flutter_moment/route/details_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/daily_focus_route.dart';
 import 'package:flutter_moment/route/rich_text_editer.dart';
@@ -483,21 +484,36 @@ Widget _getListView(BuildContext context, int dayIndex) {
       richSource: richSource,
       store: store,
       onTapLine: (index) {
-        FocusEvent event = dailyRecord.richLines[index].note;
-        int position = dailyRecord.focusEvents.indexOf(event);
+        var richLine = dailyRecord.richLines[index];
+        FocusEvent event = richLine.note;
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
           return EditerFocusEventRoute(event);
         })).then((resultItem) {
           if (resultItem is FocusEvent) {
             dailyRecord.richLines.clear();
-            store.changeFocusEventToSelectedDay(resultItem, position);
+            event.copyWith(resultItem);
+            //store.changeFocusEventForSelectedDay(resultItem, position);
+            store.changeFocusEvent(event);
           } else if (resultItem is int) {
-            dailyRecord.richLines.clear();
-            store.removeFocusEventToSelectedDay(
-                position, dailyRecord.focusEvents[position].focusItemBoxId);
+            dailyRecord
+              ..richLines.clear()
+              ..focusEvents.remove(event);
+            store.removeFocusEvent(event);
+            //store.removeFocusEventForSelectedDay(position, dailyRecord.focusEvents[position].focusItemBoxId);
           }
         });
+      },
+      onLongTapLine: (index) {
+        var richLine = dailyRecord.richLines[index];
+        if (richLine.type == RichType.FocusTitle) {
+          FocusEvent event = richLine.note;
+          var focusItem = store.getFocusItemFromId(event.focusItemBoxId);
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (BuildContext context) {
+            return FocusItemDetailsRoute(focusItem);
+          }));
+        }
       },
     );
     return richNote;

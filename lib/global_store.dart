@@ -169,6 +169,10 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // DailyRecords
 
+  DailyRecord getDailyRecord(int dayIndex) {
+    return calendarMap.everyDayIndex[dayIndex].dailyRecord;
+  }
+
   void putDailyRecord(DailyRecord dailyRecord) {
     _platformDataSource.invokeMethod("PutDailyRecord", json.encode(dailyRecord)).then((id) {
       dailyRecord.boxId = id;
@@ -209,19 +213,45 @@ class GlobalStoreState extends State<GlobalStore> {
     debugPrint('add SelectedDay Events: ${json.encode(dailyRecord.focusEvents)}');
   }
 
-  void changeFocusEventToSelectedDay(FocusEvent focusEvent, int index) {
+  void changFocusEventForDailyEvent(FocusEvent focusEvent, int focusEventsIndex, DailyRecord dailyRecord) {
+    /// 为focusEvent设置dayIndex值，重要
+    focusEvent.dayIndex = dailyRecord.dayIndex;
+
+    /// 获取给定日期的FocusEvents列表，然后替换掉index位置的记录
+    var dayEvents = dailyRecord.focusEvents;
+    dayEvents[focusEventsIndex] = focusEvent;
+
+    changeFocusEvent(focusEvent);
+    debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
+  }
+
+  void changeFocusEventForDayIndex(FocusEvent focusEvent, int focusEventsIndex, int dayIndex) {
+    /// 为focusEvent设置dayIndex值，重要
+    focusEvent.dayIndex = dayIndex;
+
+    /// 获取给定日期的FocusEvents列表，然后替换掉index位置的记录
+    var dayEvents = calendarMap.getFocusEventsFromDayIndex(dayIndex);
+    dayEvents[focusEventsIndex] = focusEvent;
+
+    changeFocusEvent(focusEvent);
+    debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
+  }
+
+  // 测试完成后改为调用上面的方法
+  void changeFocusEventForSelectedDay(FocusEvent focusEvent, int focusEventsIndex) {
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = calendarMap.selectedDateIndex;
 
     /// 获取选中日期的FocusEvents列表，然后替换掉index位置的记录
     var selectedDayEvents = calendarMap.getFocusEventsFromSelectedDay();
-    selectedDayEvents[index] = focusEvent;
+    selectedDayEvents[focusEventsIndex] = focusEvent;
 
     changeFocusEvent(focusEvent);
     debugPrint('change SelectedDay Events: ${json.encode(selectedDayEvents)}');
   }
 
-  void removeFocusEventToSelectedDay(int index, int focusItemBoxId) {
+
+  void removeFocusEventForSelectedDay(int index, int focusItemBoxId) {
     /// 获取FocusItem，引用减少一次
     FocusItem focusItem = getFocusItemFromId(focusItemBoxId);
     focusItem.minusReferences();

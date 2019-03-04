@@ -13,6 +13,7 @@ class RichNote extends StatefulWidget {
     this.richSource,
     this.richNoteLayout,
     this.onTapLine,
+    this.onLongTapLine,
     this.store,
   })  : isEditable = false,
         isFixed = false,
@@ -24,6 +25,7 @@ class RichNote extends StatefulWidget {
     this.richSource,
     this.richNoteLayout,
     this.onTapLine,
+    this.onLongTapLine,
     this.store,
   })  : isEditable = true,
         isFixed = false {
@@ -36,41 +38,40 @@ class RichNote extends StatefulWidget {
     this.richSource,
     this.richNoteLayout,
     this.onTapLine,
+    this.onLongTapLine,
     this.store,
   })  : isFixed = true,
-        isEditable = false;
+        isEditable = false {
+    richSource.richNote = this;
+  }
 
   final bool isEditable;
   final bool isFixed;
   final ValueChanged<int> onTapLine;
+  final ValueChanged<int> onLongTapLine;
   final RichNoteLayout richNoteLayout;
   final RichSource richSource;
   final GlobalStoreState store;
 
   @override
   RichNoteState createState() {
-    return new RichNoteState();
+    return RichNoteState();
   }
 }
 
 class RichNoteState extends State<RichNote> {
   TextTheme textTheme;
   RichNoteLayout layout;
-  RichSource source;
-  //List<RichLine> paragraphList;
-  //List<RichTextItem> itemList;
 
   @override
   void initState() {
     super.initState();
-    layout = widget.richNoteLayout;
-    source = widget.richSource;
-    //paragraphList = widget.richSource.paragraphList;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    layout = widget.richNoteLayout;
     textTheme = Theme.of(context).textTheme;
     if (layout == null) {
       layout = RichNoteLayout(
@@ -85,17 +86,17 @@ class RichNoteState extends State<RichNote> {
   void dispose() {
     super.dispose();
     if (widget.isEditable) {
-      source.paragraphList.forEach((item) {
+      widget.richSource.paragraphList.forEach((item) {
         if (item is RichItem) {
           item.dispose();
         }
       });
-      source.paragraphList = null;
+      widget.richSource.paragraphList = null;
     }
   }
 
   Widget buildParagraphLayoutWidget(int index) {
-    var item = source.paragraphList[index];
+    var item = widget.richSource.paragraphList[index];
     Widget paragraphWidget;
     switch (item.type) {
       case RichType.FocusTitle:
@@ -265,9 +266,9 @@ class RichNoteState extends State<RichNote> {
   }
 
   Widget buildSeparatorWidget(int index) {
-    final current = source.paragraphList[index];
-    final next = source.paragraphList[index + 1];
-    List<RichType> listType = [
+    final current = widget.richSource.paragraphList[index];
+    final next = widget.richSource.paragraphList[index + 1];
+    const List<RichType> listType = [
       RichType.OrderedLists,
       RichType.UnorderedList,
       RichType.SubOrderedLists,
@@ -296,8 +297,8 @@ class RichNoteState extends State<RichNote> {
 
   int _getCurrentLineIndex() {
     int index = -1;
-    for (int i = 0; i < source.paragraphList.length; i++) {
-      RichItem item = (source.paragraphList[i]);
+    for (int i = 0; i < widget.richSource.paragraphList.length; i++) {
+      RichItem item = (widget.richSource.paragraphList[i]);
       if (item.node.hasFocus) {
         index = i;
         break;
@@ -312,20 +313,18 @@ class RichNoteState extends State<RichNote> {
   }
 
   void removeCurrentLine() {
-    if (source.paragraphList.length == 1) return;
+    if (widget.richSource.paragraphList.length == 1) return;
     int index = _getCurrentLineIndex();
     if (index > -1) {
-      RichItem tempItem = source.paragraphList[index];
+      RichItem tempItem = widget.richSource.paragraphList[index];
       setState(() {
-        //requestFocus(item.node);
-        //item.node.unfocus();
-        source.paragraphList.removeAt(index);
+        widget.richSource.paragraphList.removeAt(index);
       });
       Future.delayed(const Duration(milliseconds: 200), () {
         tempItem.dispose();
       });
       Future.delayed(const Duration(milliseconds: 200), () {
-        RichItem item = source.paragraphList[index];
+        RichItem item = widget.richSource.paragraphList[index];
         item.controller.selection = TextSelection.fromPosition(TextPosition(
           affinity: TextAffinity.downstream,
           offset: 1,
@@ -339,7 +338,7 @@ class RichNoteState extends State<RichNote> {
     RichType type;
     int index = _getCurrentLineIndex();
     if (index > -1) {
-      RichItem item = source.paragraphList[index];
+      RichItem item = widget.richSource.paragraphList[index];
       type = item.type;
     }
     return type;
@@ -348,7 +347,7 @@ class RichNoteState extends State<RichNote> {
   void changeParagraphTypeTo(RichType type) {
     int index = _getCurrentLineIndex();
     if (index > -1) {
-      RichItem item = source.paragraphList[index];
+      RichItem item = widget.richSource.paragraphList[index];
       setState(() {
         item.type = type;
       });
@@ -360,7 +359,7 @@ class RichNoteState extends State<RichNote> {
 
   void calculationOrderedList() {
     int ybh = 1, ebh = 1;
-    source.paragraphList?.forEach((line) {
+    widget.richSource.paragraphList?.forEach((line) {
       if (line.type == RichType.OrderedLists) {
         line.leading = '$ybh.';
         ybh++;
@@ -383,10 +382,10 @@ class RichNoteState extends State<RichNote> {
 
   void mergeUPLine(int index, String text) {
     debugPrint('向上行合并');
-    RichItem tempLine = source.paragraphList[index];
+    RichItem tempLine = widget.richSource.paragraphList[index];
     if (index > 0) {
       setState(() {
-        RichItem upLine = source.paragraphList[index - 1];
+        RichItem upLine = widget.richSource.paragraphList[index - 1];
         _requestFocus(upLine.node);
         var p = upLine.controller.text.length;
         var newText = upLine.controller.text + text;
@@ -395,7 +394,7 @@ class RichNoteState extends State<RichNote> {
         upLine.controller.selection = TextSelection.fromPosition(
           TextPosition(affinity: TextAffinity.downstream, offset: p),
         );
-        source.paragraphList.removeAt(index);
+        widget.richSource.paragraphList.removeAt(index);
       });
       Future.delayed(const Duration(milliseconds: 200), () {
         tempLine.dispose();
@@ -406,7 +405,7 @@ class RichNoteState extends State<RichNote> {
   void splitLine(int index, List<String> lines) {
     if (lines.length < 2) return;
 
-    RichItem oldItem = source.paragraphList[index];
+    RichItem oldItem = widget.richSource.paragraphList[index];
     RichItem newItem;
     RichType newType;
     debugPrint('第一行字数：${lines[0].length}');
@@ -417,7 +416,7 @@ class RichNoteState extends State<RichNote> {
     if (upTxt.length == 0 && lines[1].length == 0) {
       if (index == 0) return;
       setState(() {
-        RichItem item = source.paragraphList[index];
+        RichItem item = widget.richSource.paragraphList[index];
         item.canChanged = false;
         item.type = RichType.Text;
         item.controller.text = '\u0000' + '';
@@ -447,7 +446,7 @@ class RichNoteState extends State<RichNote> {
           affinity: TextAffinity.downstream,
           offset: 1,
         ));
-        source.paragraphList.insert(index + 1, newItem);
+        widget.richSource.paragraphList.insert(index + 1, newItem);
         Future.delayed(const Duration(milliseconds: 50), () {
           _requestFocus(newItem?.node);
         });
@@ -456,7 +455,7 @@ class RichNoteState extends State<RichNote> {
   }
 
   Widget buildTextField(int index, TextStyle effectiveSytle) {
-    var item = source.paragraphList[index] as RichItem;
+    var item = widget.richSource.paragraphList[index] as RichItem;
     assert(item.controller != null);
     assert(item.node != null);
     return TextField(
@@ -490,7 +489,7 @@ class RichNoteState extends State<RichNote> {
 
   List<Widget> buildFixedBody() {
     List<Widget> bodyItems = [];
-    int listLength = source.paragraphList.length;
+    int listLength = widget.richSource.paragraphList.length;
     for (int index = 0; index < listLength; index++) {
       bodyItems.add(buildParagraphLayoutWidget(index));
       if (index < listLength - 1) bodyItems.add(buildSeparatorWidget(index));
@@ -511,12 +510,17 @@ class RichNoteState extends State<RichNote> {
                 widget.onTapLine(index);
               }
             },
+            onLongPress: () {
+              if (widget.onLongTapLine != null) {
+                widget.onLongTapLine(index);
+              }
+            },
           );
         },
         separatorBuilder: (context, index) {
           return buildSeparatorWidget(index);
         },
-        itemCount: source.paragraphList.length,
+        itemCount: widget.richSource.paragraphList.length,
       ),
     ));
     if (widget.isEditable) {

@@ -7,6 +7,7 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
@@ -153,21 +154,24 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
           ),
         ],
       ),
-      body: buildBody(context),
+      body: buildBody(context, _store),
     );
   }
 
-  Widget buildBody(BuildContext context) {
-    if (widget._focusItem.detailsList.isEmpty) {
+  Widget buildBody(BuildContext context, GlobalStoreState store) {
+    final detailsList = widget._focusItem.detailsList;
+    if (detailsList.isEmpty) {
       return Center(child: Text('还没有记录'));
     }
-    var store = GlobalStore.of(context);
-    var detailsList = widget._focusItem.detailsList;
     return ListView.builder(
       itemCount: detailsList.length,
       itemBuilder: (context, index){
-        var date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
-        var str = DateTimeExt.chineseDateString(date);
+        debugPrint('生成卡片: $index');
+        final date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
+        final str = DateTimeExt.chineseDateString(date);
+        Widget content = RichNote.fixed(
+          richSource: RichSource.fromJson(detailsList[index].note),
+        );
         return Card(
           margin: EdgeInsets.all(6),
           child: InkWell(
@@ -184,16 +188,31 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    //child: Text('qqqq'),
-                      child: RichNote.fixed(
-                        richSource: RichSource.fromJson(detailsList[index].note),
-                      ),
+                    child: content,
                   ),
                   //Text(detailsList[index].note),
                 ],
               ),
             ),
-            onTap: (){},
+            onTap: (){
+              FocusEvent event = detailsList[index];
+              var dailyRecord = store.getDailyRecord(event.dayIndex);
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (BuildContext context) {
+                return EditerFocusEventRoute(event);
+              })).then((resultItem) {
+                if (resultItem is FocusEvent) {
+                  dailyRecord.richLines.clear();
+                  event.copyWith(resultItem);
+                  store.changeFocusEvent(event);
+                } else if (resultItem is int) {
+                  dailyRecord
+                    ..richLines.clear()
+                    ..focusEvents.remove(event);
+                  store.removeFocusEvent(event);
+                }
+              });
+            },
           ),
         );
       },
