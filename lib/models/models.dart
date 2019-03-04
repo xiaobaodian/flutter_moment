@@ -280,11 +280,11 @@ class DailyRecord {
           note: event,
         )
       );
-      List<RichLine> lines = RichSource.getRichLinesFromJson(event.note);
-      lines?.forEach((line){
+      //List<RichLine> lines = RichSource.getRichLinesFromJson(event.note);
+      event.noteLines?.forEach((line){
         line.note = event;
       });
-      richLines.addAll(lines);
+      richLines.addAll(event.noteLines);
     });
   }
 
@@ -305,23 +305,27 @@ class DailyRecord {
 }
 
 class FocusEvent {
-  int boxId;
-  int dayIndex;
-  int focusItemBoxId;
-  String note;
-
   FocusEvent({
     this.boxId = 0,
     this.dayIndex = -1,
     this.focusItemBoxId = -1,
-    this.note = ''
-  });
+    note = ''
+  }) {
+    noteLines = RichSource.getRichLinesFromJson(note);
+  }
+
+  int boxId;
+  int dayIndex;
+  int focusItemBoxId;
+  //String note;
+  List<RichLine> noteLines;
 
   void copyWith(FocusEvent other) {
     boxId = other.boxId;
     dayIndex = other.dayIndex;
     focusItemBoxId = other.focusItemBoxId;
-    note = other.note;
+    noteLines = other.noteLines;
+    //note = other.note;
   }
 
   factory FocusEvent.fromJson(Map<String, dynamic> json) {
@@ -337,7 +341,7 @@ class FocusEvent {
     'boxId': boxId,
     'dayIndex': dayIndex,
     'focusItemBoxId': focusItemBoxId,
-    'note': note,
+    'note': RichSource.getJsonFromRichLine(noteLines),
   };
 }
 

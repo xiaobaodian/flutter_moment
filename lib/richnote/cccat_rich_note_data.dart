@@ -38,7 +38,7 @@ class RichLine {
     this.content = '',
     this.beginTime = '',
     this.endTime = '',
-    this.checkState = 0,
+    this.checkState = false,
   });
 
   Object note;
@@ -51,7 +51,7 @@ class RichLine {
   String content;
 
   String beginTime, endTime;
-  int checkState;
+  bool checkState;
 
   factory RichLine.fromJson(Map<String, dynamic> json) {
     return RichLine(
@@ -59,7 +59,7 @@ class RichLine {
       content: json['txt'],
       beginTime: json['bt'],
       endTime: json['et'],
-      checkState: json['cs'],
+      checkState: json['cs'] == 1,
     );
   }
 
@@ -68,7 +68,7 @@ class RichLine {
     'txt': content,
     'bt': '9:00',
     'et': '11:00',
-    'cs': checkState,
+    'cs': checkState ? 1 : 0,
   };
 }
 
@@ -80,7 +80,7 @@ class RichItem extends RichLine {
     String content,
     beginTime,
     endTime,
-    int checkState,
+    checkState,
   }) : super(
     type: type,
     note: focusEventId,
@@ -131,9 +131,6 @@ class RichSource {
     String jsonString,
   ): assert(jsonString != null) {
     this.paragraphList = RichSource.getRichLinesFromJson(jsonString) ?? [];
-    paragraphList.forEach((item){
-      debugPrint('---> ${item.content}');
-    });
   }
 
   static List<RichLine> getRichLinesFromJson(String jsonString) {
@@ -141,6 +138,10 @@ class RichSource {
     List<dynamic> resultJson = json.decode(jsonString) as List;
     List<RichLine> source = resultJson.map((item) => RichLine.fromJson(item)).toList();
     return source;
+  }
+
+  static String getJsonFromRichLine(List<RichLine> paragraphList) {
+    return json.encode(paragraphList);
   }
 
   List<RichLine> paragraphList;
@@ -168,6 +169,7 @@ class RichSource {
           tempList.add(RichItem(
             type: it.type,
             content: '\u0000' + it.content,
+            checkState: it.checkState,
           ));
         });
       }
@@ -192,7 +194,7 @@ class RichSource {
     return tempList;
   }
 
-  String getParagraphJsonString(){
+  String getJsonFromParagraphList(){
     if (richNote.isEditable) {
       return json.encode(getParagraphList());
     }

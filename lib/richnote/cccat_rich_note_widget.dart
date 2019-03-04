@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_moment/global_store.dart';
+import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 
@@ -166,6 +167,14 @@ class RichNoteState extends State<RichNote> {
             layout.taskStyle == null ? textTheme.body1 : layout.taskStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutTask(
+              Checkbox(
+                value: widget.richSource.paragraphList[index].checkState,
+                onChanged: (isSelected){
+                  setState(() {
+                    widget.richSource.paragraphList[index].checkState = isSelected;
+                  });
+                }
+              ),
               buildTextField(index, effectiveSytle),
               Text(
                 '9:20 - 10:00',
@@ -173,11 +182,29 @@ class RichNoteState extends State<RichNote> {
               ));
         } else {
           paragraphWidget = layout.richLayoutTask(
-              Text(item.content, style: effectiveSytle),
-              Text(
-                '9:20 - 10:00',
-                style: textTheme.caption,
-              ));
+            Checkbox(
+              value: widget.richSource.paragraphList[index].checkState,
+              onChanged: (isSelected){
+                setState(() {
+                  widget.richSource.paragraphList[index].checkState = isSelected;
+
+//                  List<RichLine> tempList = [];
+                  FocusEvent event = widget.richSource.paragraphList[index].note;
+//                  widget.richSource.paragraphList.forEach((line){
+//                    if (line.note == event && line.type != RichType.FocusTitle) {
+//                      tempList.add(line);
+//                    }
+//                  });
+                  //event.note = RichSource.getJsonFromRichLine(event);//widget.richSource.getParagraphJsonString(tempList);
+                  widget.store.changeFocusEvent(event);
+                });
+              }
+            ),
+            Text(item.content, style: effectiveSytle),
+            Text(
+              '9:20 - 10:00',
+              style: textTheme.caption,
+            ));
         }
         break;
       case RichType.OrderedLists:

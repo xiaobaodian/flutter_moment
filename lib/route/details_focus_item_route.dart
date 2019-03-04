@@ -166,11 +166,11 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
     return ListView.builder(
       itemCount: detailsList.length,
       itemBuilder: (context, index){
-        debugPrint('生成卡片: $index');
         final date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
         final str = DateTimeExt.chineseDateString(date);
         Widget content = RichNote.fixed(
-          richSource: RichSource.fromJson(detailsList[index].note),
+          //richSource: RichSource.fromJson(detailsList[index].note),
+          richSource: RichSource(detailsList[index].noteLines),
         );
         return Card(
           margin: EdgeInsets.all(6),

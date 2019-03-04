@@ -54,7 +54,7 @@ class RichNoteLayout {
     );
   }
 
-  Widget richLayoutTask(Widget task, Widget time) {
+  Widget richLayoutTask(Widget checkbox, Widget task, Widget time) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,12 +64,7 @@ class RichNoteLayout {
           child: SizedBox(
             width: 32,
             height: 32,
-            child: Checkbox(
-              value: true,
-              onChanged: (isSelected) {
-                isSelected = !isSelected;
-              },
-            ),
+            child: checkbox,
           ),
         ),
         Expanded(

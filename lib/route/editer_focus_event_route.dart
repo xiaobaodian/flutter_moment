@@ -25,7 +25,8 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   void initState() {
     super.initState();
     //focusEventController.text = widget._focusEvent.note;
-    richSource = RichSource.fromJson(widget._focusEvent.note);
+    //richSource = RichSource.fromJson(widget._focusEvent.note);
+    richSource = RichSource(widget._focusEvent.noteLines);
     richNote = RichNote.editable(
       richSource: richSource,
     );
@@ -66,7 +67,8 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
               if (richSource.hasNote()) {
                 FocusEvent focus = FocusEvent();
                 focus.copyWith(widget._focusEvent);
-                focus.note = richSource.getParagraphJsonString();
+                focus.noteLines = richSource.getParagraphList();
+                //focus.note = richSource.getJsonFromParagraphList();
                 Navigator.of(context).pop(focus);
               } else {
                 Navigator.of(context).pop(null);
