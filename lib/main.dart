@@ -291,11 +291,13 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             var dailyRecord = _store.calendarMap.getDailyRecordFromIndex(index);
             if (dailyRecord != null) {
-              if (dailyRecord.richLines == null || dailyRecord.richLines.length ==0) {
+              if (dailyRecord.richLines == null || dailyRecord.richLines.length == 0) {  //  || dailyRecord.richLines.length == 0
                 Future(() => buildDailyEventNote(dailyRecord)).then((length){
-                  setState(() {
-                    debugPrint('延迟生成daily record rich list 完成...');
-                  });
+                  if (length > 0) {
+                    setState(() {
+                      debugPrint('延迟生成daily record rich list 完成...');
+                    });
+                  }
                 });
               }
             }

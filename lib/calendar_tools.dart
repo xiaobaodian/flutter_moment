@@ -25,10 +25,12 @@ class DateTimeExt {
     }
   }
 
+  /// 判断是不是闰年
   static bool isLeapYear(int year) {
     return (year % 100 != 0 && year % 4 == 0) || year % 400 == 0;
   }
 
+  /// 返回该月有几天
   static int monthDaysFrom(int year, int month) {
     assert(year >= 1900 && year <=2200 );
     assert(month >= 1 && month <=12 );
@@ -43,6 +45,7 @@ class DateTimeExt {
     return days;
   }
 
+  /// 返回一年的天数
   static int yearDaysFrom(int year){
     return isLeapYear(year) ? 366 : 365;
   }

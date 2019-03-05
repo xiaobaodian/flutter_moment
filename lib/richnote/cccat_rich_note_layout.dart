@@ -84,13 +84,14 @@ class RichNoteLayout {
     );
   }
 
-  Widget richLayoutList(Widget leading, Widget content) {
+  Widget richLayoutList(int indent, Widget leading, Widget content) {
+    const left = const [3.0, 28.0, 53.0];
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.fromLTRB(3, 1, 12, 0),
+          padding: EdgeInsets.fromLTRB(left[indent], 1, 12, 0),
           child: leading,
         ),
         Expanded(
