@@ -7,18 +7,16 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:meta/meta.dart';
 
 enum RichType {
+  FocusTitle,         // 焦点标题
   Title,              // 标题
   SubTitle,           // 子标题
   Task,               // 任务
   Text,               // 标准文本
-  TextBold,           // 粗体文本
+  Comment,            // 评论
   Reference,          // 引用
   UnorderedList,      // 无序列表
   OrderedLists,       // 有序列表
-  SubUnorderedList,   // 无序列表
-  SubOrderedLists,    // 有序列表
   Image,              // 图片
-  FocusTitle,         // 焦点标题
 }
 
 enum RichStyle {
@@ -225,6 +223,7 @@ class RichSource {
       tempList.add(RichLine(
         type: item.type,
         style: item.style,
+        indent: item.indent,
         note: item.note,
         content: item.controller.text.replaceAll('\u0000', ''),
         createTime: item.createTime,

@@ -176,7 +176,7 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
           margin: EdgeInsets.all(6),
           child: InkWell(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -187,7 +187,7 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(0.0),
                     child: content,
                   ),
                   //Text(detailsList[index].note),

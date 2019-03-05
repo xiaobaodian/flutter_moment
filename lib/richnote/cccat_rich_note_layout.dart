@@ -45,13 +45,14 @@ class RichNoteLayout {
   }
 
   Widget richLayoutText(Widget content) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Expanded(child: content),
-      ],
-    );
+    return content;
+//    return Row(
+//      mainAxisAlignment: MainAxisAlignment.start,
+//      crossAxisAlignment: CrossAxisAlignment.center,
+//      children: <Widget>[
+//        Expanded(child: content),
+//      ],
+//    );
   }
 
   Widget richLayoutTask(Widget checkbox, Widget task, Widget time) {
@@ -73,8 +74,8 @@ class RichNoteLayout {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               task,
-              Offstage(
-                offstage: false,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                 child: time,
               ),
             ],
@@ -85,7 +86,7 @@ class RichNoteLayout {
   }
 
   Widget richLayoutList(int indent, Widget leading, Widget content) {
-    const left = const [3.0, 28.0, 53.0];
+    const left = const [3.0, 30.0, 53.0];
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,62 +102,14 @@ class RichNoteLayout {
     );
   }
 
-  Widget richLayoutSubList(Widget leading, Widget content) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(28, 1, 12, 0),
-          child: leading,
-        ),
-        Expanded(
-          child: content,
-        ),
-      ],
-    );
-  }
-
   Widget richLayoutReference(Widget content) {
     return Container(
       padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: Color.fromARGB(255, 245, 245, 245),
         border: Border(left: BorderSide(color: Colors.black26, width: 5.0)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Offstage(
-            offstage: true,
-            child: Text(''),
-          ),
-          Offstage(
-            offstage: true,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
-              child: Checkbox(
-                value: true,
-                onChanged: (isSelected) {},
-              ),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                content,
-                Offstage(
-                  offstage: true,
-                  child: Text(''),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      child: content,
     );
   }
 
@@ -164,8 +117,8 @@ class RichNoteLayout {
     return Container(
       padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
-        color: Colors.blueGrey,
-        border: Border(left: BorderSide(color: Colors. blue, width: 5.0)),
+        color: Color.fromARGB(255, 245, 245, 245),
+        border: Border(left: BorderSide(color: Colors. black26, width: 5.0)),
       ),
       child: content,
     );

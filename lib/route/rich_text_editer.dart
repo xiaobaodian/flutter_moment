@@ -40,7 +40,6 @@ class RichTextEditerRouteState extends State<RichTextEditerRoute> {
     richTextLine.add(RichLine(type: RichType.OrderedLists, content: '这里是有序列表'));
     richTextLine.add(RichLine(type: RichType.OrderedLists, content: '这里是有序列表，这里是有序列表，这里是有序列表。这里是有序列表，这里是有序列表，这里是有序列表。'));
     richTextLine.add(RichLine(type: RichType.OrderedLists, content: '这里是有序列表'));
-    richTextLine.add(RichLine(type: RichType.TextBold, content: '这是粗体文本演示'));
     //richTextLine.add(RichTextLine(type: RichLineType.Image, content: '这是图片的说明'));
     richTextLine.add(RichLine(type: RichType.Reference, content: '这里是引用或需要特别说明的文本。这里是引用或需要特别说明的文本。这里是引用或需要特别说明的文本。'));
   }
