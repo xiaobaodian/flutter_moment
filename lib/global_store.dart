@@ -190,11 +190,13 @@ class GlobalStoreState extends State<GlobalStore> {
     print('直接删除了一条Task: ${task.title}');
   }
 
-  void changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
+  int changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
+    int sum = 0;
     focusEvent.noteLines.forEach((line){
       if (line.type == RichType.Task) {
         TaskItem task = line.expandData;
         if (task.boxId == 0) {
+          sum++;
           addTaskItem(task);
           print('新增了一条Task：${task.title}');
         } else {
@@ -209,6 +211,7 @@ class GlobalStoreState extends State<GlobalStore> {
         }
       }
     });
+    return sum;
   }
 
   // person
@@ -303,6 +306,7 @@ class GlobalStoreState extends State<GlobalStore> {
     });
     debugPrint('add SelectedDay Events: ${json.encode(dailyRecord.focusEvents)}');
   }
+
 
   void changFocusEventForDailyEvent(FocusEvent focusEvent, int focusEventsIndex, DailyRecord dailyRecord) {
     /// 为focusEvent设置dayIndex值，重要
