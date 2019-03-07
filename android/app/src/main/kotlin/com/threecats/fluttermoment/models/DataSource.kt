@@ -17,21 +17,29 @@ object DataSource {
     val context: Context
         get() = app.applicationContext
 
+    lateinit var taskItemBox: Box<TaskItem>
     lateinit var focusItemBox:  Box<FocusItem>
     lateinit var personItemBox: Box<PersonItem>
     lateinit var placeItemBox:  Box<PlaceItem>
     lateinit var dailyRecordBox: Box<DailyRecord>
     lateinit var focusEventBox: Box<FocusEvent>
 
-    fun init(app: MomentApplication) {
-        this.app = app
+    fun init(application: MomentApplication) {
+        this.app = application
 
+        taskItemBox = app.boxStore.boxFor()
         focusItemBox = app.boxStore.boxFor()
         personItemBox = app.boxStore.boxFor()
         placeItemBox = app.boxStore.boxFor()
         dailyRecordBox = app.boxStore.boxFor()
         focusEventBox = app.boxStore.boxFor()
     }
+
+    // TaskItem
+
+    fun getTaskItemsFromJson(): String = Gson().toJson(taskItemBox.query().build().find())
+    fun putTaskItem(item: TaskItem): Long = taskItemBox.put(item)
+    fun removeTaskItemFor(id: Long) = taskItemBox.remove(id)
 
     // FocusItem
 

@@ -10,7 +10,7 @@ class CalendarMap {
   final int startYear, endYear;
   final double monthBoxTitleHeight, monthBoxCellHeight;
 
-  final DateTimeExt currentDate = DateTimeExt(DateTime.now());
+  DateTimeExt currentDate = DateTimeExt(DateTime.now());
   int currentDateIndexed = 0;
   DateTime selectedDate = DateTime.now();
 
@@ -75,6 +75,10 @@ class CalendarMap {
     currentDateIndexed = getDateIndex(currentDate.date);
 
     debugPrint('currentDateIndexed: $currentDateIndexed');
+  }
+
+  void initCurrentDate() {
+    currentDate = DateTimeExt(DateTime.now());
   }
 
   /// 返回从startYear到endYear期间的周数

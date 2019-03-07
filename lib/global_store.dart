@@ -6,6 +6,8 @@ import 'package:flutter_moment/calendar_map.dart';
 import 'package:flutter_moment/models/data_services.dart';
 import 'package:flutter_moment/models/helper_file.dart';
 import 'package:flutter_moment/models/models.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/task/TaskItem.dart';
 
 class GlobalStore extends StatefulWidget {
 
@@ -32,9 +34,11 @@ class GlobalStoreState extends State<GlobalStore> {
   Map<int, FocusItem> _focusItemMap = Map<int, FocusItem>();
   Map<int, PersonItem> _personItemMap = Map<int, PersonItem>();
   Map<int, PlaceItem> _placeItemMap = Map<int, PlaceItem>();
+  Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
   List<FocusItem> focusItemList;
   List<PersonItem> personItemList;
   List<PlaceItem> placeItemList;
+  List<TaskItem> taskList;
 
   @override
   void initState() {
@@ -45,6 +49,27 @@ class GlobalStoreState extends State<GlobalStore> {
       localDir = path;
     });
 
+    loadTaskItems();
+    loadFocusItems();
+    loadPersonItems();
+    loadPlaceItems();
+    //loadDailyRecords();
+
+  }
+
+  void loadTaskItems(){
+    _platformDataSource.invokeMethod('LoadTaskItems').then((result) {
+      List<dynamic> resultJson = json.decode(result) as List;
+      taskList = resultJson.map((item) {
+        TaskItem task = TaskItem.fromJson(item);
+        _taskItemMap[task.boxId] = task;
+        return task;
+      }).toList();
+      loadDailyRecords();
+    });
+  }
+
+  void loadFocusItems(){
     _platformDataSource.invokeMethod('LoadFocusItems').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
       focusItemList = resultJson.map((item) {
@@ -53,7 +78,9 @@ class GlobalStoreState extends State<GlobalStore> {
         return focus;
       }).toList();
     });
+  }
 
+  void loadPersonItems(){
     _platformDataSource.invokeMethod('LoadPersonItems').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
       personItemList = resultJson.map((item) {
@@ -62,7 +89,9 @@ class GlobalStoreState extends State<GlobalStore> {
         return person;
       }).toList();
     });
+  }
 
+  void loadPlaceItems(){
     _platformDataSource.invokeMethod('LoadPlaceItems').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
       placeItemList = resultJson.map((item) {
@@ -71,15 +100,29 @@ class GlobalStoreState extends State<GlobalStore> {
         return place;
       }).toList();
     });
+  }
 
+  void loadDailyRecords(){
     _platformDataSource.invokeMethod('LoadDailyRecords').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
       resultJson.forEach((item){
         DailyRecord dailyRecord = DailyRecord.fromJson(item);
         int dayIndex = dailyRecord.dayIndex;
         calendarMap.everyDayIndex[dayIndex].dailyRecord = dailyRecord;
+        dailyRecord.focusEvents.forEach((event){
+          event.noteLines.forEach((line){
+            if (line.type == RichType.Task) {
+              int id = line.expandData;
+              line.expandData = _taskItemMap[id];
+            }
+          });
+        });
       });
     });
+  }
+
+  void updateCurrentDate() {
+    calendarMap.initCurrentDate();
   }
 
   // FocusItem

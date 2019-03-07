@@ -28,10 +28,6 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     super.initState();
     //focusEventController.text = widget._focusEvent.note;
     //richSource = RichSource.fromJson(widget._focusEvent.note);
-    richSource = RichSource(widget._focusEvent.noteLines);
-    richNote = RichNote.editable(
-      richSource: richSource,
-    );
   }
 
   @override
@@ -39,6 +35,11 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     super.didChangeDependencies();
     var store = GlobalStore.of(context);
     routeTitle = store.getFocusTitleFrom(widget._focusEvent.focusItemBoxId);
+    richSource = RichSource(widget._focusEvent.noteLines);
+    richNote = RichNote.editable(
+      richSource: richSource,
+      store: store,
+    );
   }
 
   @override

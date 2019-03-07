@@ -20,6 +20,19 @@ object DataSourcePlugin {
         val channel = MethodChannel(registrar.messenger(), ChannelName)
         channel.setMethodCallHandler { methodCall, result ->
             when (methodCall.method) {
+                "LoadTaskItems" -> {
+                    result.success(DataSource.getTaskItemsFromJson())
+                }
+                "PutTaskItem" -> {
+                    val json = methodCall.arguments as String
+                    val taskItem = Gson().fromJson(json, TaskItem::class.java)
+                    result.success(DataSource.putTaskItem(taskItem)) // put到数据库，并返回boxId
+                }
+                "RemoveTaskItem" -> {
+                    val id = (methodCall.arguments as String).toLong()
+                    DataSource.removeTaskItemFor(id)
+                    result.success(null)
+                }
                 "LoadFocusItems" -> {
                     result.success(DataSource.getFocusItemsFromJson())
                 }

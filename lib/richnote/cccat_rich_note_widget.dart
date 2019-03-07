@@ -108,7 +108,7 @@ class RichNoteState extends State<RichNote> {
             : layout.titleStyle;
         if (widget.isEditable) {
           paragraphWidget =
-              layout.richLayoutText(buildTextField(index, effectiveSytle));
+              layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = layout.richLayoutTitle(Text(
               widget.store.getFocusTitleFrom(int.parse(item.content)),
@@ -121,7 +121,7 @@ class RichNoteState extends State<RichNote> {
             : layout.titleStyle;
         if (widget.isEditable) {
           paragraphWidget =
-              layout.richLayoutText(buildTextField(index, effectiveSytle));
+              layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = Text(
             item.content,
@@ -135,7 +135,7 @@ class RichNoteState extends State<RichNote> {
             : layout.subTitleStyle;
         if (widget.isEditable) {
           paragraphWidget =
-              layout.richLayoutText(buildTextField(index, effectiveSytle));
+              layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = Text(
             item.content,
@@ -149,7 +149,7 @@ class RichNoteState extends State<RichNote> {
             : layout.contentStyle;
         if (widget.isEditable) {
           paragraphWidget =
-              layout.richLayoutText(buildTextField(index, effectiveSytle));
+              layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget =
               layout.richLayoutText(Text(item.content, style: effectiveSytle));
@@ -170,7 +170,7 @@ class RichNoteState extends State<RichNote> {
                           isSelected ? RichState.Complete : RichState.StandBy;
                     });
                   }),
-              buildTextField(index, effectiveSytle),
+              _buildTextField(index, effectiveSytle),
               Text(
                 '9:20 - 10:00',
                 style: textTheme.caption,
@@ -204,7 +204,7 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget = layout.richLayoutList(
               item.indent,
               Text(item.leading, style: effectiveSytle),
-              buildTextField(index, effectiveSytle));
+              _buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = layout.richLayoutList(
               item.indent,
@@ -220,7 +220,7 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget = layout.richLayoutList(
             item.indent,
             Text(item.leading, style: effectiveSytle),
-            buildTextField(index, effectiveSytle),
+            _buildTextField(index, effectiveSytle),
           );
         } else {
           paragraphWidget = layout.richLayoutList(
@@ -235,7 +235,7 @@ class RichNoteState extends State<RichNote> {
             : layout.referenceStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutReference(
-              buildTextField(index, effectiveSytle)); //richLayoutReference
+              _buildTextField(index, effectiveSytle)); //richLayoutReference
         } else {
           paragraphWidget = layout
               .richLayoutReference(Text(item.content, style: effectiveSytle));
@@ -247,7 +247,7 @@ class RichNoteState extends State<RichNote> {
             : layout.referenceStyle;
         if (widget.isEditable) {
           paragraphWidget =
-              layout.richLayoutComment(buildTextField(index, effectiveSytle));
+              layout.richLayoutComment(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = layout
               .richLayoutComment(Text(item.content, style: effectiveSytle));
@@ -504,7 +504,15 @@ class RichNoteState extends State<RichNote> {
     }
   }
 
-  Widget buildTextField(int index, TextStyle effectiveSytle) {
+  void _findPersonNameFor(String txt){
+    widget.store.personItemList?.forEach((person){
+      if (txt.indexOf(person.name) > -1) {
+        debugPrint('找到了：${person.name}');
+      }
+    });
+  }
+
+  Widget _buildTextField(int index, TextStyle effectiveSytle) {
     var item = widget.richSource.paragraphList[index] as RichItem;
     assert(item.controller != null);
     assert(item.node != null);
@@ -525,6 +533,7 @@ class RichNoteState extends State<RichNote> {
       onChanged: (text) {
         debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
         debugPrint('内容长度: ${text.length}');
+        _findPersonNameFor(text);
         if (text.length == 0 || (text.substring(0, 1) != '\u0000')) {
           mergeUPLine(index, text ?? '');
         } else if (item.canChanged) {
@@ -537,7 +546,7 @@ class RichNoteState extends State<RichNote> {
     );
   }
 
-  List<Widget> buildFixedBody() {
+  List<Widget> _buildFixedBody() {
     List<Widget> bodyItems = [];
     int listLength = widget.richSource.paragraphList.length;
     for (int index = 0; index < listLength; index++) {
@@ -547,7 +556,7 @@ class RichNoteState extends State<RichNote> {
     return bodyItems;
   }
 
-  List<Widget> buildBody() {
+  List<Widget> _buildBody() {
     List<Widget> bodyItems = [];
     bodyItems.add(Expanded(
       child: ListView.separated(
@@ -600,7 +609,6 @@ class RichNoteState extends State<RichNote> {
               IconButton(
                 icon: Icon(Icons.format_bold),
                 onPressed: () {
-                  //changeParagraphTypeTo(RichType.TextBold);
                   changeLineStyleTo(RichStyle.Bold);
                 },
               ),
@@ -697,12 +705,12 @@ class RichNoteState extends State<RichNote> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: buildFixedBody(),
+        children: _buildFixedBody(),
       );
     }
     return Column(
       //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: buildBody(),
+      children: _buildBody(),
     );
   }
 }
