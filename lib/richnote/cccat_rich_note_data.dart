@@ -55,7 +55,7 @@ class RichLine {
   String content;
 
   /// [expandData]是复杂的扩展数据，task等。存放的是对象的引用。
-  Object expandData;
+  Object expandData = Object();
 
   /// [text]是能够根据line[type]进行内容存储的自定义属性。
   String get text {
@@ -79,19 +79,21 @@ class RichLine {
 
   Map<int, PersonItem> persons;
 
-  void changeTypeTo(RichType newType) {
+  void changeTypeTo(RichType newType, int dayIndex) {
     if (type == newType) return;
-    if (newType == RichType.Task && type != RichType.Task) {
-      if (expandData == null) {
-        expandData = TaskItem();
+    if (newType == RichType.Task) {
+      if (expandData is! TaskItem) {
+        expandData = TaskItem(createDate: dayIndex);
+        debugPrint('新建了一个TaskItem记录');
       }
       TaskItem task = expandData;
       task.title = content;
     } else {
-      if (newType != RichType.Task && type == RichType.Task) {
-        if (expandData != null ) {
+      if (type == RichType.Task) {
+        if (expandData is TaskItem ) {
           TaskItem task = expandData;
           content = task.title;
+          debugPrint('将原来Task类型的数据复制过来了');
         }
       }
     }
@@ -229,6 +231,7 @@ class RichSource {
             style: it.style,
             indent: it.indent,
             content: '\u0000' + it.content,
+            expandData: it.expandData,
           ));
         });
       }
@@ -247,6 +250,7 @@ class RichSource {
         indent: item.indent,
         note: item.note,
         content: item.controller.text.replaceAll('\u0000', ''),
+        expandData: item.expandData,
       ));
     });
     return tempList;

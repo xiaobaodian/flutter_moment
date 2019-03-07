@@ -8,6 +8,7 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
+import 'package:flutter_moment/task/TaskItem.dart';
 
 class RichNote extends StatefulWidget {
   RichNote({
@@ -156,18 +157,18 @@ class RichNoteState extends State<RichNote> {
         }
         break;
       case RichType.Task:
+        TaskItem task = widget.richSource.paragraphList[index].expandData;
         var effectiveSytle = layout.taskStyle == null
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.taskStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutTask(
               Checkbox(
-                  value: widget.richSource.paragraphList[index].state ==
-                      RichState.Complete,
+                  value: task.state == TaskState.Complete,
                   onChanged: (isSelected) {
                     setState(() {
-                      widget.richSource.paragraphList[index].state =
-                          isSelected ? RichState.Complete : RichState.StandBy;
+                      task.state =
+                          isSelected ? TaskState.Complete : TaskState.StandBy;
                     });
                   }),
               _buildTextField(index, effectiveSytle),
@@ -178,15 +179,12 @@ class RichNoteState extends State<RichNote> {
         } else {
           paragraphWidget = layout.richLayoutTask(
               Checkbox(
-                  value: widget.richSource.paragraphList[index].state ==
-                      RichState.Complete,
+                  value: task.state == TaskState.Complete,
                   onChanged: (isSelected) {
                     setState(() {
-                      widget.richSource.paragraphList[index].state =
-                          isSelected ? RichState.Complete : RichState.StandBy;
-                      FocusEvent event =
-                          widget.richSource.paragraphList[index].note;
-                      widget.store.changeFocusEvent(event);
+                      task.state =
+                          isSelected ? TaskState.Complete : TaskState.StandBy;
+                      widget.store.changeTaskItem(task);
                     });
                   }),
               Text(item.content, style: effectiveSytle),
@@ -333,6 +331,9 @@ class RichNoteState extends State<RichNote> {
     int index = _getCurrentLineIndex();
     if (index > -1) {
       RichItem tempItem = widget.richSource.paragraphList[index];
+      if (tempItem.type == RichType.Task) {
+        widget.store.removeTaskItem(tempItem.expandData);
+      }
       setState(() {
         widget.richSource.paragraphList.removeAt(index);
       });
@@ -374,7 +375,7 @@ class RichNoteState extends State<RichNote> {
     if (index > -1) {
       RichItem item = widget.richSource.paragraphList[index];
       setState(() {
-        item.type = type;
+        item.changeTypeTo(type, widget.store.calendarMap.selectedDateIndex);
       });
       Future.delayed(const Duration(milliseconds: 100), () {
         _requestFocus(item?.node);
@@ -438,6 +439,9 @@ class RichNoteState extends State<RichNote> {
         upLine.controller.selection = TextSelection.fromPosition(
           TextPosition(affinity: TextAffinity.downstream, offset: p),
         );
+        if (tempLine.type == RichType.Task) {
+          widget.store.removeTaskItem(tempLine.expandData);
+        }
         widget.richSource.paragraphList.removeAt(index);
       });
       Future.delayed(const Duration(milliseconds: 200), () {

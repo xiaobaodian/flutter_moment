@@ -34,13 +34,14 @@ class TaskItem {
     this.title = '',
     this.comment = '',
     this.placeItemId = 0,
-    this.priority,
+    this.priority = TaskPriority.Middle,
     this.state = TaskState.StandBy,
-    this.createDateTime,
-    this.startDateTime,
-    this.dueDateTime,
+    this.createDate = 0,
+    this.startDate = 0,
+    this.dueDate = 0,
+    this.time = '',
     this.allDay = 1,
-    this.cycleDate,
+    //this.cycleDate,
     this.subTasks = '',
     this.context = '',
     this.tags = '',
@@ -57,11 +58,12 @@ class TaskItem {
   int placeItemId;
   TaskPriority priority;
   TaskState state;
-  DateTime createDateTime;
-  DateTime startDateTime;
-  DateTime dueDateTime;
+  int createDate;
+  int startDate;
+  int dueDate;
+  String time;
   int allDay;
-  CycleDate cycleDate;
+  //CycleDate cycleDate;
   String subTasks;
   String context;
   String tags;
@@ -83,9 +85,10 @@ class TaskItem {
       placeItemId: json['placeItemId'],
       priority: TaskPriority.values[json['priority']],
       state: TaskState.values[json['state']],
-      createDateTime: DateTime.parse(json['createDateTime']),
-      startDateTime: DateTime.parse(json['startDateTime']),
-      dueDateTime: DateTime.parse(json['dueDateTime']),
+      createDate: json['createDate'],
+      startDate: json['startDate'],
+      dueDate: json['dueDate'],
+      time: json['time'],
       allDay: json['allDay'],
       //cycleDate: json['cycleDate'],
       subTasks: json['subTasks'],
@@ -106,9 +109,10 @@ class TaskItem {
     'placeItemId': placeItemId,
     'priority': priority.index,
     'state': state.index,
-    'createDateTime': createDateTime.toIso8601String(),
-    'startDateTime': startDateTime.toIso8601String(),
-    'dueDateTime': dueDateTime.toIso8601String(),
+    'createDate': createDate,
+    'startDate': startDate,
+    'dueDate': dueDate,
+    'time': time,
     'allDay': allDay,
     //'cycleDate': cycleDate,
     'subTasks': subTasks,
