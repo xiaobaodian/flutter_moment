@@ -14,16 +14,16 @@ import 'package:flutter_moment/route/editer_person_item_route.dart';
 import 'package:flutter_moment/route/editer_place_item_route.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
-class DailyFocusRoute extends StatefulWidget {
+class BrowseDailyFocusRoute extends StatefulWidget {
   final int _initTab;
 
-  DailyFocusRoute(int tab) : _initTab = tab;
+  BrowseDailyFocusRoute(int tab) : _initTab = tab;
 
   @override
-  DailyFocusRouteState createState() => DailyFocusRouteState();
+  BrowseDailyFocusRouteState createState() => BrowseDailyFocusRouteState();
 }
 
-class DailyFocusRouteState extends State<DailyFocusRoute>
+class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     with SingleTickerProviderStateMixin {
   GlobalStoreState _store;
   //String _localDir;

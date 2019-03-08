@@ -10,11 +10,12 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/route/browse_task_route.dart';
 import 'package:flutter_moment/route/calendar_route.dart';
 import 'package:flutter_moment/demo_data.dart';
 import 'package:flutter_moment/route/details_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
-import 'package:flutter_moment/route/daily_focus_route.dart';
+import 'package:flutter_moment/route/browse_daily_focus_route.dart';
 import 'package:flutter_moment/route/rich_text_editer.dart';
 import 'package:flutter_moment/widgets/trim_picture_dialog.dart';
 
@@ -154,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 navigator.pop(context);
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return DailyFocusRoute(0);
+                  return BrowseDailyFocusRoute(0);
                 }));
               },
             ),
@@ -170,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 navigator.pop(context);
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return DailyFocusRoute(0);
+                  return BrowseTaskRoute();
                 }));
               },
             ),
@@ -186,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 navigator.pop(context);
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return DailyFocusRoute(1);
+                  return BrowseDailyFocusRoute(1);
                 }));
               },
             ),
@@ -202,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 navigator.pop(context);
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return DailyFocusRoute(3);
+                  return BrowseDailyFocusRoute(3);
                 }));
               },
             ),
@@ -218,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 navigator.pop(context);
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return DailyFocusRoute(2);
+                  return BrowseDailyFocusRoute(2);
                 }));
               },
             ),
@@ -234,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 navigator.pop(context);
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return DailyFocusRoute(4);
+                  return BrowseDailyFocusRoute(4);
                 }));
               },
             ),
@@ -496,14 +497,13 @@ Widget _getListView(BuildContext context, int dayIndex) {
           if (resultItem is FocusEvent) {
             dailyRecord.richLines.clear();
             event.copyWith(resultItem);
-            //store.changeFocusEventForSelectedDay(resultItem, position);
-            store.changeFocusEvent(event);
+            store.changeFocusEventAndTasks(event);
+            //store.changeFocusEvent(event);
           } else if (resultItem is int) {
             dailyRecord
               ..richLines.clear()
               ..focusEvents.remove(event);
-            store.removeFocusEvent(event);
-            //store.removeFocusEventForSelectedDay(position, dailyRecord.focusEvents[position].focusItemBoxId);
+            store.removeFocusEventAndTasks(event);
           }
         });
       },

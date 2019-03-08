@@ -170,7 +170,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void addTaskItem(TaskItem task) {
     taskItemList.add(task);
+    debugPrint('加入Task到Store列表中: ${task.title}');
     _platformDataSource.invokeMethod("PutTaskItem", json.encode(task)).then((id) {
+      debugPrint('加入Task到数据库中: ${task.title}');
       task.boxId = id;
       _taskItemMap[id] = task;
     });
@@ -178,6 +180,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void changeTaskItem(TaskItem task) {
     _platformDataSource.invokeMethod("PutTaskItem", json.encode(task));
+    debugPrint('在数据库中修改了Task: ${task.title}');
   }
 
   void removeTaskItem(TaskItem task) {
@@ -185,33 +188,31 @@ class GlobalStoreState extends State<GlobalStore> {
       return;
     }
     _platformDataSource.invokeMethod("RemoveTaskItem", task.boxId.toString());
+    debugPrint('从数据库中删除了Task: ${task.title}');
     _taskItemMap.remove(task.boxId);
     taskItemList.remove(task);
-    print('直接删除了一条Task: ${task.title}');
+    debugPrint('从Store列表中删除了Task: ${task.title}');
   }
 
-  int changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
-    int sum = 0;
+  changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
     focusEvent.noteLines.forEach((line){
       if (line.type == RichType.Task) {
         TaskItem task = line.expandData;
         if (task.boxId == 0) {
-          sum++;
-          addTaskItem(task);
-          print('新增了一条Task：${task.title}');
+          //addTaskItem(task);
+          print('批处理FocusEvent包含的任务，未入库Task：${task.title}');
         } else {
           changeTaskItem(task);
-          print('修改了Task：${task.title}');
+          print('批处理FocusEvent包含的任务，修改了Task：${task.title}');
         }
       } else {
         var task = line.expandData;
         if (task is TaskItem) {
           removeTaskItem(task);
-          print('删除了Task：${task.title}');
+          print('批处理FocusEvent包含的任务，删除了Task：${task.title}');
         }
       }
     });
-    return sum;
   }
 
   // person
@@ -260,8 +261,14 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // DailyRecords
 
+  DailyRecord get selectedDailyRecord => calendarMap.getDailyRecordFromSelectedDay();
+
   DailyRecord getDailyRecord(int dayIndex) {
     return calendarMap.everyDayIndex[dayIndex].dailyRecord;
+  }
+
+  void clearSelectedDayDailyRecord(){
+    calendarMap.clearDailyRecordOfSelectedDay();
   }
 
   void putDailyRecord(DailyRecord dailyRecord) {
@@ -301,9 +308,7 @@ class GlobalStoreState extends State<GlobalStore> {
       putDailyRecord(dailyRecord);
     }
     changeTaskItemFromFocusEvent(focusEvent);
-    Future.delayed(const Duration(milliseconds: 500), () {
-      putFocusEvent(focusEvent);
-    });
+    putFocusEvent(focusEvent);
     debugPrint('add SelectedDay Events: ${json.encode(dailyRecord.focusEvents)}');
   }
 
@@ -315,8 +320,8 @@ class GlobalStoreState extends State<GlobalStore> {
     /// 获取给定日期的FocusEvents列表，然后替换掉index位置的记录
     var dayEvents = dailyRecord.focusEvents;
     dayEvents[focusEventsIndex] = focusEvent;
-    changeTaskItemFromFocusEvent(focusEvent);
-    Future.delayed(const Duration(milliseconds: 500), () {
+    int i = changeTaskItemFromFocusEvent(focusEvent);
+    Future.delayed(Duration(milliseconds: 100 * i), () {
       changeFocusEvent(focusEvent);
     });
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
@@ -329,37 +334,24 @@ class GlobalStoreState extends State<GlobalStore> {
     /// 获取给定日期的FocusEvents列表，然后替换掉index位置的记录
     var dayEvents = calendarMap.getFocusEventsFromDayIndex(dayIndex);
     dayEvents[focusEventsIndex] = focusEvent;
-    changeTaskItemFromFocusEvent(focusEvent);
-    Future.delayed(const Duration(milliseconds: 500), () {
+    int i = changeTaskItemFromFocusEvent(focusEvent);
+    Future.delayed(Duration(milliseconds: 100 * i), () {
       changeFocusEvent(focusEvent);
     });
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
   }
 
-  // 测试完成后改为调用上面的方法
-  void changeFocusEventForSelectedDay(FocusEvent focusEvent, int focusEventsIndex) {
-    /// 为focusEvent设置dayIndex值，重要
-    focusEvent.dayIndex = calendarMap.selectedDateIndex;
-
-    /// 获取选中日期的FocusEvents列表，然后替换掉index位置的记录
-    var selectedDayEvents = calendarMap.getFocusEventsFromSelectedDay();
-    selectedDayEvents[focusEventsIndex] = focusEvent;
-
-    changeFocusEvent(focusEvent);
+  void changeFocusEventAndTasks(FocusEvent focusEvent) {
     changeTaskItemFromFocusEvent(focusEvent);
-    debugPrint('change SelectedDay Events: ${json.encode(selectedDayEvents)}');
+    changeFocusEvent(focusEvent);
   }
 
 
-  void removeFocusEventForSelectedDay(int index, int focusItemBoxId) {
+  void removeFocusEventAndTasks(FocusEvent focusEvent) {
     /// 获取FocusItem，引用减少一次
-    FocusItem focusItem = getFocusItemFromId(focusItemBoxId);
+    FocusItem focusItem = getFocusItemFromId(focusEvent.focusItemBoxId);
     focusItem.minusReferences();
     changeFocusItem(focusItem);
-
-    /// 获取选中日期的FocusEvents列表，然后删除掉index位置的记录
-    var selectedDayEvents = calendarMap.getFocusEventsFromSelectedDay();
-    FocusEvent focusEvent = selectedDayEvents[index];
 
     /// 删除index位置focusEvent记录里面的TaskItem
     focusEvent.noteLines.forEach((line){
@@ -368,15 +360,13 @@ class GlobalStoreState extends State<GlobalStore> {
       }
     });
     removeFocusEvent(focusEvent);
-    selectedDayEvents.removeAt(index);
+    selectedDailyRecord.focusEvents.remove(focusEvent);
 
-    var record = calendarMap.getDailyRecordFromSelectedDay();
-    if (record.isNull) {
-      removeDailyRecord(record);
-      calendarMap.clearDailyRecordOfSelectedDay();
+    if (selectedDailyRecord.isNull) {
+      removeDailyRecord(selectedDailyRecord);
+      clearSelectedDayDailyRecord();
     }
-
-    debugPrint('remove SelectedDay Events: ${json.encode(selectedDayEvents)}');
+    //debugPrint('remove SelectedDay Events: ${json.encode(selectedDailyRecord.focusEvents)}');
   }
 
   void putFocusEvent(FocusEvent focusEvent) {

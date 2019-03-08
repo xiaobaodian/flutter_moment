@@ -79,27 +79,6 @@ class RichLine {
 
   Map<int, PersonItem> persons;
 
-  void changeTypeTo(RichType newType, int dayIndex) {
-    if (type == newType) return;
-    if (newType == RichType.Task) {
-      if (expandData is! TaskItem) {
-        expandData = TaskItem(createDate: dayIndex);
-        debugPrint('新建了一个TaskItem记录');
-      }
-      TaskItem task = expandData;
-      task.title = content;
-    } else {
-      if (type == RichType.Task) {
-        if (expandData is TaskItem ) {
-          TaskItem task = expandData;
-          content = task.title;
-          debugPrint('将原来Task类型的数据复制过来了');
-        }
-      }
-    }
-    type = newType;
-  }
-
   void copyWith(RichLine other) {
     this.type = other.type;
     this.style = other.style;
@@ -136,6 +115,7 @@ class RichLine {
 class RichItem extends RichLine {
   RichItem({
     @required type,
+    @required this.source,
     style = RichStyle.Normal,
     indent = 0,
     focusEventId = 0,
@@ -166,6 +146,7 @@ class RichItem extends RichLine {
 
   String image;
   bool canChanged = true;
+  RichSource source;
 
   Key key;
   TextEditingController controller;
@@ -176,6 +157,31 @@ class RichItem extends RichLine {
   void dispose() {
     controller?.dispose();
     node?.dispose();
+  }
+
+  void changeTypeTo(RichType newType, int dayIndex) {
+    if (type == newType) return;
+    if (newType == RichType.Task) {
+      if (expandData is! TaskItem) {
+        expandData = TaskItem(createDate: dayIndex);
+        source.richNote.store.addTaskItem(expandData);
+        debugPrint('新建了一个TaskItem记录:');
+      }
+      TaskItem task = expandData;
+      task.title = content;
+    } else {
+      if (type == RichType.Task) {
+        if (expandData is TaskItem ) {
+          TaskItem task = expandData;
+          content = task.title;
+          debugPrint('将原来Task类型的数据复制过来了');
+          if (task.boxId > 0) {
+            source.richNote.store.removeTaskItem(task);
+          }
+        }
+      }
+    }
+    type = newType;
   }
 }
 
@@ -221,12 +227,14 @@ class RichSource {
       List<RichLine> tempList = [];
       if (paragraphList.length == 0) {
         tempList.add(RichItem(
+          source: this,
           type: RichType.Text,
           content: '\u0000' + '',
         ));
       } else {
         paragraphList.forEach((it) {
           tempList.add(RichItem(
+            source: this,
             type: it.type,
             style: it.style,
             indent: it.indent,
