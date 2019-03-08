@@ -86,9 +86,13 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
     return ListView.builder(
       itemCount: _store.taskItemList.length,
       itemBuilder: (context, index){
+        var task = _store.taskItemList[index];
+        print('task createDate: ${task.createDate}');
+        final date = store.calendarMap.getDateFromIndex(task.createDate);
+        final str = DateTimeExt.chineseDateString(date);
         return ListTile(
-          title: Text(_store.taskItemList[index].title),
-          subtitle: Text('日期'),
+          title: Text(task.title),
+          subtitle: Text(str),
           onTap: (){},
         );
       },

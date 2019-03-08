@@ -125,6 +125,8 @@ class GlobalStoreState extends State<GlobalStore> {
     calendarMap.initCurrentDate();
   }
 
+  int get selectedDateIndex => calendarMap.selectedDateIndex;
+
   // FocusItem
 
   String getFocusTitleFrom(int id) => _focusItemMap[id]?.title;
@@ -213,6 +215,7 @@ class GlobalStoreState extends State<GlobalStore> {
           removeTaskItem(task);
           print('批处理FocusEvent包含的任务，删除了Task：${task.title}');
         }
+        line.expandData = null;
       }
     });
     return s;

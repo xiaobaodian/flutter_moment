@@ -119,28 +119,40 @@ class RichItem extends RichLine {
     style = RichStyle.Normal,
     indent = 0,
     focusEventId = 0,
-    content = '',
+    text = '',
+    dayIndex = 0,
     expandData,
   }) : super(
-          type: type,
-          style: style,
-          indent: indent,
-          note: focusEventId,
-          content: content,
-          expandData: expandData,
-        ) {
-    if (type != RichType.Image) {
+    type: type,
+    style: style,
+    indent: indent,
+    note: focusEventId,
+    content: text,
+    expandData: expandData,
+  ) {
+    if (type == RichType.Image) {
+      image = content;
+    } else  {
+      if (type == RichType.Task) {
+        if (expandData == null) {
+          assert(dayIndex > 0);
+          expandData = TaskItem(title: text, createDate: dayIndex);
+        } else {
+          TaskItem task = expandData;
+          task.title = text;
+        }
+      } else {
+        content = text;
+      }
       key = GlobalKey();
       controller = TextEditingController();
+      controller.text = text;
       node = FocusNode();
       node.addListener(() {
         if (node.hasFocus) {
           canChanged = true;
         }
       });
-      controller.text = text;
-    } else {
-      image = content;
     }
   }
 
@@ -159,15 +171,18 @@ class RichItem extends RichLine {
     node?.dispose();
   }
 
-  void changeTypeTo(RichType newType, int dayIndex) {
+  void changeTypeTo(RichType newType) {
     if (type == newType) return;
     if (newType == RichType.Task) {
+      assert(source.richNote.store.selectedDateIndex != null);
       if (expandData is! TaskItem) {
-        expandData = TaskItem(createDate: dayIndex);
+        expandData = TaskItem(createDate: source.richNote.store.selectedDateIndex);
         debugPrint('新建了一个TaskItem记录:');
       }
       TaskItem task = expandData;
       task.title = content;
+      task.createDate = source.richNote.store.selectedDateIndex;
+      print('任务的日期序号：${source.richNote.store.selectedDateIndex}');
     } else {
       if (type == RichType.Task) {
         if (expandData is TaskItem ) {
@@ -225,16 +240,20 @@ class RichSource {
         tempList.add(RichItem(
           source: this,
           type: RichType.Text,
-          content: '\u0000' + '',
+          text: '\u0000' + '',
         ));
       } else {
         paragraphList.forEach((it) {
+//          if (it.type == RichType.Task) {
+//            TaskItem task = it.expandData;
+//            task.title = '\u0000' + task.title;
+//          }
           tempList.add(RichItem(
             source: this,
             type: it.type,
             style: it.style,
             indent: it.indent,
-            content: '\u0000' + it.content,
+            text: '\u0000' + it.content,
             expandData: it.expandData,
           ));
         });
@@ -246,6 +265,7 @@ class RichSource {
   List<RichLine> getParagraphList() {
     List<RichLine> tempList = [];
     if (!richNote.isEditable) return paragraphList;
+
     paragraphList.forEach((line) {
       RichItem item = line;
       if (item.type == RichType.Task) {

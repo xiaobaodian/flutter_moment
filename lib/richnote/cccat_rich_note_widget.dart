@@ -373,7 +373,7 @@ class RichNoteState extends State<RichNote> {
     if (index > -1) {
       RichItem item = widget.richSource.paragraphList[index];
       setState(() {
-        item.changeTypeTo(type, widget.store.calendarMap.selectedDateIndex);
+        item.changeTypeTo(type);
       });
       Future.delayed(const Duration(milliseconds: 100), () {
         _requestFocus(item?.node);
@@ -437,10 +437,6 @@ class RichNoteState extends State<RichNote> {
         upLine.controller.selection = TextSelection.fromPosition(
           TextPosition(affinity: TextAffinity.downstream, offset: p),
         );
-        if (tempLine.type == RichType.Task) {
-          // 这里删除一个任务有可能造成放弃编辑时的数据错误，后面要改进
-          widget.store.removeTaskItem(tempLine.expandData);
-        }
         widget.richSource.paragraphList.removeAt(index);
       });
       Future.delayed(const Duration(milliseconds: 200), () {
@@ -464,11 +460,10 @@ class RichNoteState extends State<RichNote> {
     if (upTxt.length == 0 && lines[1].length == 0) {
       if (index == 0) return;
       setState(() {
-        RichItem item = widget.richSource.paragraphList[index];
-        item.canChanged = false;
-        item.type = RichType.Text;
-        item.controller.text = '\u0000' + '';
-        item.controller.selection = TextSelection.fromPosition(
+        oldItem.canChanged = false;
+        oldItem.type = RichType.Text;
+        oldItem.controller.text = '\u0000' + '';
+        oldItem.controller.selection = TextSelection.fromPosition(
             TextPosition(affinity: TextAffinity.downstream, offset: 1));
         //item.canChanged = true;
       });
@@ -492,11 +487,16 @@ class RichNoteState extends State<RichNote> {
         }
       }
       setState(() {
+        TaskItem newTask;
+        if (newType == RichType.Task) {
+          newTask = TaskItem(title: '\u0000' + lines[1], createDate: widget.store.selectedDateIndex);
+        }
         newItem = RichItem(
           source: widget.richSource,
           type: newType,
-          indent: indent,
-          content: '\u0000' + lines[1],
+          indent: oldItem.indent,
+          text: '\u0000' + lines[1],
+          expandData: newTask,
         );
         newItem.canChanged = false;
         newItem.controller.selection = TextSelection.fromPosition(TextPosition(
