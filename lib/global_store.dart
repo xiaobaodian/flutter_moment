@@ -194,13 +194,15 @@ class GlobalStoreState extends State<GlobalStore> {
     debugPrint('从Store列表中删除了Task: ${task.title}');
   }
 
-  changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
+  int changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
+    int s = 0;
     focusEvent.noteLines.forEach((line){
       if (line.type == RichType.Task) {
         TaskItem task = line.expandData;
         if (task.boxId == 0) {
-          //addTaskItem(task);
           print('批处理FocusEvent包含的任务，未入库Task：${task.title}');
+          addTaskItem(task);
+          s++;
         } else {
           changeTaskItem(task);
           print('批处理FocusEvent包含的任务，修改了Task：${task.title}');
@@ -213,6 +215,7 @@ class GlobalStoreState extends State<GlobalStore> {
         }
       }
     });
+    return s;
   }
 
   // person
@@ -289,9 +292,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // FocusEvent
 
-  void addFocusEventToSelectedDay(FocusEvent focusEvent, int focusItemBoxId) {
+  void addFocusEventToSelectedDay(FocusEvent focusEvent) { //, int focusItemBoxId
     /// 获取FocusItem，引用增加一次，保存到数据库
-    FocusItem focusItem = getFocusItemFromId(focusItemBoxId);
+    FocusItem focusItem = getFocusItemFromId(focusEvent.focusItemBoxId);
     focusItem.addReferences();
     changeFocusItem(focusItem);
 
@@ -299,17 +302,16 @@ class GlobalStoreState extends State<GlobalStore> {
     focusEvent.dayIndex = calendarMap.selectedDateIndex;
 
     /// 获取选中日期的DailyRecord，
-    var dailyRecord = calendarMap.getDailyRecordFromSelectedDay();
-    debugPrint('保存时获取到的daily record : $dailyRecord');
-    dailyRecord.focusEvents.add(focusEvent);
+    selectedDailyRecord.focusEvents.add(focusEvent);
 
     /// 如果还没有保存过就加入到数据库
-    if (dailyRecord.boxId == 0) {
-      putDailyRecord(dailyRecord);
+    if (selectedDailyRecord.boxId == 0) {
+      putDailyRecord(selectedDailyRecord);
     }
-    changeTaskItemFromFocusEvent(focusEvent);
-    putFocusEvent(focusEvent);
-    debugPrint('add SelectedDay Events: ${json.encode(dailyRecord.focusEvents)}');
+    int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
+    Future.delayed(Duration(milliseconds: r), (){
+      putFocusEvent(focusEvent);
+    });
   }
 
 
@@ -342,8 +344,10 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void changeFocusEventAndTasks(FocusEvent focusEvent) {
-    changeTaskItemFromFocusEvent(focusEvent);
-    changeFocusEvent(focusEvent);
+    int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
+    Future.delayed(Duration(milliseconds: r), (){
+      changeFocusEvent(focusEvent);
+    });
   }
 
 

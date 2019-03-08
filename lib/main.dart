@@ -160,9 +160,9 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.list),
+              leading: Icon(Icons.assignment_turned_in),
               title: Text(
-                '事项',
+                '任务',
                 style: TextStyle(fontSize: 18),
               ),
               trailing: Icon(Icons.arrow_right),
@@ -435,8 +435,7 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
                 })).then((resultItem) {
                   if (resultItem is FocusEvent) {
                     dailyRecord.richLines.clear();
-                    store.addFocusEventToSelectedDay(
-                        resultItem, usableList[index].boxId);
+                    store.addFocusEventToSelectedDay(resultItem);
                     //usableList[index].addReferences();
                   }
                 });

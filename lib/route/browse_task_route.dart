@@ -87,8 +87,9 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
       itemCount: _store.taskItemList.length,
       itemBuilder: (context, index){
         return ListTile(
-          title: Text('标题：${_store.taskItemList[index].title}'),
+          title: Text(_store.taskItemList[index].title),
           subtitle: Text('日期'),
+          onTap: (){},
         );
       },
     );

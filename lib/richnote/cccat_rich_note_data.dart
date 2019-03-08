@@ -138,7 +138,7 @@ class RichItem extends RichLine {
           canChanged = true;
         }
       });
-      controller.text = content;
+      controller.text = text;
     } else {
       image = content;
     }
@@ -164,7 +164,6 @@ class RichItem extends RichLine {
     if (newType == RichType.Task) {
       if (expandData is! TaskItem) {
         expandData = TaskItem(createDate: dayIndex);
-        source.richNote.store.addTaskItem(expandData);
         debugPrint('新建了一个TaskItem记录:');
       }
       TaskItem task = expandData;
@@ -175,9 +174,6 @@ class RichItem extends RichLine {
           TaskItem task = expandData;
           content = task.title;
           debugPrint('将原来Task类型的数据复制过来了');
-          if (task.boxId > 0) {
-            source.richNote.store.removeTaskItem(task);
-          }
         }
       }
     }
@@ -252,6 +248,10 @@ class RichSource {
     if (!richNote.isEditable) return paragraphList;
     paragraphList.forEach((line) {
       RichItem item = line;
+      if (item.type == RichType.Task) {
+        TaskItem task = item.expandData;
+        task.title = item.controller.text.replaceAll('\u0000', '');
+      }
       tempList.add(RichLine(
         type: item.type,
         style: item.style,
@@ -274,7 +274,7 @@ class RichSource {
   bool hasNote() {
     int words = 0;
     paragraphList.forEach((line) {
-      words += line.content.length;
+      words += line.text.length;
     });
     return words > 0;
   }

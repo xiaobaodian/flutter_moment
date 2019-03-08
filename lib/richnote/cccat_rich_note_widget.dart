@@ -110,7 +110,7 @@ class RichNoteState extends State<RichNote> {
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = layout.richLayoutTitle(Text(
-              widget.store.getFocusTitleFrom(int.parse(item.content)),
+              widget.store.getFocusTitleFrom(int.parse(item.text)),
               style: effectiveSytle));
         }
         break;
@@ -123,7 +123,7 @@ class RichNoteState extends State<RichNote> {
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = Text(
-            item.content,
+            item.text,
             style: effectiveSytle,
           );
         }
@@ -137,7 +137,7 @@ class RichNoteState extends State<RichNote> {
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = Text(
-            item.content,
+            item.text,
             style: effectiveSytle,
           );
         }
@@ -151,7 +151,7 @@ class RichNoteState extends State<RichNote> {
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget =
-              layout.richLayoutText(Text(item.content, style: effectiveSytle));
+              layout.richLayoutText(Text(item.text, style: effectiveSytle));
         }
         break;
       case RichType.Task:
@@ -185,7 +185,7 @@ class RichNoteState extends State<RichNote> {
                       widget.store.changeTaskItem(task);
                     });
                   }),
-              Text(item.content, style: effectiveSytle),
+              Text(item.text, style: effectiveSytle),
               Text(
                 '9:20 - 10:00',
                 style: textTheme.caption,
@@ -205,7 +205,7 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget = layout.richLayoutList(
               item.indent,
               Text(item.leading, style: effectiveSytle),
-              Text(item.content, style: effectiveSytle));
+              Text(item.text, style: effectiveSytle));
         }
         break;
       case RichType.UnorderedList:
@@ -222,7 +222,7 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget = layout.richLayoutList(
               item.indent,
               Text(item.leading, style: effectiveSytle),
-              Text(item.content, style: effectiveSytle));
+              Text(item.text, style: effectiveSytle));
         }
         break;
       case RichType.Reference:
@@ -234,7 +234,7 @@ class RichNoteState extends State<RichNote> {
               _buildTextField(index, effectiveSytle)); //richLayoutReference
         } else {
           paragraphWidget = layout
-              .richLayoutReference(Text(item.content, style: effectiveSytle));
+              .richLayoutReference(Text(item.text, style: effectiveSytle));
         }
         break;
       case RichType.Comment:
@@ -246,7 +246,7 @@ class RichNoteState extends State<RichNote> {
               layout.richLayoutComment(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = layout
-              .richLayoutComment(Text(item.content, style: effectiveSytle));
+              .richLayoutComment(Text(item.text, style: effectiveSytle));
         }
         break;
       case RichType.Image:
@@ -438,6 +438,7 @@ class RichNoteState extends State<RichNote> {
           TextPosition(affinity: TextAffinity.downstream, offset: p),
         );
         if (tempLine.type == RichType.Task) {
+          // 这里删除一个任务有可能造成放弃编辑时的数据错误，后面要改进
           widget.store.removeTaskItem(tempLine.expandData);
         }
         widget.richSource.paragraphList.removeAt(index);
