@@ -181,19 +181,25 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void changeTaskItem(TaskItem task) {
+    int p = taskItemList.indexOf(_taskItemMap[task.boxId]);
+    taskItemList[p] = task;
+    _taskItemMap[task.boxId] = task;
     _platformDataSource.invokeMethod("PutTaskItem", json.encode(task));
     debugPrint('在数据库中修改了Task: ${task.title}');
   }
 
   void removeTaskItem(TaskItem task) {
-    if (task == null) {
-      return;
-    }
+    if (task == null) return;
+    var oldTask = _taskItemMap[task.boxId];
+    taskItemList.remove(oldTask);
+    _taskItemMap.remove(task.boxId);
+    debugPrint('从Store列表中删除了Task: ${task.title}');
     _platformDataSource.invokeMethod("RemoveTaskItem", task.boxId.toString());
     debugPrint('从数据库中删除了Task: ${task.title}');
-    _taskItemMap.remove(task.boxId);
-    taskItemList.remove(task);
-    debugPrint('从Store列表中删除了Task: ${task.title}');
+  }
+
+  void removeTaskItemFromId(int id) {
+    removeTaskItem(_taskItemMap[id]);
   }
 
   int changeTaskItemFromFocusEvent(FocusEvent focusEvent) {

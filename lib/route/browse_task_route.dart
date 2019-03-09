@@ -87,7 +87,7 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
       itemCount: _store.taskItemList.length,
       itemBuilder: (context, index){
         var task = _store.taskItemList[index];
-        print('task createDate: ${task.createDate}');
+        print('task createDate: ${task.title} - ${task.createDate}');
         final date = store.calendarMap.getDateFromIndex(task.createDate);
         final str = DateTimeExt.chineseDateString(date);
         return ListTile(

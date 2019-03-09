@@ -70,7 +70,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
               if (richSource.hasNote()) {
                 FocusEvent focus = FocusEvent();
                 focus.copyWith(widget._focusEvent);
-                focus.noteLines = richSource.getParagraphList();
+                focus.noteLines = richSource.exportingRichLists();
                 //focus.note = richSource.getJsonFromParagraphList();
                 Navigator.of(context).pop(focus);
               } else {

@@ -58,7 +58,7 @@ class RichLine {
   Object expandData = Object();
 
   /// [text]是能够根据line[type]进行内容存储的自定义属性。
-  String get text {
+  String getContent() {
     if (type == RichType.Task) {
       assert(expandData != null);
       TaskItem task = expandData;
@@ -67,7 +67,7 @@ class RichLine {
     return content;
   }
 
-  set text(String value) {
+  void setContent(String value) {
     if (type == RichType.Task) {
       assert(expandData != null);
       TaskItem task = expandData;
@@ -116,43 +116,55 @@ class RichItem extends RichLine {
   RichItem({
     @required type,
     @required this.source,
-    style = RichStyle.Normal,
-    indent = 0,
-    focusEventId = 0,
-    text = '',
-    dayIndex = 0,
-    expandData,
+    @required dayIndex,
+    content = '',
   }) : super(
     type: type,
-    style: style,
-    indent: indent,
-    note: focusEventId,
-    content: text,
-    expandData: expandData,
   ) {
-    if (type == RichType.Image) {
-      image = content;
-    } else  {
-      if (type == RichType.Task) {
-        if (expandData == null) {
-          assert(dayIndex > 0);
-          expandData = TaskItem(title: text, createDate: dayIndex);
-        } else {
-          TaskItem task = expandData;
-          task.title = text;
-        }
-      } else {
-        content = text;
-      }
-      key = GlobalKey();
-      controller = TextEditingController();
-      controller.text = text;
-      node = FocusNode();
-      node.addListener(() {
+    if (type == RichType.Task) {
+      expandData = TaskItem(createDate: dayIndex);
+    }
+    key = GlobalKey();
+    controller = TextEditingController();
+    controller.text = '\u0000' + content;
+    node = FocusNode();
+    node.addListener(() {
         if (node.hasFocus) {
           canChanged = true;
         }
-      });
+    });
+  }
+
+  RichItem.from({
+    @required RichLine richLine,
+    @required this.source,
+    @required dayIndex,
+  }): super(type: richLine.type){
+    key = GlobalKey();
+    node = FocusNode();
+    node.addListener(() {
+      if (node.hasFocus) {
+        canChanged = true;
+      }
+    });
+    controller = TextEditingController();
+    type = richLine.type;
+    style = richLine.style;
+    indent = richLine.indent;
+    note = richLine.note;
+    this.source = source;
+    if (type == RichType.Task) {
+      TaskItem other = richLine.expandData;
+      TaskItem newTask = TaskItem.copyWith(other);
+      if (dayIndex != null) newTask.createDate = dayIndex;
+      newTask.title = '\u0000' + other.title;
+      this.expandData = newTask;
+      controller.text = newTask.title;
+      print('复制了richLine的task数据：${newTask.title} / ${newTask.createDate}');
+    } else {
+      content = '\u0000' + richLine.content;
+      controller.text = content;
+      print('复制了richLine的基本数据');
     }
   }
 
@@ -180,17 +192,17 @@ class RichItem extends RichLine {
         debugPrint('新建了一个TaskItem记录:');
       }
       TaskItem task = expandData;
-      task.title = content;
+      //task.title = content;
       task.createDate = source.richNote.store.selectedDateIndex;
       print('任务的日期序号：${source.richNote.store.selectedDateIndex}');
     } else {
-      if (type == RichType.Task) {
-        if (expandData is TaskItem ) {
-          TaskItem task = expandData;
-          content = task.title;
-          debugPrint('将原来Task类型的数据复制过来了');
-        }
-      }
+//      if (type == RichType.Task) {
+//        if (expandData is TaskItem ) {
+//          TaskItem task = expandData;
+//          content = task.title;
+//          debugPrint('将原来Task类型的数据复制过来了');
+//        }
+//      }
     }
     type = newType;
   }
@@ -200,13 +212,13 @@ class RichSource {
   RichSource(
     paragraphList,
   ) : assert(paragraphList != null) {
-    this.paragraphList = paragraphList ?? [];
+    this.richLineList = paragraphList ?? [];
   }
 
   RichSource.fromJson(
     String jsonString,
   ) : assert(jsonString != null) {
-    this.paragraphList = RichSource.getRichLinesFromJson(jsonString) ?? [];
+    this.richLineList = RichSource.getRichLinesFromJson(jsonString) ?? [];
   }
 
   static List<RichLine> getRichLinesFromJson(String jsonString) {
@@ -221,81 +233,100 @@ class RichSource {
     return json.encode(paragraphList);
   }
 
-  List<RichLine> paragraphList;
+  List<RichLine> richLineList;
+  List<TaskItem> mergeRemoveTask = [];
   RichNote richNote;
 
   void dispose() {
     if (!richNote.isEditable) return;
-    paragraphList?.forEach((paragraph) {
+    richLineList?.forEach((paragraph) {
       RichItem item = paragraph;
       item?.dispose();
     });
   }
 
-  void markToEditer() {
+  void markEditerItem() {
     debugPrint('生成编辑器使用的line');
-    if (richNote.isEditable) {
-      List<RichLine> tempList = [];
-      if (paragraphList.length == 0) {
-        tempList.add(RichItem(
-          source: this,
-          type: RichType.Text,
-          text: '\u0000' + '',
-        ));
-      } else {
-        paragraphList.forEach((it) {
+    if (richNote.isNotEditable) return;
+    List<RichLine> tempList = [];
+    if (richLineList.length == 0) {
+      tempList.add(RichItem(
+        source: this,
+        type: RichType.Text,
+        dayIndex: richNote.store.selectedDateIndex,
+      ));
+    } else {
+      richLineList.forEach((it) {
 //          if (it.type == RichType.Task) {
 //            TaskItem task = it.expandData;
 //            task.title = '\u0000' + task.title;
 //          }
-          tempList.add(RichItem(
+//        tempList.add(RichItem(
+//          source: this,
+//          type: it.type,
+//          style: it.style,
+//          indent: it.indent,
+//          content: '\u0000' + it.content,
+//          expandData: it.expandData,
+//        ));
+        tempList.add(RichItem.from(
+            richLine: it,
             source: this,
-            type: it.type,
-            style: it.style,
-            indent: it.indent,
-            text: '\u0000' + it.content,
-            expandData: it.expandData,
-          ));
-        });
-      }
-      paragraphList = tempList;
+            dayIndex: richNote.store.selectedDateIndex,
+        ));
+      });
     }
+    richLineList = tempList;
   }
 
-  List<RichLine> getParagraphList() {
-    List<RichLine> tempList = [];
-    if (!richNote.isEditable) return paragraphList;
+  List<RichLine> exportingRichLists() {
+    /// [mergeRemoveTask]保存的是进入编辑器以后生成的复制数据，只有boxId是唯一的标识
+    /// 所以删除合并后废弃的line数据附带的task，只能通过boxId来操作。
+    mergeRemoveTask.forEach((task){
+      print('清理合并行遗弃的数据：ID = ${task.boxId}');
+      richNote.store.removeTaskItemFromId(task.boxId);
+    });
+    return _getRichLines();
+  }
 
-    paragraphList.forEach((line) {
+  List<RichLine> _getRichLines() {
+    List<RichLine> richLines = [];
+    if (richNote.isNotEditable) return richLineList;
+
+    richLineList.forEach((line) {
       RichItem item = line;
+      var content = '';
       if (item.type == RichType.Task) {
         TaskItem task = item.expandData;
         task.title = item.controller.text.replaceAll('\u0000', '');
+      } else {
+        content = item.controller.text.replaceAll('\u0000', '');
       }
-      tempList.add(RichLine(
+      richLines.add(RichLine(
         type: item.type,
         style: item.style,
         indent: item.indent,
         note: item.note,
-        content: item.controller.text.replaceAll('\u0000', ''),
+        content: content,
         expandData: item.expandData,
       ));
     });
-    return tempList;
+    print('返回了${richLines.length}行数据');
+    return richLines;
   }
 
   String getJsonFromParagraphList() {
     if (richNote.isEditable) {
-      return json.encode(getParagraphList());
+      return json.encode(_getRichLines());
     }
-    return json.encode(paragraphList);
+    return json.encode(richLineList);
   }
 
   bool hasNote() {
     int words = 0;
-    paragraphList.forEach((line) {
-      words += line.text.length;
+    richLineList.forEach((line) {
+      words += line.getContent().length;
     });
-    return words > 0;
+    return true;//words > 0;
   }
 }

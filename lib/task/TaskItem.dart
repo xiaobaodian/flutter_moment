@@ -51,6 +51,29 @@ class TaskItem {
     this.delegate = 0,
   });
 
+  TaskItem.copyWith(TaskItem other){
+    this.boxId = other.boxId;
+    this.focusItemId = other.focusItemId;
+    this.title = other.title;
+    this.comment = other.comment;
+    this.placeItemId = other.placeItemId;
+    this.priority = other.priority;
+    this.state = other.state;
+    this.createDate = other.createDate;
+    this.startDate = other.startDate;
+    this.dueDate = other.dueDate;
+    this.time = other.time;
+    this.allDay = other.allDay;
+    //this.cycleDate,
+    this.subTasks = other.subTasks;
+    this.context = other.context;
+    this.tags = other.tags;
+    this.remindPlan = other.remindPlan;
+    this.shareTo = other.shareTo;
+    this.author = other.author;
+    this.delegate = other.delegate;
+  }
+
   int boxId;
   int focusItemId;
   String title;
