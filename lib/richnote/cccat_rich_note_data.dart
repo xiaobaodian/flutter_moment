@@ -124,7 +124,8 @@ class RichItem extends RichLine {
     if (type == RichType.Task) {
       expandData = TaskItem(createDate: dayIndex);
     }
-    key = GlobalKey();
+    textkey = GlobalKey();
+    checkBoxKey = GlobalKey();
     controller = TextEditingController();
     controller.text = '\u0000' + content;
     node = FocusNode();
@@ -140,7 +141,8 @@ class RichItem extends RichLine {
     @required this.source,
     @required dayIndex,
   }): super(type: richLine.type){
-    key = GlobalKey();
+    textkey = GlobalKey();
+    checkBoxKey = GlobalKey();
     node = FocusNode();
     node.addListener(() {
       if (node.hasFocus) {
@@ -172,7 +174,8 @@ class RichItem extends RichLine {
   bool canChanged = true;
   RichSource source;
 
-  Key key;
+  Key textkey;
+  Key checkBoxKey;
   TextEditingController controller;
   FocusNode node;
 
@@ -299,17 +302,24 @@ class RichSource {
       if (item.type == RichType.Task) {
         TaskItem task = item.expandData;
         task.title = item.controller.text.replaceAll('\u0000', '');
+        richLines.add(RichLine(
+          type: item.type,
+          style: item.style,
+          indent: item.indent,
+          note: item.note,
+          //content: content,
+          expandData: item.expandData,
+        ));
       } else {
-        content = item.controller.text.replaceAll('\u0000', '');
+        //content = item.controller.text.replaceAll('\u0000', '');
+        richLines.add(RichLine(
+          type: item.type,
+          style: item.style,
+          indent: item.indent,
+          note: item.note,
+          content: item.controller.text.replaceAll('\u0000', ''),
+        ));
       }
-      richLines.add(RichLine(
-        type: item.type,
-        style: item.style,
-        indent: item.indent,
-        note: item.note,
-        content: content,
-        expandData: item.expandData,
-      ));
     });
     print('返回了${richLines.length}行数据');
     return richLines;

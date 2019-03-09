@@ -156,20 +156,22 @@ class RichNoteState extends State<RichNote> {
         }
         break;
       case RichType.Task:
-        TaskItem task = widget.richSource.richLineList[index].expandData;
+        RichLine richLine = widget.richSource.richLineList[index];
+        TaskItem task = richLine.expandData;
         var effectiveSytle = layout.taskStyle == null
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.taskStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutTask(
               Checkbox(
-                  value: task.state == TaskState.Complete,
-                  onChanged: (isSelected) {
-                    setState(() {
-                      task.state =
-                          isSelected ? TaskState.Complete : TaskState.StandBy;
-                    });
-                  }),
+                key: (richLine as RichItem).checkBoxKey ,
+                value: task.state == TaskState.Complete,
+                onChanged: (isSelected) {
+                  setState(() {
+                    task.state =
+                        isSelected ? TaskState.Complete : TaskState.StandBy;
+                  });
+                }),
               _buildTextField(index, effectiveSytle),
               Text(
                 '9:20 - 10:00',
@@ -526,7 +528,7 @@ class RichNoteState extends State<RichNote> {
     assert(item.controller != null);
     assert(item.node != null);
     return TextField(
-      key: item.key,
+      key: item.textkey,
       focusNode: item.node,
       controller: item.controller,
       maxLines: null,
