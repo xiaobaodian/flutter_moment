@@ -320,6 +320,7 @@ class GlobalStoreState extends State<GlobalStore> {
       putDailyRecord(selectedDailyRecord);
     }
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
+    focusEvent.extractingPersonList(this);
     Future.delayed(Duration(milliseconds: r), (){
       putFocusEvent(focusEvent);
     });
@@ -356,6 +357,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void changeFocusEventAndTasks(FocusEvent focusEvent) {
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
+    focusEvent.extractingPersonList(this);
     Future.delayed(Duration(milliseconds: r), (){
       changeFocusEvent(focusEvent);
     });

@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int buildDailyEventNote(DailyRecord dailyRecord){
-    dailyRecord.buildRichList(_store);
+    dailyRecord.buildRichList(_store, true);
     return dailyRecord.richLines.length;
   }
 
@@ -481,43 +481,43 @@ Widget _getListView(BuildContext context, int dayIndex) {
     return Center(
       child: Text('还没有数据'),
     );
-  } else {
-    RichSource richSource = RichSource(dailyRecord.richLines);
-    RichNote richNote = RichNote(
-      richSource: richSource,
-      store: store,
-      onTapLine: (index) {
-        var richLine = dailyRecord.richLines[index];
+  }
+
+  RichSource richSource = RichSource(dailyRecord.richLines);
+  RichNote richNote = RichNote(
+    richSource: richSource,
+    store: store,
+    onTapLine: (index) {
+      var richLine = dailyRecord.richLines[index];
+      FocusEvent event = richLine.note;
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (BuildContext context) {
+        return EditerFocusEventRoute(event);
+      })).then((resultItem) {
+        if (resultItem is FocusEvent) {
+          dailyRecord.richLines.clear();
+          event.copyWith(resultItem);
+          store.changeFocusEventAndTasks(event);
+          //store.changeFocusEvent(event);
+        } else if (resultItem is int) {
+          dailyRecord
+            ..richLines.clear()
+            ..focusEvents.remove(event);
+          store.removeFocusEventAndTasks(event);
+        }
+      });
+    },
+    onLongTapLine: (index) {
+      var richLine = dailyRecord.richLines[index];
+      if (richLine.type == RichType.FocusTitle) {
         FocusEvent event = richLine.note;
+        var focusItem = store.getFocusItemFromId(event.focusItemBoxId);
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
-          return EditerFocusEventRoute(event);
-        })).then((resultItem) {
-          if (resultItem is FocusEvent) {
-            dailyRecord.richLines.clear();
-            event.copyWith(resultItem);
-            store.changeFocusEventAndTasks(event);
-            //store.changeFocusEvent(event);
-          } else if (resultItem is int) {
-            dailyRecord
-              ..richLines.clear()
-              ..focusEvents.remove(event);
-            store.removeFocusEventAndTasks(event);
-          }
-        });
-      },
-      onLongTapLine: (index) {
-        var richLine = dailyRecord.richLines[index];
-        if (richLine.type == RichType.FocusTitle) {
-          FocusEvent event = richLine.note;
-          var focusItem = store.getFocusItemFromId(event.focusItemBoxId);
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (BuildContext context) {
-            return FocusItemDetailsRoute(focusItem);
-          }));
-        }
-      },
-    );
-    return richNote;
-  }
+          return FocusItemDetailsRoute(focusItem);
+        }));
+      }
+    },
+  );
+  return richNote;
 }

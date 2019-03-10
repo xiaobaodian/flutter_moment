@@ -263,6 +263,13 @@ class RichNoteState extends State<RichNote> {
           );
         }
         break;
+      case RichType.Food:
+        break;
+      case RichType.Related:
+        paragraphWidget = Text(item.content,
+          style: textTheme.caption,
+        );
+        break;
     }
     return paragraphWidget;
   }
@@ -515,14 +522,6 @@ class RichNoteState extends State<RichNote> {
     }
   }
 
-  void _findPersonNameFor(String txt){
-    widget.store.personItemList?.forEach((person){
-      if (txt.indexOf(person.name) > -1) {
-        debugPrint('找到了：${person.name}');
-      }
-    });
-  }
-
   Widget _buildTextField(int index, TextStyle effectiveSytle) {
     var item = widget.richSource.richLineList[index] as RichItem;
     assert(item.controller != null);
@@ -544,7 +543,6 @@ class RichNoteState extends State<RichNote> {
       onChanged: (text) {
         debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
         debugPrint('内容长度: ${text.length}');
-        _findPersonNameFor(text);
         if (text.length == 0 || (text.substring(0, 1) != '\u0000')) {
           mergeUPLine(index, text ?? '');
         } else if (item.canChanged) {
@@ -606,6 +604,7 @@ class RichNoteState extends State<RichNote> {
             children: <Widget>[
               IconButton(
                 icon: Icon(Icons.clear_all),
+                color: Colors.black87,
                 tooltip: '删除当前段落文本',
                 onPressed: () {
                   removeCurrentLine();
@@ -613,18 +612,21 @@ class RichNoteState extends State<RichNote> {
               ),
               IconButton(
                 icon: Icon(Icons.reorder),
+                color: Colors.black87,
                 onPressed: () {
                   changeParagraphTypeTo(RichType.Text);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_bold),
+                color: Colors.black87,
                 onPressed: () {
                   changeLineStyleTo(RichStyle.Bold);
                 },
               ),
               IconButton(
                 icon: Icon(Icons.format_list_numbered),
+                color: Colors.black87,
                 onPressed: () {
                   final item = getCurrentRichItem();
                   if (item.type == RichType.OrderedLists) {
@@ -636,6 +638,7 @@ class RichNoteState extends State<RichNote> {
               ),
               IconButton(
                 icon: Icon(Icons.format_list_bulleted),
+                color: Colors.black87,
                 onPressed: () {
                   final item = getCurrentRichItem();
                   if (item.type == RichType.UnorderedList) {
@@ -647,6 +650,7 @@ class RichNoteState extends State<RichNote> {
               ),
               IconButton(
                 icon: Icon(Icons.format_indent_increase),
+                color: Colors.black87,
                 onPressed: () {
                   var item = getCurrentRichItem();
                   if (item.type == RichType.OrderedLists ||
@@ -661,6 +665,7 @@ class RichNoteState extends State<RichNote> {
               ),
               IconButton(
                 icon: Icon(Icons.format_indent_decrease),
+                color: Colors.black87,
                 onPressed: () {
                   var item = getCurrentRichItem();
                   if (item.type == RichType.OrderedLists ||
@@ -675,6 +680,7 @@ class RichNoteState extends State<RichNote> {
               ),
               IconButton(
                 icon: Icon(Icons.insert_comment),
+                color: Colors.black87,
                 onPressed: () {
                   final item = getCurrentRichItem();
                   if (item.type == RichType.Comment) {
@@ -686,6 +692,7 @@ class RichNoteState extends State<RichNote> {
               ),
               IconButton(
                 icon: Icon(Icons.check_box),
+                color: Colors.black87,
                 onPressed: () {
                   final item = getCurrentRichItem();
                   if (item.type == RichType.Task) {
@@ -697,6 +704,7 @@ class RichNoteState extends State<RichNote> {
               ),
               IconButton(
                 icon: Icon(Icons.photo),
+                color: Colors.black87,
                 onPressed: () {
                   //getContentList();
                 },

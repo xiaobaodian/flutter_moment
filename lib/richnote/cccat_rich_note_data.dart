@@ -7,16 +7,18 @@ import 'package:flutter_moment/task/TaskItem.dart';
 import 'package:meta/meta.dart';
 
 enum RichType {
-  FocusTitle, // 焦点标题
-  Title, // 标题
-  SubTitle, // 子标题
-  Task, // 任务
-  Text, // 标准文本
-  Comment, // 评论
-  Reference, // 引用
-  UnorderedList, // 无序列表
-  OrderedLists, // 有序列表
-  Image, // 图片
+  FocusTitle,     // 焦点标题
+  Title,          // 标题
+  SubTitle,       // 子标题
+  Task,           // 任务
+  Text,           // 标准文本
+  Comment,        // 评论
+  Reference,      // 引用
+  UnorderedList,  // 无序列表
+  OrderedLists,   // 有序列表
+  Image,          // 图片
+  Food,           // 膳食
+  Related,        // 相关数据展示行
 }
 
 enum RichStyle {
@@ -57,7 +59,7 @@ class RichLine {
   /// [expandData]是复杂的扩展数据，task等。存放的是对象的引用。
   Object expandData = Object();
 
-  /// [text]是能够根据line[type]进行内容存储的自定义属性。
+  /// [getContent]是能够根据line[type]进行内容存储的自定义属性。
   String getContent() {
     if (type == RichType.Task) {
       assert(expandData != null);
@@ -76,8 +78,6 @@ class RichLine {
       content = value;
     }
   }
-
-  Map<int, PersonItem> persons;
 
   void copyWith(RichLine other) {
     this.type = other.type;
@@ -124,8 +124,8 @@ class RichItem extends RichLine {
     if (type == RichType.Task) {
       expandData = TaskItem(createDate: dayIndex);
     }
-    textkey = GlobalKey();
-    checkBoxKey = GlobalKey();
+    textkey = UniqueKey();
+    checkBoxKey = UniqueKey();
     controller = TextEditingController();
     controller.text = '\u0000' + content;
     node = FocusNode();
@@ -141,8 +141,8 @@ class RichItem extends RichLine {
     @required this.source,
     @required dayIndex,
   }): super(type: richLine.type){
-    textkey = GlobalKey();
-    checkBoxKey = GlobalKey();
+    textkey = UniqueKey();
+    checkBoxKey = UniqueKey();
     node = FocusNode();
     node.addListener(() {
       if (node.hasFocus) {
@@ -311,13 +311,14 @@ class RichSource {
           expandData: item.expandData,
         ));
       } else {
-        //content = item.controller.text.replaceAll('\u0000', '');
         richLines.add(RichLine(
           type: item.type,
           style: item.style,
           indent: item.indent,
           note: item.note,
           content: item.controller.text.replaceAll('\u0000', ''),
+          /// 不是[RichType.Task]类型的line也可能是task转换过来的，必须携带expandData数据
+          /// 让store的changeTaskItemFromFocusEvent处理
           expandData: item.expandData,
         ));
       }

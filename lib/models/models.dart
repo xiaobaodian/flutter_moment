@@ -266,13 +266,14 @@ class DailyRecord {
     return weather.isEmpty && focusEvents.length == 0;
   }
 
-  void buildRichList(GlobalStoreState store){
+  void buildRichList(GlobalStoreState store, bool hasRelated){
     if (richLines == null) {
       richLines = List<RichLine>();
     } else {
       richLines.clear();
     }
     focusEvents?.forEach((event){
+      // 加入FocusTitle
       richLines.add(
         RichLine(
           type: RichType.FocusTitle,
@@ -281,10 +282,26 @@ class DailyRecord {
         )
       );
       //List<RichLine> lines = RichSource.getRichLinesFromJson(event.note);
+
+      // 整体加入noteLines
       event.noteLines?.forEach((line){
         line.note = event;
       });
       richLines.addAll(event.noteLines);
+
+      if (hasRelated && event.persons.length > 0) {
+        String text = '';
+        event.persons.forEach((key, person){
+          text = text + person.name + '，';
+        });
+        richLines.add(
+          RichLine(
+            type: RichType.Related,
+            content: '提到了：$text',
+            note: event,
+          )
+        );
+      }
     });
   }
 
@@ -319,6 +336,21 @@ class FocusEvent {
   int focusItemBoxId;
   //String note;
   List<RichLine> noteLines;
+
+  /// [persons]在内容[noteLines]里面提及的相关人员
+  Map<int, PersonItem> persons = Map<int, PersonItem>();
+
+  void extractingPersonList(GlobalStoreState store){
+    persons.clear();
+    noteLines.forEach((line){
+      store.personItemList?.forEach((person){
+        if (line.getContent().indexOf(person.name) > -1) {
+          debugPrint('找到了：${person.name}');
+          persons[person.boxId] = person;
+        }
+      });
+    });
+  }
 
   void copyWith(FocusEvent other) {
     boxId = other.boxId;
