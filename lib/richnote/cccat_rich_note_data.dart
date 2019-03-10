@@ -318,6 +318,7 @@ class RichSource {
           indent: item.indent,
           note: item.note,
           content: item.controller.text.replaceAll('\u0000', ''),
+          expandData: item.expandData,
         ));
       }
     });

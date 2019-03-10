@@ -216,12 +216,14 @@ class GlobalStoreState extends State<GlobalStore> {
           print('批处理FocusEvent包含的任务，修改了Task：${task.title}');
         }
       } else {
-        var task = line.expandData;
-        if (task is TaskItem) {
-          removeTaskItem(task);
-          print('批处理FocusEvent包含的任务，删除了Task：${task.title}');
+        if (line.expandData != null) {
+          TaskItem task = line.expandData;
+          if (task.boxId > 0) {
+            removeTaskItem(task);
+            print('批处理FocusEvent包含的任务，删除了Task：${task.title}');
+          }
+          line.expandData = null;
         }
-        line.expandData = null;
       }
     });
     return s;
