@@ -144,22 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.filter_center_focus),
-              title: Text(
-                '焦点',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.arrow_right),
-              onTap: () {
-                var navigator = Navigator.of(context);
-                navigator.pop(context);
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseDailyFocusRoute(0);
-                }));
-              },
-            ),
-            ListTile(
               leading: Icon(Icons.assignment_turned_in),
               title: Text(
                 '任务',
@@ -172,6 +156,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
                   return BrowseTaskRoute();
+                }));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.filter_center_focus),
+              title: Text(
+                '焦点',
+                style: TextStyle(fontSize: 18),
+              ),
+              trailing: Icon(Icons.arrow_right),
+              onTap: () {
+                var navigator = Navigator.of(context);
+                navigator.pop(context);
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                  return BrowseDailyFocusRoute(0);
                 }));
               },
             ),

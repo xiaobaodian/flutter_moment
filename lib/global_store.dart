@@ -132,22 +132,6 @@ class GlobalStoreState extends State<GlobalStore> {
   String getFocusTitleFrom(int id) => _focusItemMap[id]?.title;
   FocusItem getFocusItemFromId(int id) => _focusItemMap[id];
 
-  List<FocusEvent> getFocusEventsFromFocusItemId(int id){
-    List<FocusEvent> focusEvents = [];
-    var everyDay = calendarMap.everyDayIndex;
-    for (int i = everyDay.length - 1; i > 0; i--) {
-      var day = everyDay[i];
-      if (day.dailyRecord != null) {
-        day.dailyRecord.focusEvents.forEach((event){
-          if (event.focusItemBoxId == id) {
-            focusEvents.add(event);
-          }
-        });
-      }
-    }
-    return focusEvents;
-  }
-
   void addFocusItem(FocusItem focus) {
     focusItemList.add(focus);
     _platformDataSource.invokeMethod("PutFocusItem", json.encode(focus)).then((id) {
@@ -281,6 +265,10 @@ class GlobalStoreState extends State<GlobalStore> {
     return calendarMap.everyDayIndex[dayIndex].dailyRecord;
   }
 
+  DailyRecord getDailyRecordFormTask(TaskItem task) {
+    return calendarMap.getDailyRecordFromIndex(task.createDate);
+  }
+
   void clearSelectedDayDailyRecord(){
     calendarMap.clearDailyRecordOfSelectedDay();
   }
@@ -406,6 +394,39 @@ class GlobalStoreState extends State<GlobalStore> {
     _platformDataSource.invokeMethod("RemoveFocusEvent", focusEvent.boxId.toString());
     var test = json.encode(focusEvent);
     debugPrint('remove Focus Event: $test');
+  }
+
+  List<FocusEvent> getFocusEventsFromFocusItemId(int id){
+    List<FocusEvent> focusEvents = [];
+    var everyDay = calendarMap.everyDayIndex;
+    for (int i = everyDay.length - 1; i > 0; i--) {
+      var day = everyDay[i];
+      if (day.dailyRecord != null) {
+        day.dailyRecord.focusEvents.forEach((event){
+          if (event.focusItemBoxId == id) {
+            focusEvents.add(event);
+          }
+        });
+      }
+    }
+    return focusEvents;
+  }
+
+  FocusEvent getFocusEventFormDailyRecord(DailyRecord dailyRecord, int focusId) {
+    FocusEvent focusEvent;
+    dailyRecord.focusEvents.forEach((event){
+      if (event.focusItemBoxId == focusId) {
+        focusEvent = event;
+      }
+    });
+    return focusEvent;
+  }
+
+  FocusEvent getFocusEventFormTask(TaskItem task) {
+    //FocusEvent focusEvent;
+    DailyRecord dailyRecord = calendarMap.getDailyRecordFromIndex(task.createDate);
+    FocusEvent focusEvent = getFocusEventFormDailyRecord(dailyRecord, task.focusItemId);
+    return focusEvent;
   }
 
 

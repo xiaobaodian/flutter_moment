@@ -1,5 +1,7 @@
 
 
+import 'package:flutter/material.dart';
+
 enum TaskState {
   StandBy,
   Complete,
@@ -49,7 +51,9 @@ class TaskItem {
     this.shareTo = '',
     this.author = 0,
     this.delegate = 0,
-  });
+  }){
+    checkBoxKey = GlobalKey();
+  }
 
   TaskItem.copyWith(TaskItem other){
     this.boxId = other.boxId;
@@ -94,6 +98,8 @@ class TaskItem {
   String shareTo;
   int author;
   int delegate;
+
+  Key checkBoxKey;
 
   String getTimeString() {
     return '8:30 - 11:15';

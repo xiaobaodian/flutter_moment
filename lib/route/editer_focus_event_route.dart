@@ -8,7 +8,6 @@ import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 
 class EditerFocusEventRoute extends StatefulWidget {
-
   final FocusEvent _focusEvent;
 
   EditerFocusEventRoute(this._focusEvent);
@@ -35,7 +34,8 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     super.didChangeDependencies();
     var store = GlobalStore.of(context);
     routeTitle = store.getFocusTitleFrom(widget._focusEvent.focusItemBoxId);
-    richSource = RichSource(widget._focusEvent.noteLines);
+    richSource = RichSource(widget._focusEvent.noteLines,
+        focusItemBoxId: widget._focusEvent.focusItemBoxId);
     richNote = RichNote.editable(
       richSource: richSource,
       store: store,
@@ -58,7 +58,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.delete),
-            onPressed: (){
+            onPressed: () {
               // 删除数据时传入任意一个整数（这里是-1），前一个页面收到返回之后判断一下
               // 类型，如果是整数型就执行删除。
               Navigator.of(context).pop(-1);
@@ -66,7 +66,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
           ),
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: (){
+            onPressed: () {
               if (richSource.hasNote()) {
                 FocusEvent focus = FocusEvent();
                 focus.copyWith(widget._focusEvent);
@@ -83,5 +83,4 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
       body: richNote,
     );
   }
-
 }

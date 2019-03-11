@@ -9,6 +9,7 @@ import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
+import 'package:flutter_moment/task/TaskItem.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class BrowseTaskRoute extends StatefulWidget {
@@ -83,6 +84,7 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
   }
 
   Widget buildBody(BuildContext context, GlobalStoreState store) {
+    store.taskItemList.sort((a,b) => b.createDate.compareTo(a.createDate));
     return ListView.builder(
       itemCount: _store.taskItemList.length,
       itemBuilder: (context, index){
@@ -91,9 +93,46 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
         final date = store.calendarMap.getDateFromIndex(task.createDate);
         final str = DateTimeExt.chineseDateString(date);
         return ListTile(
+          leading: SizedBox(
+            width: 32,
+            height: 32,
+            child: Checkbox(
+              value: task.state == TaskState.Complete,
+              onChanged: (isSelected) {
+                setState(() {
+                  task.state =
+                  isSelected ? TaskState.Complete : TaskState.StandBy;
+                  store.changeTaskItem(task);
+                });
+              }
+            ),
+          ),
           title: Text(task.title),
           subtitle: Text(str),
-          onTap: (){},
+          isThreeLine: true,
+          onTap: (){
+            DailyRecord dailyRecord = store.getDailyRecordFormTask(task);
+            FocusEvent focusEvent = store.getFocusEventFormTask(task);
+            print('task focusitem id : ${task.focusItemId}');
+            assert(dailyRecord != null);
+            assert(focusEvent != null);
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return EditerFocusEventRoute(focusEvent);
+            })).then((resultItem) {
+              if (resultItem is FocusEvent) {
+                dailyRecord.richLines.clear();
+                focusEvent.copyWith(resultItem);
+                store.changeFocusEventAndTasks(focusEvent);
+                //store.changeFocusEvent(event);
+              } else if (resultItem is int) {
+                dailyRecord
+                  ..richLines.clear()
+                  ..focusEvents.remove(focusEvent);
+                store.removeFocusEventAndTasks(focusEvent);
+              }
+            });
+          },
         );
       },
     );

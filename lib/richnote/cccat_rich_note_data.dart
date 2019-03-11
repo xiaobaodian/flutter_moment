@@ -122,12 +122,15 @@ class RichItem extends RichLine {
     type: type,
   ) {
     if (type == RichType.Task) {
-      expandData = TaskItem(createDate: dayIndex);
+      expandData = TaskItem(createDate: dayIndex, focusItemId: source.focusItemBoxId);
     }
-    textkey = UniqueKey();
-    checkBoxKey = UniqueKey();
+    textkey = GlobalKey();//UniqueKey();
     controller = TextEditingController();
-    controller.text = '\u0000' + content;
+    if ((content.substring(0, 1) == '\u0000')) {
+      controller.text = content;
+    } else {
+      controller.text = '\u0000' + content;
+    }
     node = FocusNode();
     node.addListener(() {
         if (node.hasFocus) {
@@ -141,8 +144,7 @@ class RichItem extends RichLine {
     @required this.source,
     @required dayIndex,
   }): super(type: richLine.type){
-    textkey = UniqueKey();
-    checkBoxKey = UniqueKey();
+    textkey = GlobalKey();
     node = FocusNode();
     node.addListener(() {
       if (node.hasFocus) {
@@ -156,10 +158,16 @@ class RichItem extends RichLine {
     note = richLine.note;
     this.source = source;
     if (type == RichType.Task) {
-      TaskItem other = richLine.expandData;
-      TaskItem newTask = TaskItem.copyWith(other);
+      TaskItem oldTask = richLine.expandData;
+      TaskItem newTask = TaskItem.copyWith(oldTask);
       if (dayIndex != null) newTask.createDate = dayIndex;
-      newTask.title = '\u0000' + other.title;
+
+      if ((oldTask.title.substring(0, 1) == '\u0000')) {
+        newTask.title = oldTask.title;
+      } else {
+        newTask.title = '\u0000' + oldTask.title;
+      }
+
       this.expandData = newTask;
       controller.text = newTask.title;
       print('复制了richLine的task数据：${newTask.title} / ${newTask.createDate}');
@@ -175,7 +183,6 @@ class RichItem extends RichLine {
   RichSource source;
 
   Key textkey;
-  Key checkBoxKey;
   TextEditingController controller;
   FocusNode node;
 
@@ -198,14 +205,6 @@ class RichItem extends RichLine {
       //task.title = content;
       task.createDate = source.richNote.store.selectedDateIndex;
       print('任务的日期序号：${source.richNote.store.selectedDateIndex}');
-    } else {
-//      if (type == RichType.Task) {
-//        if (expandData is TaskItem ) {
-//          TaskItem task = expandData;
-//          content = task.title;
-//          debugPrint('将原来Task类型的数据复制过来了');
-//        }
-//      }
     }
     type = newType;
   }
@@ -213,8 +212,9 @@ class RichItem extends RichLine {
 
 class RichSource {
   RichSource(
-    paragraphList,
-  ) : assert(paragraphList != null) {
+    paragraphList, {
+    this.focusItemBoxId
+  }) : assert(paragraphList != null) {
     this.richLineList = paragraphList ?? [];
   }
 
@@ -239,6 +239,7 @@ class RichSource {
   List<RichLine> richLineList;
   List<TaskItem> mergeRemoveTask = [];
   RichNote richNote;
+  int focusItemBoxId;
 
   void dispose() {
     if (!richNote.isEditable) return;

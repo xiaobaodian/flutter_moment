@@ -53,7 +53,7 @@ class RichNote extends StatefulWidget {
   final RichSource richSource;
   final GlobalStoreState store;
 
-  final maxIndent = 1;
+  final _maxIndent = 1;
   bool get isNotEditable => !isEditable;
 
   @override
@@ -156,15 +156,14 @@ class RichNoteState extends State<RichNote> {
         }
         break;
       case RichType.Task:
-        RichLine richLine = widget.richSource.richLineList[index];
-        TaskItem task = richLine.expandData;
+        TaskItem task = item.expandData;
         var effectiveSytle = layout.taskStyle == null
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.taskStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutTask(
               Checkbox(
-                key: (richLine as RichItem).checkBoxKey ,
+                //key: task.checkBoxKey ,
                 value: task.state == TaskState.Complete,
                 onChanged: (isSelected) {
                   setState(() {
@@ -174,23 +173,24 @@ class RichNoteState extends State<RichNote> {
                 }),
               _buildTextField(index, effectiveSytle),
               Text(
-                '9:20 - 10:00',
+                '全天',
                 style: textTheme.caption,
               ));
         } else {
           paragraphWidget = layout.richLayoutTask(
               Checkbox(
-                  value: task.state == TaskState.Complete,
-                  onChanged: (isSelected) {
-                    setState(() {
-                      task.state =
-                          isSelected ? TaskState.Complete : TaskState.StandBy;
-                      widget.store.changeTaskItem(task);
-                    });
-                  }),
+                //key: task.checkBoxKey,
+                value: task.state == TaskState.Complete,
+                onChanged: (isSelected) {
+                  setState(() {
+                    task.state =
+                        isSelected ? TaskState.Complete : TaskState.StandBy;
+                    widget.store.changeTaskItem(task);
+                  });
+                }),
               Text(item.getContent(), style: effectiveSytle),
               Text(
-                '9:20 - 10:00',
+                '全天',
                 style: textTheme.caption,
               ));
         }
@@ -655,7 +655,7 @@ class RichNoteState extends State<RichNote> {
                   var item = getCurrentRichItem();
                   if (item.type == RichType.OrderedLists ||
                       item.type == RichType.UnorderedList) {
-                    if (item.indent < widget.maxIndent) {
+                    if (item.indent < widget._maxIndent) {
                       setState(() {
                         item.indent++;
                       });
