@@ -136,6 +136,24 @@ class CalendarMap {
     return days - 1;  // 天数累加是按实际进行的，在List中，下标从0开始，所以需要-1
   }
 
+  String getChineseTermOfRecentDay(int dayIndex) {
+    List<String> dayName = ['前天', '昨天', '今天', '明天', '后天'];
+    int base = currentDateIndexed - 2;
+    int offset = dayIndex - base;
+    String dayLeap;
+    if (offset < 0 || offset > 4) {
+      dayLeap = '';
+    } else {
+      dayLeap = dayName[offset];
+    }
+    return dayLeap;
+  }
+
+  String getChineseTermOfDate(int dayIndex) {
+    DateTime date = everyDayIndex[dayIndex].date();
+    return '${date.year}年${date.month}月${date.day}日';
+  }
+
   void setSelectedDateFromIndex(int index) {
     selectedDate = everyDayIndex[index].date();
   }

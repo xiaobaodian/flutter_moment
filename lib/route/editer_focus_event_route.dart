@@ -21,6 +21,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   String routeTitle;
   RichSource richSource;
   RichNote richNote;
+  String dateTitle;
 
   @override
   void initState() {
@@ -34,8 +35,11 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     super.didChangeDependencies();
     var store = GlobalStore.of(context);
     routeTitle = store.getFocusTitleFrom(widget._focusEvent.focusItemBoxId);
+    dateTitle = store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
     richSource = RichSource(widget._focusEvent.noteLines,
-        focusItemBoxId: widget._focusEvent.focusItemBoxId);
+      focusItemBoxId: widget._focusEvent.focusItemBoxId,
+      dayIndex: widget._focusEvent.dayIndex,
+    );
     richNote = RichNote.editable(
       richSource: richSource,
       store: store,
@@ -54,7 +58,19 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     debugPrint('生成编辑窗');
     return Scaffold(
       appBar: AppBar(
-        title: Text('今日$routeTitle'),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(routeTitle),
+            Text(dateTitle,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white54,
+              ),
+            ),
+          ],
+        ),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.delete),

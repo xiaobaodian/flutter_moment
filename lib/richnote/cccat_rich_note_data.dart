@@ -116,33 +116,27 @@ class RichItem extends RichLine {
   RichItem({
     @required type,
     @required this.source,
-    @required dayIndex,
-    content = '',
+    String content = '',
   }) : super(
     type: type,
   ) {
     if (type == RichType.Task) {
-      expandData = TaskItem(createDate: dayIndex, focusItemId: source.focusItemBoxId);
+      expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemBoxId);
     }
-    textkey = GlobalKey();//UniqueKey();
+    textkey = GlobalKey();
     controller = TextEditingController();
-    if ((content.substring(0, 1) == '\u0000')) {
-      controller.text = content;
-    } else {
-      controller.text = '\u0000' + content;
-    }
+    controller.text = buildEditerText(content);
     node = FocusNode();
     node.addListener(() {
-        if (node.hasFocus) {
-          canChanged = true;
-        }
+      if (node.hasFocus) {
+        canChanged = true;
+      }
     });
   }
 
   RichItem.from({
     @required RichLine richLine,
     @required this.source,
-    @required dayIndex,
   }): super(type: richLine.type){
     textkey = GlobalKey();
     node = FocusNode();
@@ -160,19 +154,12 @@ class RichItem extends RichLine {
     if (type == RichType.Task) {
       TaskItem oldTask = richLine.expandData;
       TaskItem newTask = TaskItem.copyWith(oldTask);
-      if (dayIndex != null) newTask.createDate = dayIndex;
-
-      if ((oldTask.title.substring(0, 1) == '\u0000')) {
-        newTask.title = oldTask.title;
-      } else {
-        newTask.title = '\u0000' + oldTask.title;
-      }
-
+      newTask.title = buildEditerText(oldTask.title);
       this.expandData = newTask;
       controller.text = newTask.title;
       print('复制了richLine的task数据：${newTask.title} / ${newTask.createDate}');
     } else {
-      content = '\u0000' + richLine.content;
+      content = buildEditerText(richLine.content);
       controller.text = content;
       print('复制了richLine的基本数据');
     }
@@ -193,18 +180,24 @@ class RichItem extends RichLine {
     node?.dispose();
   }
 
+  String buildEditerText(String text) {
+    String buildText;
+    if (text.length >=1 && text.substring(0, 1) == '\u0000') {
+      buildText = text;
+    } else {
+      buildText = '\u0000' + text;
+    }
+    return buildText;
+  }
+
   void changeTypeTo(RichType newType) {
     if (type == newType) return;
     if (newType == RichType.Task) {
       assert(source.richNote.store.selectedDateIndex != null);
       if (expandData is! TaskItem) {
-        expandData = TaskItem(createDate: source.richNote.store.selectedDateIndex);
-        debugPrint('新建了一个TaskItem记录:');
+        expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemBoxId);
+        debugPrint('新建了一个TaskItem记录, dayIndex：${source.dayIndex}');
       }
-      TaskItem task = expandData;
-      //task.title = content;
-      task.createDate = source.richNote.store.selectedDateIndex;
-      print('任务的日期序号：${source.richNote.store.selectedDateIndex}');
     }
     type = newType;
   }
@@ -213,7 +206,8 @@ class RichItem extends RichLine {
 class RichSource {
   RichSource(
     paragraphList, {
-    this.focusItemBoxId
+    this.focusItemBoxId,
+    this.dayIndex,
   }) : assert(paragraphList != null) {
     this.richLineList = paragraphList ?? [];
   }
@@ -240,6 +234,7 @@ class RichSource {
   List<TaskItem> mergeRemoveTask = [];
   RichNote richNote;
   int focusItemBoxId;
+  int dayIndex;
 
   void dispose() {
     if (!richNote.isEditable) return;
@@ -257,26 +252,12 @@ class RichSource {
       tempList.add(RichItem(
         source: this,
         type: RichType.Text,
-        dayIndex: richNote.store.selectedDateIndex,
       ));
     } else {
       richLineList.forEach((it) {
-//          if (it.type == RichType.Task) {
-//            TaskItem task = it.expandData;
-//            task.title = '\u0000' + task.title;
-//          }
-//        tempList.add(RichItem(
-//          source: this,
-//          type: it.type,
-//          style: it.style,
-//          indent: it.indent,
-//          content: '\u0000' + it.content,
-//          expandData: it.expandData,
-//        ));
         tempList.add(RichItem.from(
             richLine: it,
             source: this,
-            dayIndex: richNote.store.selectedDateIndex,
         ));
       });
     }

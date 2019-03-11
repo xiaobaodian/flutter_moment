@@ -85,7 +85,7 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
 
   Widget buildBody(BuildContext context, GlobalStoreState store) {
     store.taskItemList.sort((a,b) => b.createDate.compareTo(a.createDate));
-    return ListView.builder(
+    return ListView.separated(
       itemCount: _store.taskItemList.length,
       itemBuilder: (context, index){
         var task = _store.taskItemList[index];
@@ -114,6 +114,8 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
             DailyRecord dailyRecord = store.getDailyRecordFormTask(task);
             FocusEvent focusEvent = store.getFocusEventFormTask(task);
             print('task focusitem id : ${task.focusItemId}');
+            print('task dayIndex: ${task.createDate}');
+            print('focusEvent dayIndex: ${focusEvent.dayIndex}');
             assert(dailyRecord != null);
             assert(focusEvent != null);
             Navigator.of(context)
@@ -135,6 +137,9 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
           },
         );
       },
+      separatorBuilder: (context, index){
+        return Divider();
+      }
     );
   }
 

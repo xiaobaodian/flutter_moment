@@ -365,15 +365,7 @@ Widget getDayNote(BuildContext context, int index) {
 
 Widget _getDateHeader(BuildContext context, int index, DateTime date) {
   var map = GlobalStore.of(context).calendarMap;
-  List<String> dayName = ['前天', '昨天', '今天', '明天', '后天'];
-  int base = map.currentDateIndexed - 2;
-  int offset = index - base;
-  String dayLeap;
-  if (offset < 0 || offset > 4) {
-    dayLeap = '';
-  } else {
-    dayLeap = dayName[offset];
-  }
+  String dayLeap = map.getChineseTermOfRecentDay(index);
   return Container(
     padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
     decoration: BoxDecoration(
@@ -431,7 +423,11 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
                   return EditerFocusEventRoute(
-                      FocusEvent(focusItemBoxId: usableList[index].boxId));
+                    FocusEvent(
+                      dayIndex: store.selectedDateIndex,
+                      focusItemBoxId: usableList[index].boxId,
+                    )
+                  );
                 })).then((resultItem) {
                   if (resultItem is FocusEvent) {
                     dailyRecord.richLines.clear();

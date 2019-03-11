@@ -438,8 +438,8 @@ class RichNoteState extends State<RichNote> {
     RichItem tempLine = widget.richSource.richLineList[index];
     if (index > 0) {
       setState(() {
+        tempLine.node.unfocus();
         RichItem upLine = widget.richSource.richLineList[index - 1];
-        _requestFocus(upLine.node);
         var p = upLine.controller.text.length;
         var newText = upLine.controller.text + text;
         upLine.canChanged = false;
@@ -447,6 +447,7 @@ class RichNoteState extends State<RichNote> {
         upLine.controller.selection = TextSelection.fromPosition(
           TextPosition(affinity: TextAffinity.downstream, offset: p),
         );
+        _requestFocus(upLine.node);
         if (tempLine.type == RichType.Task) {
           TaskItem task = tempLine.expandData;
           if (task.boxId > 0) {
@@ -476,8 +477,8 @@ class RichNoteState extends State<RichNote> {
     if (upTxt.length == 0 && lines[1].length == 0) {  // 处理在空行上按回车键后转换成text类型
       if (index == 0) return;
       setState(() {
-        oldItem.canChanged = false;
         oldItem.type = RichType.Text;
+        oldItem.canChanged = false;
         oldItem.controller.text = '\u0000' + '';
         oldItem.controller.selection = TextSelection.fromPosition(
             TextPosition(affinity: TextAffinity.downstream, offset: 1));
@@ -485,7 +486,8 @@ class RichNoteState extends State<RichNote> {
       });
     } else {
       oldItem.canChanged = false;
-      oldItem.controller.text = '\u0000' + lines[0];
+      // '\u0000' + lines[0] 是错误的方法，lines[0]已经包含了'\u0000'
+      oldItem.controller.text = lines[0];
       oldItem.controller.selection = TextSelection.fromPosition(TextPosition(
         affinity: TextAffinity.downstream,
         offset: oldItem.controller.text.length,
@@ -506,17 +508,16 @@ class RichNoteState extends State<RichNote> {
         newItem = RichItem(
           source: widget.richSource,
           type: newType,
-          content: lines[1],
-          dayIndex: widget.store.selectedDateIndex,
+          content: lines[1],  // '\u0000' +
         );
         newItem.canChanged = false;
-        newItem.controller.selection = TextSelection.fromPosition(TextPosition(
-          affinity: TextAffinity.downstream,
-          offset: 1,
-        ));
         widget.richSource.richLineList.insert(index + 1, newItem);
-        Future.delayed(const Duration(milliseconds: 50), () {
+        Future.delayed(const Duration(milliseconds: 100), () {
           _requestFocus(newItem?.node);
+          newItem.controller.selection = TextSelection.fromPosition(TextPosition(
+            affinity: TextAffinity.downstream,
+            offset: 1,
+          ));
         });
       });
     }
