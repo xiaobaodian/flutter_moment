@@ -289,15 +289,19 @@ class DailyRecord {
       });
       richLines.addAll(event.noteLines);
 
-      if (hasRelated && event.persons.length > 0) {
-        String text = '';
-        event.persons.forEach((key, person){
-          text = text + person.name + '，';
-        });
+      if (hasRelated && event.personKeys.length > 0) {
+        String text;
+        for (int i = 0; i < event.personKeys.length; i++) {
+          if (i == 0) {
+            text = store.getPersonItemFromId(event.personKeys[i]).name;
+          } else {
+            text = text + "，${store.getPersonItemFromId(event.personKeys[i]).name}";
+          }
+        }
         richLines.add(
           RichLine(
             type: RichType.Related,
-            content: '提到了：$text',
+            content: text,
             note: event,
           )
         );
@@ -326,9 +330,13 @@ class FocusEvent {
     this.boxId = 0,
     this.dayIndex = -1,
     this.focusItemBoxId = -1,
-    note = ''
+    String note = '',
+    String personBoxIds,
   }) {
     noteLines = RichSource.getRichLinesFromJson(note);
+    if (personBoxIds != null) {
+      personKeys = personBoxIds.split('|').map((key) => int.parse(key)).toList();
+    }
   }
 
   int boxId;
@@ -338,15 +346,15 @@ class FocusEvent {
   List<RichLine> noteLines;
 
   /// [persons]在内容[noteLines]里面提及的相关人员
-  Map<int, PersonItem> persons = Map<int, PersonItem>();
+  List<int> personKeys = [];
 
-  void extractingPersonList(GlobalStoreState store){
-    persons.clear();
+  void extractingPersonList(List<PersonItem> personList){
+    personKeys.clear();
     for (var line in noteLines) {
-      for (var person in store.personItemList) {
+      for (var person in personList) {
         if (line.getContent().indexOf(person.name) > -1) {
           debugPrint('找到了：${person.name}');
-          persons[person.boxId] = person;
+          personKeys.add(person.boxId);
         }
       }
     }
@@ -357,6 +365,7 @@ class FocusEvent {
     dayIndex = other.dayIndex;
     focusItemBoxId = other.focusItemBoxId;
     noteLines = other.noteLines;
+    personKeys = other.personKeys.sublist(0);
     //note = other.note;
   }
 
@@ -369,12 +378,30 @@ class FocusEvent {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'dayIndex': dayIndex,
-    'focusItemBoxId': focusItemBoxId,
-    'note': RichSource.getJsonFromRichLine(noteLines),
-  };
+  Map<String, dynamic> toJson() {
+    String personStr;
+    for (int i = 0; i < personKeys.length; i++) {
+      if (i == 0) {
+        personStr = personKeys[i].toString();
+      } else {
+        personStr = personStr + '|${personKeys[i].toString()}';
+      }
+    }
+    return {
+      'boxId': boxId,
+      'dayIndex': dayIndex,
+      'focusItemBoxId': focusItemBoxId,
+      'note': RichSource.getJsonFromRichLine(noteLines),
+      'personBoxIds': personStr,
+    };
+  }
+
+//  Map<String, dynamic> toJson() => {
+//    'boxId': boxId,
+//    'dayIndex': dayIndex,
+//    'focusItemBoxId': focusItemBoxId,
+//    'note': RichSource.getJsonFromRichLine(noteLines),
+//  };
 }
 
 mixin DetailsListMixin<T> {

@@ -266,8 +266,16 @@ class RichNoteState extends State<RichNote> {
       case RichType.Food:
         break;
       case RichType.Related:
-        paragraphWidget = Text(item.content,
-          style: textTheme.caption,
+        paragraphWidget = Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Icon(Icons.people,
+              color: Theme.of(context).accentColor,
+            ),
+            Text('   '),
+            Text(item.content,style: textTheme.caption),
+          ],
         );
         break;
     }
