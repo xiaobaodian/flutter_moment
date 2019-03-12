@@ -12,7 +12,8 @@ import io.objectbox.relation.ToOne
 data class FocusEvent (
         var dayIndex: Int = 0,
         var focusItemBoxId: Long = 0,
-        var note: String = ""
+        var note: String = "",
+        var personBoxIds: String = ""
 ) {
     @Id
     var boxId: Long = 0

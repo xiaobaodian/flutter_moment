@@ -290,6 +290,7 @@ class DailyRecord {
       richLines.addAll(event.noteLines);
 
       if (hasRelated && event.personKeys.length > 0) {
+        print('加入人物引用');
         String text;
         for (int i = 0; i < event.personKeys.length; i++) {
           if (i == 0) {
@@ -334,9 +335,7 @@ class FocusEvent {
     String personBoxIds,
   }) {
     noteLines = RichSource.getRichLinesFromJson(note);
-    if (personBoxIds != null) {
-      personKeys = personBoxIds.split('|').map((key) => int.parse(key)).toList();
-    }
+    personKeys = StringExt.stringToListInt(personBoxIds);
   }
 
   int boxId;
@@ -346,7 +345,7 @@ class FocusEvent {
   List<RichLine> noteLines;
 
   /// [persons]在内容[noteLines]里面提及的相关人员
-  List<int> personKeys = [];
+  List<int> personKeys;
 
   void extractingPersonList(List<PersonItem> personList){
     personKeys.clear();
@@ -354,7 +353,9 @@ class FocusEvent {
       for (var person in personList) {
         if (line.getContent().indexOf(person.name) > -1) {
           debugPrint('找到了：${person.name}');
-          personKeys.add(person.boxId);
+          if (personKeys.indexOf(person.boxId) == -1) {
+            personKeys.add(person.boxId);
+          }
         }
       }
     }
@@ -375,33 +376,17 @@ class FocusEvent {
       dayIndex: json['dayIndex'],
       focusItemBoxId: json['focusItemBoxId'],
       note: json['note'],
+      personBoxIds: json['personBoxIds'],
     );
   }
 
-  Map<String, dynamic> toJson() {
-    String personStr;
-    for (int i = 0; i < personKeys.length; i++) {
-      if (i == 0) {
-        personStr = personKeys[i].toString();
-      } else {
-        personStr = personStr + '|${personKeys[i].toString()}';
-      }
-    }
-    return {
-      'boxId': boxId,
-      'dayIndex': dayIndex,
-      'focusItemBoxId': focusItemBoxId,
-      'note': RichSource.getJsonFromRichLine(noteLines),
-      'personBoxIds': personStr,
-    };
-  }
-
-//  Map<String, dynamic> toJson() => {
-//    'boxId': boxId,
-//    'dayIndex': dayIndex,
-//    'focusItemBoxId': focusItemBoxId,
-//    'note': RichSource.getJsonFromRichLine(noteLines),
-//  };
+  Map<String, dynamic> toJson() => {
+    'boxId': boxId,
+    'dayIndex': dayIndex,
+    'focusItemBoxId': focusItemBoxId,
+    'note': RichSource.getJsonFromRichLine(noteLines),
+    'personBoxIds': StringExt.listIntToString(personKeys),
+  };
 }
 
 mixin DetailsListMixin<T> {

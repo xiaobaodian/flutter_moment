@@ -14,3 +14,24 @@ mixin GetPersonChineseStringMixin {
   }
 }
 
+class StringExt {
+  static String listIntToString(List<int> list, {String split = '|'}){
+    String text;
+    for (int i = 0; i < list.length; i++) {
+      if (i == 0) {
+        text = list[i].toString();
+      } else {
+        text = text + "|${list[i].toString()}";
+      }
+    }
+    return text;
+  }
+  static List<int> stringToListInt(String text, {String split = '|'}){
+    print('stringToListInt => text: $text');
+    List<int> list = [];
+    if (text != null) {
+      list = text.split('|').map((key) => int.parse(key)).toList();
+    }
+    return list;
+  }
+}
