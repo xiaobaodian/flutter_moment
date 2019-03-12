@@ -145,7 +145,7 @@ class RichNoteState extends State<RichNote> {
         break;
       case RichType.Text:
         var effectiveSytle = layout.contentStyle == null
-            ? textTheme.body1.merge(mergeRichStyle(item.style))
+            ? textTheme.subhead.merge(mergeRichStyle(item.style))
             : layout.contentStyle;
         if (widget.isEditable) {
           paragraphWidget =
@@ -158,7 +158,7 @@ class RichNoteState extends State<RichNote> {
       case RichType.Task:
         TaskItem task = item.expandData;
         var effectiveSytle = layout.taskStyle == null
-            ? textTheme.body1.merge(mergeRichStyle(item.style))
+            ? textTheme.subhead.merge(mergeRichStyle(item.style))
             : layout.taskStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutTask(
@@ -197,7 +197,7 @@ class RichNoteState extends State<RichNote> {
         break;
       case RichType.OrderedLists:
         var effectiveSytle = layout.orderedListsStyle == null
-            ? textTheme.body1.merge(mergeRichStyle(item.style))
+            ? textTheme.subhead.merge(mergeRichStyle(item.style))
             : layout.orderedListsStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutList(
@@ -213,7 +213,7 @@ class RichNoteState extends State<RichNote> {
         break;
       case RichType.UnorderedList:
         var effectiveSytle = layout.unorderedListStyle == null
-            ? textTheme.body1.merge(mergeRichStyle(item.style))
+            ? textTheme.subhead.merge(mergeRichStyle(item.style))
             : layout.unorderedListStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutList(

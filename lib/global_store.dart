@@ -273,6 +273,8 @@ class GlobalStoreState extends State<GlobalStore> {
     calendarMap.clearDailyRecordOfSelectedDay();
   }
 
+  void clearDailyRecordOfDayIndex(int dayIndex) => calendarMap.clearDailyRecordOfDayIndex(dayIndex);
+
   void putDailyRecord(DailyRecord dailyRecord) {
     _platformDataSource.invokeMethod("PutDailyRecord", json.encode(dailyRecord)).then((id) {
       dailyRecord.boxId = id;
@@ -353,6 +355,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
 
   void removeFocusEventAndTasks(FocusEvent focusEvent) {
+    print('开始执行: removeFocusEventAndTasks');
     /// 获取FocusItem，引用减少一次
     FocusItem focusItem = getFocusItemFromId(focusEvent.focusItemBoxId);
     focusItem.minusReferences();
@@ -365,11 +368,12 @@ class GlobalStoreState extends State<GlobalStore> {
       }
     });
     removeFocusEvent(focusEvent);
-    selectedDailyRecord.focusEvents.remove(focusEvent);
+    DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
+    dailyRecord.focusEvents.remove(focusEvent);
 
-    if (selectedDailyRecord.isNull) {
-      removeDailyRecord(selectedDailyRecord);
-      clearSelectedDayDailyRecord();
+    if (dailyRecord.isNull) {
+      removeDailyRecord(dailyRecord);
+      clearDailyRecordOfDayIndex(focusEvent.dayIndex);
     }
     //debugPrint('remove SelectedDay Events: ${json.encode(selectedDailyRecord.focusEvents)}');
   }

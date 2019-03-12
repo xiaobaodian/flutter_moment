@@ -128,9 +128,7 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
                 store.changeFocusEventAndTasks(focusEvent);
                 //store.changeFocusEvent(event);
               } else if (resultItem is int) {
-                dailyRecord
-                  ..richLines.clear()
-                  ..focusEvents.remove(focusEvent);
+                dailyRecord.richLines.clear();
                 store.removeFocusEventAndTasks(focusEvent);
               }
             });

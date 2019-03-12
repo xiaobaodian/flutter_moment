@@ -318,9 +318,11 @@ class RichSource {
 
   bool hasNote() {
     int words = 0;
-    richLineList.forEach((line) {
-      words += line.getContent().length;
-    });
-    return true;//words > 0;
+    for (var line in richLineList) {
+      RichItem item = line;
+      String txt = item.controller.text.replaceAll('\u0000', '');
+      words += txt.length;
+    }
+    return words > 0;
   }
 }

@@ -53,6 +53,39 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     richSource.dispose();
   }
 
+  void removeFocusEventItem(BuildContext context) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('将要删除'),
+            content: Text('确实需要删除 <$routeTitle> 吗？'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('取消'),
+                onPressed: () {
+                  Navigator.of(context).pop(null);
+                },
+              ),
+              FlatButton(
+                child: Text('确认'),
+                onPressed: () {
+                  Navigator.of(context).pop(1);
+                },
+              ),
+            ],
+          );
+        }
+    ).then((result) {
+      if (result != null) {
+        // 删除数据时传入任意一个整数（这里是-1），前一个页面收到返回之后判断一下
+        // 类型，如果是整数型就执行删除。
+        Navigator.of(context).pop(-1);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('生成编辑窗');
@@ -75,9 +108,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
           IconButton(
             icon: Icon(Icons.delete),
             onPressed: () {
-              // 删除数据时传入任意一个整数（这里是-1），前一个页面收到返回之后判断一下
-              // 类型，如果是整数型就执行删除。
-              Navigator.of(context).pop(-1);
+              removeFocusEventItem(context);
             },
           ),
           IconButton(

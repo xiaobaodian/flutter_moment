@@ -173,6 +173,7 @@ class CalendarMap {
   List<FocusEvent> getFocusEventsFromDayIndex(int dayIndex) => getDailyRecordFromIndex(dayIndex).focusEvents;
 
   void clearDailyRecordOfSelectedDay() =>  everyDayIndex[selectedDateIndex].dailyRecord = null;
+  void clearDailyRecordOfDayIndex(int dayIndex) => everyDayIndex[dayIndex].dailyRecord = null;
 
 //  DailyRecord getSelectedDayDailyEvents() {
 //    return everyDayIndex[selectedDateIndex].dailyRecord;

@@ -496,9 +496,7 @@ Widget _getListView(BuildContext context, int dayIndex) {
           store.changeFocusEventAndTasks(event);
           //store.changeFocusEvent(event);
         } else if (resultItem is int) {
-          dailyRecord
-            ..richLines.clear()
-            ..focusEvents.remove(event);
+          dailyRecord.richLines.clear();
           store.removeFocusEventAndTasks(event);
         }
       });

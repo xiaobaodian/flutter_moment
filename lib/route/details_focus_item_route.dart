@@ -206,10 +206,8 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
                   event.copyWith(resultItem);
                   store.changeFocusEvent(event);
                 } else if (resultItem is int) {
-                  dailyRecord
-                    ..richLines.clear()
-                    ..focusEvents.remove(event);
-                  store.removeFocusEvent(event);
+                  dailyRecord.richLines.clear();
+                  store.removeFocusEventAndTasks(event);
                 }
               });
             },

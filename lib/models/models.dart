@@ -342,14 +342,14 @@ class FocusEvent {
 
   void extractingPersonList(GlobalStoreState store){
     persons.clear();
-    noteLines.forEach((line){
-      store.personItemList?.forEach((person){
+    for (var line in noteLines) {
+      for (var person in store.personItemList) {
         if (line.getContent().indexOf(person.name) > -1) {
           debugPrint('找到了：${person.name}');
           persons[person.boxId] = person;
         }
-      });
-    });
+      }
+    }
   }
 
   void copyWith(FocusEvent other) {
