@@ -3,10 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/enums.dart';
 import 'package:flutter_moment/models/helper_file.dart';
 import 'package:flutter_moment/models/models.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_person_item_route.dart';
 
@@ -31,9 +35,10 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() {  //getFocusEventsFromPersonItemId
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
+    widget._personItem.detailsList = _store.getFocusEventsFromPersonItemId(widget._personItem.boxId);
   }
 
   @override
@@ -119,136 +124,69 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
           ),
         ],
       ),
-      body: ListView(
-        children: <Widget>[
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
+      body: buildBody(context, _store),
+    );
+  }
+
+  Widget buildBody(BuildContext context, GlobalStoreState store) {
+    final detailsList = widget._personItem.detailsList;
+    if (detailsList.isEmpty) {
+      return Center(child: Text('还没有记录'));
+    }
+    return ListView.separated(
+      itemCount: detailsList.length,
+      itemBuilder: (context, index){
+        final date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
+        final str = DateTimeExt.chineseDateString(date);
+        Widget content = RichNote.fixed(
+          //richSource: RichSource.fromJson(detailsList[index].note),
+          richSource: RichSource(detailsList[index].noteLines),
+        );
+        return InkWell(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                  child: Text(str,
+                    style: TextStyle(fontSize: 12, color: Colors.black45),
                   ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: content,
+                ),
+                //Text(detailsList[index].note),
+              ],
             ),
           ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+          onTap: (){
+            FocusEvent event = detailsList[index];
+            var dailyRecord = store.getDailyRecord(event.dayIndex);
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return EditerFocusEventRoute(event);
+            })).then((resultItem) {
+              if (resultItem is PassingObject<FocusEvent>) {
+                dailyRecord.richLines.clear();
+                Future(() {
+                  store.changeFocusEventAndTasks(resultItem);
+                }).then((_) {
+                  event.copyWith(resultItem.newObject);
+                });
+              } else if (resultItem is int) {
+                dailyRecord.richLines.clear();
+                store.removeFocusEventAndTasks(event);
+              }
+            });
+          },
+        );
+      },
+      separatorBuilder: (context, index){
+        return Divider(height: 1,);
+      },
     );
   }
 

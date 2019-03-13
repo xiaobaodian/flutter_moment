@@ -163,7 +163,7 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
     if (detailsList.isEmpty) {
       return Center(child: Text('还没有记录'));
     }
-    return ListView.builder(
+    return ListView.separated(
       itemCount: detailsList.length,
       itemBuilder: (context, index){
         final date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
@@ -172,47 +172,50 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
           //richSource: RichSource.fromJson(detailsList[index].note),
           richSource: RichSource(detailsList[index].noteLines),
         );
-        return Card(
-          margin: EdgeInsets.all(6),
-          child: InkWell(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text(str,
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
+        return InkWell(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                  child: Text(str,
+                    style: TextStyle(fontSize: 12, color: Colors.black45),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(0.0),
-                    child: content,
-                  ),
-                  //Text(detailsList[index].note),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: content,
+                ),
+                //Text(detailsList[index].note),
+              ],
             ),
-            onTap: (){
-              FocusEvent event = detailsList[index];
-              var dailyRecord = store.getDailyRecord(event.dayIndex);
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (BuildContext context) {
-                return EditerFocusEventRoute(event);
-              })).then((resultItem) {
-                if (resultItem is PassingObject<FocusEvent>) {
-                  dailyRecord.richLines.clear();
-                  event = resultItem.newObject;
-                  store.changeFocusEventAndTasks(resultItem);
-                } else if (resultItem is int) {
-                  dailyRecord.richLines.clear();
-                  store.removeFocusEventAndTasks(event);
-                }
-              });
-            },
           ),
+          onTap: (){
+            FocusEvent event = detailsList[index];
+            var dailyRecord = store.getDailyRecord(event.dayIndex);
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return EditerFocusEventRoute(event);
+            })).then((resultItem) {
+              if (resultItem is PassingObject<FocusEvent>) {
+                dailyRecord.richLines.clear();
+                Future(() {
+                  store.changeFocusEventAndTasks(resultItem);
+                }).then((_) {
+                  event.copyWith(resultItem.newObject);
+                });
+              } else if (resultItem is int) {
+                dailyRecord.richLines.clear();
+                store.removeFocusEventAndTasks(event);
+              }
+            });
+          },
         );
+      },
+      separatorBuilder: (context, index){
+        return Divider(height: 1,);
       },
     );
   }

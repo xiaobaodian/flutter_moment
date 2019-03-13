@@ -469,6 +469,8 @@ class SliverPanel extends SliverPersistentHeaderDelegate {
   }
 }
 
+/// [event]是一个指向[richLine.note]的变量，所以下面的处理中只能使用event.copyWith
+/// 方法获取新的数据，不能直接赋值。如果被复制的话是没有意义的。
 Widget _getListView(BuildContext context, int dayIndex) {
   var store = GlobalStore.of(context);
   var dailyRecord = store.calendarMap.getDailyRecordFromIndex(dayIndex);

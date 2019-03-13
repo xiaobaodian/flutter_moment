@@ -168,7 +168,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
   Widget buildFocusListViewItem(BuildContext context, int index) {
     FocusItem focusItem = focusList[index];
     var subTitle =
-        focusItem.references == 0 ? '未关注' : '聚焦 ${focusItem.references} 次';
+        focusItem.references == 0 ? '未关注' : '已关注 ${focusItem.references} 次';
     return CatListTile(
       title: Text(
         focusItem.title,
@@ -216,7 +216,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
 
     var personItem = personList[index];
     var subTitle =
-        personItem.references == 0 ? '未关注' : '相逢 ${personItem.references} 次';
+        personItem.references == 0 ? '未关注' : '在 ${personItem.references} 个焦点中';
     return CatListTile(
       leading: SizedBox(
         height: 36,

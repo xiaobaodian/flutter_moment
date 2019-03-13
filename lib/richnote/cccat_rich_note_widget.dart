@@ -230,7 +230,7 @@ class RichNoteState extends State<RichNote> {
         break;
       case RichType.Reference:
         var effectiveSytle = layout.referenceStyle == null
-            ? textTheme.body1.merge(mergeRichStyle(item.style))
+            ? textTheme.subhead.merge(mergeRichStyle(item.style))
             : layout.referenceStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutReference(

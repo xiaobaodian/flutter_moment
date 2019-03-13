@@ -460,6 +460,22 @@ class GlobalStoreState extends State<GlobalStore> {
     return focusEvents;
   }
 
+  List<FocusEvent> getFocusEventsFromPersonItemId(int id){
+    List<FocusEvent> focusEvents = [];
+    var everyDay = calendarMap.everyDayIndex;
+    for (int i = everyDay.length - 1; i > 0; i--) {
+      var day = everyDay[i];
+      if (day.dailyRecord != null) {
+        day.dailyRecord.focusEvents.forEach((event){
+          if (event.personKeys.indexOf(id) > -1) {
+            focusEvents.add(event);
+          }
+        });
+      }
+    }
+    return focusEvents;
+  }
+
   FocusEvent getFocusEventFormDailyRecord(DailyRecord dailyRecord, int focusId) {
     FocusEvent focusEvent;
     dailyRecord.focusEvents.forEach((event){

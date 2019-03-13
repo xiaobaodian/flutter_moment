@@ -79,6 +79,7 @@ class CalendarMap {
 
   void initCurrentDate() {
     currentDate = DateTimeExt(DateTime.now());
+    currentDateIndexed = getDateIndex(currentDate.date);
   }
 
   /// 返回从startYear到endYear期间的周数

@@ -12,10 +12,7 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 
 class PassingObject<T> {
-  PassingObject({
-    this.oldObject,
-    this.newObject
-});
+  PassingObject({this.oldObject, this.newObject});
   T oldObject;
   T newObject;
 }
@@ -40,6 +37,7 @@ class BaseItem {
 
   void minusReferences() {
     references--;
+    if (references < 0) references = 0;
   }
 }
 
@@ -52,10 +50,10 @@ class SystemBaseItem extends BaseItem {
     references = 0,
     systemPresets = false,
     internal = false,
-}): super(
-    boxId: boxId,
-    references: references,
-  );
+  }) : super(
+          boxId: boxId,
+          references: references,
+        );
 }
 
 // user.g.dart 将在我们运行生成命令后自动生成
@@ -70,7 +68,7 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
   FocusItem({
     this.title = "",
     this.comment = "",
-  }): super();
+  }) : super();
 
   // 新建实例时的构建函数
   FocusItem.build({
@@ -80,7 +78,11 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     int references = 0,
     bool systemPresets = false,
     bool internal = false,
-  }): super(boxId: boxId, references: references, systemPresets: systemPresets, internal: internal) {
+  }) : super(
+            boxId: boxId,
+            references: references,
+            systemPresets: systemPresets,
+            internal: internal) {
     //id = DateTime.now().millisecondsSinceEpoch.toString();
   }
 
@@ -89,20 +91,20 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
       boxId: json['boxId'],
       title: json['title'],
       comment: json['comment'],
-      references: json['references'],                   // 引用次数
-      systemPresets: json['systemPresets'],             // 系统预设
-      internal: json['internal'],                       // 内部使用
+      references: json['references'], // 引用次数
+      systemPresets: json['systemPresets'], // 系统预设
+      internal: json['internal'], // 内部使用
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'title': title,
-    'comment': comment,
-    'references': references,
-    'systemPresets': systemPresets,
-    'internal': internal,
-  };
+        'boxId': boxId,
+        'title': title,
+        'comment': comment,
+        'references': references,
+        'systemPresets': systemPresets,
+        'internal': internal,
+      };
 }
 
 ///
@@ -120,7 +122,7 @@ class PlaceItem extends BaseItem with BuildImageMixin {
     this.picture,
     boxId = 0,
     references = 0,
-  }): super(boxId: boxId, references: references) {
+  }) : super(boxId: boxId, references: references) {
     setMixinImageSource(picture);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
@@ -159,19 +161,22 @@ class PlaceItem extends BaseItem with BuildImageMixin {
   }
 
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'title': title,
-    'address': address,
-    'picture': picture,
-    'references': references,
-  };
-
+        'boxId': boxId,
+        'title': title,
+        'address': address,
+        'picture': picture,
+        'references': references,
+      };
 }
 
 ///
 /// gender: 0->Female, 1->Male, 2->None
 ///
-class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMixin {
+class PersonItem extends BaseItem
+    with
+        BuildImageMixin,
+        DetailsListMixin<FocusEvent>,
+        GetPersonChineseStringMixin {
   String name;
   //String photo;
   int gender;
@@ -186,7 +191,7 @@ class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMi
     photo = '',
     boxId = 0,
     references = 0,
-  }): super(boxId: boxId, references: references) {
+  }) : super(boxId: boxId, references: references) {
     setMixinImageSource(photo);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
@@ -226,24 +231,23 @@ class PersonItem extends BaseItem with BuildImageMixin, GetPersonChineseStringMi
   factory PersonItem.fromJson(Map<String, dynamic> json) {
     String _birthday = json['birthday'];
     return PersonItem(
-      name: json['name'],
-      photo: json['photo'],
-      gender: json['gender'],
-      birthday: _birthday == '' ? null : DateTime.parse(_birthday),
-      boxId: json['boxId'],
-      references: json['references']
-    );
+        name: json['name'],
+        photo: json['photo'],
+        gender: json['gender'],
+        birthday: _birthday == '' ? null : DateTime.parse(_birthday),
+        boxId: json['boxId'],
+        references: json['references']);
   }
 
   //
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'name': name,
-    'photo': mixinImage,
-    'gender': gender,
-    'birthday': hasBirthday() ? birthday.toIso8601String() : '',
-    'references': references,
-  };
+        'boxId': boxId,
+        'name': name,
+        'photo': mixinImage,
+        'gender': gender,
+        'birthday': hasBirthday() ? birthday.toIso8601String() : '',
+        'references': references,
+      };
 }
 
 ///
@@ -275,25 +279,23 @@ class DailyRecord {
     return weather.isEmpty && focusEvents.length == 0;
   }
 
-  void buildRichList(GlobalStoreState store, bool hasRelated){
+  void buildRichList(GlobalStoreState store, bool hasRelated) {
     if (richLines == null) {
       richLines = List<RichLine>();
     } else {
       richLines.clear();
     }
-    focusEvents?.forEach((event){
+    focusEvents?.forEach((event) {
       // 加入FocusTitle
-      richLines.add(
-        RichLine(
-          type: RichType.FocusTitle,
-          content: event.focusItemBoxId.toString(),
-          note: event,
-        )
-      );
+      richLines.add(RichLine(
+        type: RichType.FocusTitle,
+        content: event.focusItemBoxId.toString(),
+        note: event,
+      ));
       //List<RichLine> lines = RichSource.getRichLinesFromJson(event.note);
 
       // 整体加入noteLines
-      event.noteLines?.forEach((line){
+      event.noteLines?.forEach((line) {
         line.note = event;
       });
       richLines.addAll(event.noteLines);
@@ -301,20 +303,21 @@ class DailyRecord {
       if (hasRelated && event.personKeys.length > 0) {
         print('加入人物引用');
         String text;
+        //List<Widget> widgets = [];
         for (int i = 0; i < event.personKeys.length; i++) {
           if (i == 0) {
             text = store.getPersonItemFromId(event.personKeys[i]).name;
           } else {
-            text = text + "，${store.getPersonItemFromId(event.personKeys[i]).name}";
+            text = text +
+                "、${store.getPersonItemFromId(event.personKeys[i]).name}";
           }
         }
-        richLines.add(
-          RichLine(
-            type: RichType.Related,
-            content: text,
-            note: event,
-          )
-        );
+
+        richLines.add(RichLine(
+          type: RichType.Related,
+          content: text,
+          note: event,
+        ));
       }
     });
   }
@@ -329,10 +332,10 @@ class DailyRecord {
   }
 
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'dayIndex': dayIndex,
-    'weather': weather,
-  };
+        'boxId': boxId,
+        'dayIndex': dayIndex,
+        'weather': weather,
+      };
 }
 
 class FocusEvent {
@@ -356,7 +359,7 @@ class FocusEvent {
   /// [persons]在内容[noteLines]里面提及的相关人员
   List<int> personKeys;
 
-  void extractingPersonList(List<PersonItem> personList){
+  void extractingPersonList(List<PersonItem> personList) {
     personKeys.clear();
     for (var line in noteLines) {
       for (var person in personList) {
@@ -390,12 +393,12 @@ class FocusEvent {
   }
 
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'dayIndex': dayIndex,
-    'focusItemBoxId': focusItemBoxId,
-    'note': RichSource.getJsonFromRichLine(noteLines),
-    'personBoxIds': StringExt.listIntToString(personKeys),
-  };
+        'boxId': boxId,
+        'dayIndex': dayIndex,
+        'focusItemBoxId': focusItemBoxId,
+        'note': RichSource.getJsonFromRichLine(noteLines),
+        'personBoxIds': StringExt.listIntToString(personKeys),
+      };
 }
 
 mixin DetailsListMixin<T> {
