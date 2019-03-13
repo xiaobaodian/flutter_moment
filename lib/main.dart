@@ -12,11 +12,9 @@ import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/browse_task_route.dart';
 import 'package:flutter_moment/route/calendar_route.dart';
-import 'package:flutter_moment/demo_data.dart';
 import 'package:flutter_moment/route/details_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/browse_daily_focus_route.dart';
-import 'package:flutter_moment/route/rich_text_editer.dart';
 import 'package:flutter_moment/widgets/trim_picture_dialog.dart';
 
 void main() => runApp(GlobalStore(child: MyApp()));
@@ -485,8 +483,9 @@ Widget _getListView(BuildContext context, int dayIndex) {
   RichNote richNote = RichNote(
     richSource: richSource,
     store: store,
-    onTapLine: (index) {
-      var richLine = dailyRecord.richLines[index];
+    onTapLine: (tapObject) {
+      //var richLine = dailyRecord.richLines[tapObject.index];
+      var richLine = tapObject.richLine;
       FocusEvent event = richLine.note;
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (BuildContext context) {
@@ -505,8 +504,9 @@ Widget _getListView(BuildContext context, int dayIndex) {
         }
       });
     },
-    onLongTapLine: (index) {
-      var richLine = dailyRecord.richLines[index];
+    onLongTapLine: (tapObject) {
+      //var richLine = dailyRecord.richLines[index];
+      var richLine = tapObject.richLine;
       if (richLine.type == RichType.FocusTitle) {
         FocusEvent event = richLine.note;
         var focusItem = store.getFocusItemFromId(event.focusItemBoxId);

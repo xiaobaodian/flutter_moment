@@ -4,17 +4,27 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_moment/global_store.dart';
+import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 import 'package:flutter_moment/task/TaskItem.dart';
 
+class RichNoteTapObject {
+  RichNoteTapObject(
+    this.index,
+    this.richLine,
+  );
+  int index;
+  RichLine richLine;
+}
+
 class RichNote extends StatefulWidget {
   RichNote({
-    this.richSource,
+    @required this.store,
+    @required this.richSource,
     this.richNoteLayout,
     this.onTapLine,
     this.onLongTapLine,
-    this.store,
   })  : isEditable = false,
         isFixed = false,
         assert(richSource.richLineList != null) {
@@ -22,11 +32,11 @@ class RichNote extends StatefulWidget {
   }
 
   RichNote.editable({
-    this.richSource,
+    @required this.store,
+    @required this.richSource,
     this.richNoteLayout,
     this.onTapLine,
     this.onLongTapLine,
-    this.store,
   })  : isEditable = true,
         isFixed = false {
     richSource.richNote = this;
@@ -35,11 +45,11 @@ class RichNote extends StatefulWidget {
   }
 
   RichNote.fixed({
-    this.richSource,
+    @required this.store,
+    @required this.richSource,
     this.richNoteLayout,
     this.onTapLine,
     this.onLongTapLine,
-    this.store,
   })  : isFixed = true,
         isEditable = false {
     richSource.richNote = this;
@@ -47,8 +57,8 @@ class RichNote extends StatefulWidget {
 
   final bool isEditable;
   final bool isFixed;
-  final ValueChanged<int> onTapLine;
-  final ValueChanged<int> onLongTapLine;
+  final ValueChanged<RichNoteTapObject> onTapLine;
+  final ValueChanged<RichNoteTapObject> onLongTapLine;
   final RichNoteLayout richNoteLayout;
   final RichSource richSource;
   final GlobalStoreState store;
@@ -98,7 +108,7 @@ class RichNoteState extends State<RichNote> {
     }
   }
 
-  Widget buildParagraphLayoutWidget(int index) {
+  Widget buildLineLayoutWidget(int index) {
     var item = widget.richSource.richLineList[index];
     Widget paragraphWidget;
     switch (item.type) {
@@ -242,7 +252,7 @@ class RichNoteState extends State<RichNote> {
         break;
       case RichType.Comment:
         var effectiveSytle = layout.referenceStyle == null
-            ? textTheme.body1.merge(mergeRichStyle(item.style))
+            ? textTheme.subhead.merge(mergeRichStyle(item.style))
             : layout.referenceStyle;
         if (widget.isEditable) {
           paragraphWidget =
@@ -419,7 +429,7 @@ class RichNoteState extends State<RichNote> {
   }
 
   void calculationOrderedList() {
-    const unorderedLeading = ['-', '•']; // • ▪ ●
+    const unorderedLeading = ['●', '•']; // • ▪ ●
     int ybh = 1, ebh = 1;
     widget.richSource.richLineList?.forEach((line) {
       if (line.type == RichType.OrderedLists) {
@@ -568,12 +578,23 @@ class RichNoteState extends State<RichNote> {
     List<Widget> bodyItems = [];
     int listLength = widget.richSource.richLineList.length;
     for (int index = 0; index < listLength; index++) {
-      bodyItems.add(buildParagraphLayoutWidget(index));
+      bodyItems.add(InkWell(
+        child: buildLineLayoutWidget(index),
+        onTap: () {
+          if (widget.onTapLine != null) {
+            widget.onTapLine(RichNoteTapObject(index, widget.richSource.richLineList[index]));
+          }
+        },
+        onLongPress: () {
+          if (widget.onLongTapLine != null) {
+            widget.onLongTapLine(RichNoteTapObject(index, widget.richSource.richLineList[index]));
+          }
+        },
+      ));
       if (index < listLength - 1) bodyItems.add(buildSeparatorWidget(index));
     }
     return bodyItems;
   }
-
   List<Widget> _buildBody() {
     List<Widget> bodyItems = [];
     bodyItems.add(Expanded(
@@ -581,15 +602,15 @@ class RichNoteState extends State<RichNote> {
         padding: EdgeInsets.all(16),
         itemBuilder: (context, index) {
           return InkWell(
-            child: buildParagraphLayoutWidget(index),
+            child: buildLineLayoutWidget(index),
             onTap: () {
               if (widget.onTapLine != null) {
-                widget.onTapLine(index);
+                widget.onTapLine(RichNoteTapObject(index, widget.richSource.richLineList[index]));
               }
             },
             onLongPress: () {
               if (widget.onLongTapLine != null) {
-                widget.onLongTapLine(index);
+                widget.onLongTapLine(RichNoteTapObject(index, widget.richSource.richLineList[index]));
               }
             },
           );

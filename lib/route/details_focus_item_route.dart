@@ -169,32 +169,14 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
         final date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
         final str = DateTimeExt.chineseDateString(date);
         Widget content = RichNote.fixed(
-          //richSource: RichSource.fromJson(detailsList[index].note),
+          store: _store,
           richSource: RichSource(detailsList[index].noteLines),
-        );
-        return InkWell(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                  child: Text(str,
-                    style: TextStyle(fontSize: 12, color: Colors.black45),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: content,
-                ),
-                //Text(detailsList[index].note),
-              ],
-            ),
-          ),
-          onTap: (){
-            FocusEvent event = detailsList[index];
-            var dailyRecord = store.getDailyRecord(event.dayIndex);
+          onTapLine: (tapObject) {
+            print('tap rich line');
+            var richLine = tapObject.richLine;
+            FocusEvent event = richLine.note;
+            //FocusEvent event = detailsList[index];
+            DailyRecord dailyRecord = store.getDailyRecord(event.dayIndex);
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return EditerFocusEventRoute(event);
@@ -212,6 +194,25 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
               }
             });
           },
+        );
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                child: Text(str,
+                  style: TextStyle(fontSize: 12, color: Colors.black45),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: content,
+              ),
+              //Text(detailsList[index].note),
+            ],
+          ),
         );
       },
       separatorBuilder: (context, index){
