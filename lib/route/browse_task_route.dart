@@ -122,10 +122,10 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return EditerFocusEventRoute(focusEvent);
             })).then((resultItem) {
-              if (resultItem is FocusEvent) {
+              if (resultItem is PassingObject<FocusEvent>) {
                 dailyRecord.richLines.clear();
-                focusEvent.copyWith(resultItem);
-                store.changeFocusEventAndTasks(focusEvent);
+                focusEvent = resultItem.newObject;
+                store.changeFocusEventAndTasks(resultItem);
                 //store.changeFocusEvent(event);
               } else if (resultItem is int) {
                 dailyRecord.richLines.clear();

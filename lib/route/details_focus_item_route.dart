@@ -201,10 +201,10 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
                   .push(MaterialPageRoute(builder: (BuildContext context) {
                 return EditerFocusEventRoute(event);
               })).then((resultItem) {
-                if (resultItem is FocusEvent) {
+                if (resultItem is PassingObject<FocusEvent>) {
                   dailyRecord.richLines.clear();
-                  event.copyWith(resultItem);
-                  store.changeFocusEvent(event);
+                  event = resultItem.newObject;
+                  store.changeFocusEventAndTasks(resultItem);
                 } else if (resultItem is int) {
                   dailyRecord.richLines.clear();
                   store.removeFocusEventAndTasks(event);

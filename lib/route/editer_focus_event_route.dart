@@ -119,7 +119,11 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
                 focus.copyWith(widget._focusEvent);
                 focus.noteLines = richSource.exportingRichLists();
                 //focus.note = richSource.getJsonFromParagraphList();
-                Navigator.of(context).pop(focus);
+                PassingObject<FocusEvent> focusEventPassingObject = PassingObject(
+                  oldObject: widget._focusEvent,
+                  newObject: focus,
+                );
+                Navigator.of(context).pop(focusEventPassingObject);
               } else {
                 Navigator.of(context).pop(null);
               }

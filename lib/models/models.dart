@@ -11,6 +11,15 @@ import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 
+class PassingObject<T> {
+  PassingObject({
+    this.oldObject,
+    this.newObject
+});
+  T oldObject;
+  T newObject;
+}
+
 class BaseItem {
   int boxId = 0;
   int references = 0;

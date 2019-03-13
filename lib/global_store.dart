@@ -132,6 +132,18 @@ class GlobalStoreState extends State<GlobalStore> {
   String getFocusTitleFrom(int id) => _focusItemMap[id]?.title;
   FocusItem getFocusItemFromId(int id) => _focusItemMap[id];
 
+  void focusItemAddReferences(int id) {
+    FocusItem focusItem = _focusItemMap[id];
+    focusItem.addReferences();
+    changeFocusItem(focusItem);
+  }
+
+  void focusItemMinusReferences(int id) {
+    FocusItem focusItem = _focusItemMap[id];
+    focusItem.minusReferences();
+    changeFocusItem(focusItem);
+  }
+
   void addFocusItem(FocusItem focus) {
     focusItemList.add(focus);
     _platformDataSource.invokeMethod("PutFocusItem", json.encode(focus)).then((id) {
@@ -217,6 +229,18 @@ class GlobalStoreState extends State<GlobalStore> {
 
   PersonItem getPersonItemFromId(int id) => _personItemMap[id];
 
+  void personItemAddReferences(int id) {
+    PersonItem person = _personItemMap[id];
+    person.addReferences();
+    changePersonItem(person);
+  }
+
+  void personItemMinusReferences(int id) {
+    PersonItem person = _personItemMap[id];
+    person.minusReferences();
+    changePersonItem(person);
+  }
+
   void addPersonItem(PersonItem person) {
     personItemList.add(person);
     _platformDataSource.invokeMethod("PutPersonItem", json.encode(person)).then((id) {
@@ -295,9 +319,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void addFocusEventToSelectedDay(FocusEvent focusEvent) { //, int focusItemBoxId
     /// 获取FocusItem，引用增加一次，保存到数据库
-    FocusItem focusItem = getFocusItemFromId(focusEvent.focusItemBoxId);
-    focusItem.addReferences();
-    changeFocusItem(focusItem);
+    focusItemAddReferences(focusEvent.focusItemBoxId);
 
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = calendarMap.selectedDateIndex;
@@ -311,6 +333,7 @@ class GlobalStoreState extends State<GlobalStore> {
     }
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
     focusEvent.extractingPersonList(personItemList);
+    focusEvent.personKeys.forEach((key) => personItemAddReferences(key));
     Future.delayed(Duration(milliseconds: r), (){
       putFocusEvent(focusEvent);
     });
@@ -345,11 +368,33 @@ class GlobalStoreState extends State<GlobalStore> {
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
   }
 
-  void changeFocusEventAndTasks(FocusEvent focusEvent) {
-    int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
-    focusEvent.extractingPersonList(personItemList);
+  void changeFocusEventAndTasks(PassingObject<FocusEvent> passingObject) {
+    FocusEvent newFocus = passingObject.newObject;
+    FocusEvent oldFocus = passingObject.oldObject;
+
+    int r = changeTaskItemFromFocusEvent(newFocus) * 100;
+    newFocus.extractingPersonList(personItemList);
+
+    // 下面比较人物的引用
+    List<int> newKeys = [];
+    for (var personKey in newFocus.personKeys) {
+      int keyIndex = oldFocus.personKeys.indexOf(personKey);
+      if (keyIndex == -1) {
+        newKeys.add(personKey);
+      } else {
+        oldFocus.personKeys.removeAt(keyIndex);
+      }
+    }
+
+    // 测试用
+    newKeys.forEach((key) => print('新增人物引用：${getPersonItemFromId(key).name}'));
+    oldFocus.personKeys.forEach((key) => print('减少人物引用：${getPersonItemFromId(key).name}'));
+
+    newKeys.forEach((key) => personItemAddReferences(key));
+    oldFocus.personKeys.forEach((key) => personItemMinusReferences(key));
+
     Future.delayed(Duration(milliseconds: r), (){
-      changeFocusEvent(focusEvent);
+      changeFocusEvent(newFocus);
     });
   }
 
@@ -357,9 +402,7 @@ class GlobalStoreState extends State<GlobalStore> {
   void removeFocusEventAndTasks(FocusEvent focusEvent) {
     print('开始执行: removeFocusEventAndTasks');
     /// 获取FocusItem，引用减少一次
-    FocusItem focusItem = getFocusItemFromId(focusEvent.focusItemBoxId);
-    focusItem.minusReferences();
-    changeFocusItem(focusItem);
+    focusItemMinusReferences(focusEvent.focusItemBoxId);
 
     /// 删除index位置focusEvent记录里面的TaskItem
     focusEvent.noteLines.forEach((line){
@@ -367,6 +410,7 @@ class GlobalStoreState extends State<GlobalStore> {
         removeTaskItem(line.expandData);
       }
     });
+    focusEvent.personKeys.forEach((key) => personItemMinusReferences(key));
     removeFocusEvent(focusEvent);
     DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
     dailyRecord.focusEvents.remove(focusEvent);

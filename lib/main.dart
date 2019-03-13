@@ -113,11 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  int buildDailyEventNote(DailyRecord dailyRecord){
+  int buildDailyEventNote(DailyRecord dailyRecord) {
     dailyRecord.buildRichList(_store, true);
     return dailyRecord.richLines.length;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -293,8 +292,10 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             var dailyRecord = _store.calendarMap.getDailyRecordFromIndex(index);
             if (dailyRecord != null) {
-              if (dailyRecord.richLines == null || dailyRecord.richLines.length == 0) {  //  || dailyRecord.richLines.length == 0
-                Future(() => buildDailyEventNote(dailyRecord)).then((length){
+              if (dailyRecord.richLines == null ||
+                  dailyRecord.richLines.length == 0) {
+                //  || dailyRecord.richLines.length == 0
+                Future(() => buildDailyEventNote(dailyRecord)).then((length) {
                   if (length > 0) {
                     setState(() {
                       debugPrint('延迟生成daily record rich list 完成...');
@@ -399,7 +400,8 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
   );
 }
 
-Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList) {
+Widget _buildFocusModelSheet(
+    GlobalStoreState store, List<FocusItem> usableList) {
   final dailyRecord = store.calendarMap.getDailyRecordFromSelectedDay();
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
@@ -422,16 +424,14 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
                 Navigator.of(context).pop();
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return EditerFocusEventRoute(
-                    FocusEvent(
-                      dayIndex: store.selectedDateIndex,
-                      focusItemBoxId: usableList[index].boxId,
-                    )
-                  );
+                  return EditerFocusEventRoute(FocusEvent(
+                    dayIndex: store.selectedDateIndex,
+                    focusItemBoxId: usableList[index].boxId,
+                  ));
                 })).then((resultItem) {
-                  if (resultItem is FocusEvent) {
+                  if (resultItem is PassingObject<FocusEvent>) {
                     dailyRecord.richLines.clear();
-                    store.addFocusEventToSelectedDay(resultItem);
+                    store.addFocusEventToSelectedDay(resultItem.newObject);
                     //usableList[index].addReferences();
                   }
                 });
@@ -490,11 +490,13 @@ Widget _getListView(BuildContext context, int dayIndex) {
           .push(MaterialPageRoute(builder: (BuildContext context) {
         return EditerFocusEventRoute(event);
       })).then((resultItem) {
-        if (resultItem is FocusEvent) {
+        if (resultItem is PassingObject<FocusEvent>) {
           dailyRecord.richLines.clear();
-          event.copyWith(resultItem);
-          store.changeFocusEventAndTasks(event);
-          //store.changeFocusEvent(event);
+          Future(() {
+            store.changeFocusEventAndTasks(resultItem);
+          }).then((_) {
+            event.copyWith(resultItem.newObject);
+          });
         } else if (resultItem is int) {
           dailyRecord.richLines.clear();
           store.removeFocusEventAndTasks(event);
