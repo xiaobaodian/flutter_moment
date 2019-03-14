@@ -31,39 +31,38 @@ class GlobalStore extends StatefulWidget {
 class ItemSet<T extends  BaseItem> {
   ItemSet({
     this.dataSource,
-    this.command,
-  })  : _loadCommand = 'Load$command',
-        _putCommand = 'Load$command',
-        _removeCommand = 'Load$command';
+    this.loadCommand,
+    this.putCommand,
+    this.removeCommand,
+  });
 
   final MethodChannel dataSource;
-  final String command;
-  final String _loadCommand;
-  final String _putCommand;
-  final String _removeCommand;
+  final String loadCommand;
+  final String putCommand;
+  final String removeCommand;
 
   Map<int, T> itemMap = Map();
   List<T> itemList = [];
 
   T getItemFromId(int id) => itemMap[id];
 
-  List<T> loadItems() {
-    List<T> items;
-    dataSource.invokeMethod(_loadCommand).then((result) {
-      List<dynamic> resultJson = json.decode(result) as List;
-      items = resultJson.map((jsonString) {
-        T item = T.fromJson(jsonString);
-        itemMap[item.boxId] = item;
-        return item;
-      }).toList();
-    });
-    return items;
+  void addItemsFromBox(List<T> items) {
+    for (T item in items) {
+      itemList.add(item);
+      itemMap[item.boxId] = item;
+    }
+  }
+
+  void addItems(List<T> items) {
+    for (T item in items) {
+      addItem(item);
+    }
   }
 
   void addItem(T item) {
     itemList.add(item);
     dataSource
-        .invokeMethod(_putCommand, json.encode(item))
+        .invokeMethod(putCommand, json.encode(item))
         .then((id) {
       item.boxId = id;
       itemMap[id] = item;
@@ -71,11 +70,11 @@ class ItemSet<T extends  BaseItem> {
   }
 
   void changeItem(T item) {
-    dataSource.invokeMethod(_putCommand, json.encode(item));
+    dataSource.invokeMethod(putCommand, json.encode(item));
   }
 
   void removeItem(T item) {
-    dataSource.invokeMethod(_removeCommand, item.boxId.toString());
+    dataSource.invokeMethod(removeCommand, item.boxId.toString());
     itemMap.remove(item.boxId);
     itemList.remove(item);
   }

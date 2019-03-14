@@ -17,7 +17,7 @@ class PassingObject<T> {
   T newObject;
 }
 
-class BaseItem {
+abstract class BaseItem {
   int boxId = 0;
   int references = 0;
 //  bool systemPresets = false;
@@ -27,6 +27,10 @@ class BaseItem {
     this.boxId = 0,
     this.references = 0,
   });
+
+  factory BaseItem.itemFromJson(String type, Map<String, dynamic> json){
+    return PlaceItem.fromJson(json);
+  }
 
   bool get isReferences => references == 0;
   bool get isNotReferences => references > 0;
