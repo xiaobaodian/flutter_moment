@@ -10,7 +10,6 @@ import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/task/TaskItem.dart';
 
 class GlobalStore extends StatefulWidget {
-
   final Widget child;
   final CalendarMap calendarMap;
 
@@ -20,11 +19,66 @@ class GlobalStore extends StatefulWidget {
   });
 
   static GlobalStoreState of(BuildContext context) {
-    return (context.inheritFromWidgetOfExactType(_StoreInherited) as _StoreInherited).data;
+    return (context.inheritFromWidgetOfExactType(_StoreInherited)
+            as _StoreInherited)
+        .data;
   }
 
   @override
   GlobalStoreState createState() => GlobalStoreState();
+}
+
+class ItemSet<T extends  BaseItem> {
+  ItemSet({
+    this.dataSource,
+    this.command,
+  })  : _loadCommand = 'Load$command',
+        _putCommand = 'Load$command',
+        _removeCommand = 'Load$command';
+
+  final MethodChannel dataSource;
+  final String command;
+  final String _loadCommand;
+  final String _putCommand;
+  final String _removeCommand;
+
+  Map<int, T> itemMap = Map();
+  List<T> itemList = [];
+
+  T getItemFromId(int id) => itemMap[id];
+
+  List<T> loadItems() {
+    List<T> items;
+    dataSource.invokeMethod(_loadCommand).then((result) {
+      List<dynamic> resultJson = json.decode(result) as List;
+      items = resultJson.map((jsonString) {
+        T item = T.fromJson(jsonString);
+        itemMap[item.boxId] = item;
+        return item;
+      }).toList();
+    });
+    return items;
+  }
+
+  void addItem(T item) {
+    itemList.add(item);
+    dataSource
+        .invokeMethod(_putCommand, json.encode(item))
+        .then((id) {
+      item.boxId = id;
+      itemMap[id] = item;
+    });
+  }
+
+  void changeItem(T item) {
+    dataSource.invokeMethod(_putCommand, json.encode(item));
+  }
+
+  void removeItem(T item) {
+    dataSource.invokeMethod(_removeCommand, item.boxId.toString());
+    itemMap.remove(item.boxId);
+    itemList.remove(item);
+  }
 }
 
 class GlobalStoreState extends State<GlobalStore> {
@@ -34,10 +88,12 @@ class GlobalStoreState extends State<GlobalStore> {
   Map<int, FocusItem> _focusItemMap = Map<int, FocusItem>();
   Map<int, PersonItem> _personItemMap = Map<int, PersonItem>();
   Map<int, PlaceItem> _placeItemMap = Map<int, PlaceItem>();
+  Map<int, TagItem> _tagItemMap = Map<int, TagItem>();
   Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
   List<FocusItem> focusItemList;
   List<PersonItem> personItemList;
   List<PlaceItem> placeItemList;
+  List<TagItem> tagItemList;
   List<TaskItem> taskItemList;
 
   @override
@@ -45,7 +101,7 @@ class GlobalStoreState extends State<GlobalStore> {
     super.initState();
     debugPrint('GlobalStore 初始化...');
 
-    getLocalPath().then((path){
+    getLocalPath().then((path) {
       localDir = path;
     });
 
@@ -54,10 +110,9 @@ class GlobalStoreState extends State<GlobalStore> {
     loadPersonItems();
     loadPlaceItems();
     //loadDailyRecords();
-
   }
 
-  void loadTaskItems(){
+  void loadTaskItems() {
     _platformDataSource.invokeMethod('LoadTaskItems').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
       taskItemList = resultJson.map((item) {
@@ -69,7 +124,7 @@ class GlobalStoreState extends State<GlobalStore> {
     });
   }
 
-  void loadFocusItems(){
+  void loadFocusItems() {
     _platformDataSource.invokeMethod('LoadFocusItems').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
       focusItemList = resultJson.map((item) {
@@ -80,7 +135,7 @@ class GlobalStoreState extends State<GlobalStore> {
     });
   }
 
-  void loadPersonItems(){
+  void loadPersonItems() {
     _platformDataSource.invokeMethod('LoadPersonItems').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
       personItemList = resultJson.map((item) {
@@ -91,7 +146,7 @@ class GlobalStoreState extends State<GlobalStore> {
     });
   }
 
-  void loadPlaceItems(){
+  void loadPlaceItems() {
     _platformDataSource.invokeMethod('LoadPlaceItems').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
       placeItemList = resultJson.map((item) {
@@ -102,15 +157,15 @@ class GlobalStoreState extends State<GlobalStore> {
     });
   }
 
-  void loadDailyRecords(){
+  void loadDailyRecords() {
     _platformDataSource.invokeMethod('LoadDailyRecords').then((result) {
       List<dynamic> resultJson = json.decode(result) as List;
-      resultJson.forEach((item){
+      resultJson.forEach((item) {
         DailyRecord dailyRecord = DailyRecord.fromJson(item);
         int dayIndex = dailyRecord.dayIndex;
         calendarMap.everyDayIndex[dayIndex].dailyRecord = dailyRecord;
-        dailyRecord.focusEvents.forEach((event){
-          event.noteLines.forEach((line){
+        dailyRecord.focusEvents.forEach((event) {
+          event.noteLines.forEach((line) {
             if (line.type == RichType.Task) {
               int id = line.expandData;
               line.expandData = _taskItemMap[id];
@@ -146,7 +201,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void addFocusItem(FocusItem focus) {
     focusItemList.add(focus);
-    _platformDataSource.invokeMethod("PutFocusItem", json.encode(focus)).then((id) {
+    _platformDataSource
+        .invokeMethod("PutFocusItem", json.encode(focus))
+        .then((id) {
       print('新的焦点条目已加入，boxId: $id');
       focus.boxId = id;
       _focusItemMap[id] = focus;
@@ -169,7 +226,9 @@ class GlobalStoreState extends State<GlobalStore> {
   void addTaskItem(TaskItem task) {
     taskItemList.add(task);
     debugPrint('加入Task到Store列表中: ${task.title}');
-    _platformDataSource.invokeMethod("PutTaskItem", json.encode(task)).then((id) {
+    _platformDataSource
+        .invokeMethod("PutTaskItem", json.encode(task))
+        .then((id) {
       debugPrint('加入Task到数据库中: ${task.title}');
       task.boxId = id;
       _taskItemMap[id] = task;
@@ -200,7 +259,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
   int changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
     int s = 0;
-    focusEvent.noteLines.forEach((line){
+    focusEvent.noteLines.forEach((line) {
       if (line.type == RichType.Task) {
         TaskItem task = line.expandData;
         if (task.boxId == 0) {
@@ -246,7 +305,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void addPersonItem(PersonItem person) {
     personItemList.add(person);
-    _platformDataSource.invokeMethod("PutPersonItem", json.encode(person)).then((id) {
+    _platformDataSource
+        .invokeMethod("PutPersonItem", json.encode(person))
+        .then((id) {
       person.boxId = id;
       _personItemMap[id] = person;
     });
@@ -257,7 +318,8 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void removePersonItem(PersonItem person) {
-    _platformDataSource.invokeMethod("RemovePersonItem", person.boxId.toString());
+    _platformDataSource.invokeMethod(
+        "RemovePersonItem", person.boxId.toString());
     _personItemMap.remove(person.boxId);
     personItemList.remove(person);
   }
@@ -268,7 +330,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void addPlaceItem(PlaceItem place) {
     placeItemList.add(place);
-    _platformDataSource.invokeMethod("PutPlaceItem", json.encode(place)).then((id) {
+    _platformDataSource
+        .invokeMethod("PutPlaceItem", json.encode(place))
+        .then((id) {
       place.boxId = id;
       _placeItemMap[id] = place;
     });
@@ -284,9 +348,22 @@ class GlobalStoreState extends State<GlobalStore> {
     placeItemList.remove(place);
   }
 
+  // tag
+
+  TagItem getTagItemFromId(int id) => _tagItemMap[id];
+
+  void addTagItem(TagItem tag) {
+    tagItemList.add(tag);
+    _platformDataSource.invokeMethod("PutTagItem", json.encode(tag)).then((id) {
+      tag.boxId = id;
+      _tagItemMap[id] = tag;
+    });
+  }
+
   // DailyRecords
 
-  DailyRecord get selectedDailyRecord => calendarMap.getDailyRecordFromSelectedDay();
+  DailyRecord get selectedDailyRecord =>
+      calendarMap.getDailyRecordFromSelectedDay();
 
   DailyRecord getDailyRecord(int dayIndex) {
     return calendarMap.everyDayIndex[dayIndex].dailyRecord;
@@ -296,25 +373,30 @@ class GlobalStoreState extends State<GlobalStore> {
     return calendarMap.getDailyRecordFromIndex(task.createDate);
   }
 
-  void clearSelectedDayDailyRecord(){
+  void clearSelectedDayDailyRecord() {
     calendarMap.clearDailyRecordOfSelectedDay();
   }
 
-  void clearDailyRecordOfDayIndex(int dayIndex) => calendarMap.clearDailyRecordOfDayIndex(dayIndex);
+  void clearDailyRecordOfDayIndex(int dayIndex) =>
+      calendarMap.clearDailyRecordOfDayIndex(dayIndex);
 
   void putDailyRecord(DailyRecord dailyRecord) {
-    _platformDataSource.invokeMethod("PutDailyRecord", json.encode(dailyRecord)).then((id) {
+    _platformDataSource
+        .invokeMethod("PutDailyRecord", json.encode(dailyRecord))
+        .then((id) {
       dailyRecord.boxId = id;
     });
   }
 
   void changeDailyRecord(DailyRecord dailyRecord) {
-    _platformDataSource.invokeMethod("PutDailyRecord", json.encode(dailyRecord));
+    _platformDataSource.invokeMethod(
+        "PutDailyRecord", json.encode(dailyRecord));
   }
 
   void removeDailyRecord(DailyRecord dailyEvens) {
     // 删除DailyEvents数据
-    _platformDataSource.invokeMethod("RemoveDailyRecord", dailyEvens.boxId.toString());
+    _platformDataSource.invokeMethod(
+        "RemoveDailyRecord", dailyEvens.boxId.toString());
     //dailyEventsMap
   }
 
@@ -330,7 +412,8 @@ class GlobalStoreState extends State<GlobalStore> {
     }
   }
 
-  void addFocusEventToSelectedDay(FocusEvent focusEvent) { //, int focusItemBoxId
+  void addFocusEventToSelectedDay(FocusEvent focusEvent) {
+    //, int focusItemBoxId
     /// 获取FocusItem，引用增加一次，保存到数据库
     focusItemAddReferences(focusEvent.focusItemBoxId);
 
@@ -347,13 +430,13 @@ class GlobalStoreState extends State<GlobalStore> {
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
     focusEvent.extractingPersonList(personItemList);
     focusEvent.personKeys.forEach((key) => personItemAddReferences(key));
-    Future.delayed(Duration(milliseconds: r), (){
+    Future.delayed(Duration(milliseconds: r), () {
       putFocusEvent(focusEvent);
     });
   }
 
-
-  void changFocusEventForDailyEvent(FocusEvent focusEvent, int focusEventsIndex, DailyRecord dailyRecord) {
+  void changFocusEventForDailyEvent(
+      FocusEvent focusEvent, int focusEventsIndex, DailyRecord dailyRecord) {
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = dailyRecord.dayIndex;
 
@@ -367,7 +450,8 @@ class GlobalStoreState extends State<GlobalStore> {
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
   }
 
-  void changeFocusEventForDayIndex(FocusEvent focusEvent, int focusEventsIndex, int dayIndex) {
+  void changeFocusEventForDayIndex(
+      FocusEvent focusEvent, int focusEventsIndex, int dayIndex) {
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = dayIndex;
 
@@ -401,26 +485,28 @@ class GlobalStoreState extends State<GlobalStore> {
       }
 
       // 测试用
-      newKeys.forEach((key) => print('新增人物引用：${getPersonItemFromId(key).name}'));
-      oldFocus.personKeys.forEach((key) => print('减少人物引用：${getPersonItemFromId(key).name}'));
+      newKeys
+          .forEach((key) => print('新增人物引用：${getPersonItemFromId(key).name}'));
+      oldFocus.personKeys
+          .forEach((key) => print('减少人物引用：${getPersonItemFromId(key).name}'));
 
       newKeys.forEach((key) => personItemAddReferences(key));
       oldFocus.personKeys.forEach((key) => personItemMinusReferences(key));
     }
 
-    Future.delayed(Duration(milliseconds: r), (){
+    Future.delayed(Duration(milliseconds: r), () {
       changeFocusEvent(newFocus);
     });
   }
 
-
   void removeFocusEventAndTasks(FocusEvent focusEvent) {
     print('开始执行: removeFocusEventAndTasks');
+
     /// 获取FocusItem，引用减少一次
     focusItemMinusReferences(focusEvent.focusItemBoxId);
 
     /// 删除index位置focusEvent记录里面的TaskItem
-    focusEvent.noteLines.forEach((line){
+    focusEvent.noteLines.forEach((line) {
       if (line.expandData is TaskItem) {
         removeTaskItem(line.expandData);
       }
@@ -439,7 +525,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void putFocusEvent(FocusEvent focusEvent) {
     assert(focusEvent.boxId == 0);
-    _platformDataSource.invokeMethod("PutFocusEvent", json.encode(focusEvent)).then((id) {
+    _platformDataSource
+        .invokeMethod("PutFocusEvent", json.encode(focusEvent))
+        .then((id) {
       focusEvent.boxId = id;
     });
     var test = json.encode(focusEvent);
@@ -454,19 +542,20 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void removeFocusEvent(FocusEvent focusEvent) {
-    _platformDataSource.invokeMethod("RemoveFocusEvent", focusEvent.boxId.toString());
+    _platformDataSource.invokeMethod(
+        "RemoveFocusEvent", focusEvent.boxId.toString());
     var test = json.encode(focusEvent);
     debugPrint('remove Focus Event: $test');
   }
 
-  List<FocusEvent> getFocusEventsFromFocusItemId(int id){
+  List<FocusEvent> getFocusEventsFromFocusItemId(int id) {
     List<FocusEvent> focusEvents = [];
     var everyDay = calendarMap.everyDayIndex;
     for (int i = everyDay.length - 1; i > 0; i--) {
       var day = everyDay[i];
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
-        day.dailyRecord.focusEvents.forEach((event){
+        day.dailyRecord.focusEvents.forEach((event) {
           if (event.focusItemBoxId == id) {
             focusEvents.add(event);
           }
@@ -476,14 +565,14 @@ class GlobalStoreState extends State<GlobalStore> {
     return focusEvents;
   }
 
-  List<FocusEvent> getFocusEventsFromPersonItemId(int id){
+  List<FocusEvent> getFocusEventsFromPersonItemId(int id) {
     List<FocusEvent> focusEvents = [];
     var everyDay = calendarMap.everyDayIndex;
     for (int i = everyDay.length - 1; i > 0; i--) {
       var day = everyDay[i];
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
-        day.dailyRecord.focusEvents.forEach((event){
+        day.dailyRecord.focusEvents.forEach((event) {
           if (event.personKeys.indexOf(id) > -1) {
             focusEvents.add(event);
           }
@@ -493,9 +582,10 @@ class GlobalStoreState extends State<GlobalStore> {
     return focusEvents;
   }
 
-  FocusEvent getFocusEventFormDailyRecord(DailyRecord dailyRecord, int focusId) {
+  FocusEvent getFocusEventFormDailyRecord(
+      DailyRecord dailyRecord, int focusId) {
     FocusEvent focusEvent;
-    dailyRecord.focusEvents.forEach((event){
+    dailyRecord.focusEvents.forEach((event) {
       if (event.focusItemBoxId == focusId) {
         focusEvent = event;
       }
@@ -505,11 +595,12 @@ class GlobalStoreState extends State<GlobalStore> {
 
   FocusEvent getFocusEventFormTask(TaskItem task) {
     //FocusEvent focusEvent;
-    DailyRecord dailyRecord = calendarMap.getDailyRecordFromIndex(task.createDate);
-    FocusEvent focusEvent = getFocusEventFormDailyRecord(dailyRecord, task.focusItemId);
+    DailyRecord dailyRecord =
+        calendarMap.getDailyRecordFromIndex(task.createDate);
+    FocusEvent focusEvent =
+        getFocusEventFormDailyRecord(dailyRecord, task.focusItemId);
     return focusEvent;
   }
-
 
   // build & inherited
 
@@ -523,18 +614,16 @@ class GlobalStoreState extends State<GlobalStore> {
 }
 
 class _StoreInherited extends InheritedWidget {
-
   final GlobalStoreState data;
 
   _StoreInherited({
     Key key,
     @required this.data,
     @required Widget child,
-  }): super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) {
     return true;
   }
-
 }

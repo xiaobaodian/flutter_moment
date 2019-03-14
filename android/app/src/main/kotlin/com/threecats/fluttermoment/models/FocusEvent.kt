@@ -13,7 +13,9 @@ data class FocusEvent (
         var dayIndex: Int = 0,
         var focusItemBoxId: Long = 0,
         var note: String = "",
-        var personBoxIds: String = ""
+        var personBoxIds: String = "",
+        var placeBoxIds: String = "",
+        var tagBoxIds: String = ""
 ) {
     @Id
     var boxId: Long = 0

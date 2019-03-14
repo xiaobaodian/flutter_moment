@@ -39,9 +39,10 @@ class BaseItem {
     references--;
     if (references < 0) references = 0;
   }
+
 }
 
-class SystemBaseItem extends BaseItem {
+abstract class SystemBaseItem extends BaseItem {
   bool systemPresets = false;
   bool internal = false;
 
@@ -54,6 +55,7 @@ class SystemBaseItem extends BaseItem {
           boxId: boxId,
           references: references,
         );
+
 }
 
 // user.g.dart 将在我们运行生成命令后自动生成
@@ -148,29 +150,66 @@ class PlaceItem extends BaseItem with BuildImageMixin {
       picture = other.picture;
       setMixinImageSource(picture);
     }
+    boxId = other.boxId;
+    references = other.references;
   }
 
   factory PlaceItem.fromJson(Map<String, dynamic> json) {
     return PlaceItem(
-      boxId: json['boxId'],
       title: json['title'],
       address: json['address'],
       picture: json['picture'],
+      boxId: json['boxId'],
       references: json['references'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'boxId': boxId,
         'title': title,
         'address': address,
         'picture': picture,
+        'boxId': boxId,
         'references': references,
       };
 }
 
 ///
-/// gender: 0->Female, 1->Male, 2->None
+/// TagItem 定义
+///
+class TagItem extends BaseItem {
+  String title;
+
+  TagItem({
+    this.title = '',
+    boxId = 0,
+    references = 0,
+  }) : super(boxId: boxId, references: references);
+
+  bool hasTitle() => title.isNotEmpty;
+
+  void copyWith(TagItem other) {
+    title = other.title;
+    boxId = other.boxId;
+    references = other.references;
+  }
+
+  factory TagItem.fromJson(Map<String, dynamic> json) {
+    return TagItem(
+      title: json['title'],
+      boxId: json['boxId'],
+      references: json['references'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'boxId': boxId,
+    'references': references,
+  };
+}
+
+///
+/// [gender]数值: 0->Female, 1->Male, 2->None
 ///
 class PersonItem extends BaseItem
     with
@@ -227,6 +266,8 @@ class PersonItem extends BaseItem
     if (mixinImage != other.mixinImage) {
       setMixinImageSource(other.mixinImage);
     }
+    boxId = other.boxId;
+    references = other.references;
   }
 
   factory PersonItem.fromJson(Map<String, dynamic> json) {
@@ -242,11 +283,11 @@ class PersonItem extends BaseItem
 
   //
   Map<String, dynamic> toJson() => {
-        'boxId': boxId,
         'name': name,
         'photo': mixinImage,
         'gender': gender,
         'birthday': hasBirthday() ? birthday.toIso8601String() : '',
+        'boxId': boxId,
         'references': references,
       };
 }
@@ -310,24 +351,61 @@ class DailyRecord {
       });
       richLines.addAll(event.noteLines);
 
-      if (hasRelated && event.personKeys.length > 0) {
-        print('加入人物引用');
-        String text;
-        //List<Widget> widgets = [];
-        for (int i = 0; i < event.personKeys.length; i++) {
-          if (i == 0) {
-            text = store.getPersonItemFromId(event.personKeys[i]).name;
-          } else {
-            text = text +
-                "、${store.getPersonItemFromId(event.personKeys[i]).name}";
+      if (hasRelated) {
+        if (event.personKeys.length > 0) {
+          print('加入人物引用');
+          String text;
+          for (int i = 0; i < event.personKeys.length; i++) {
+            if (i == 0) {
+              text = store.getPersonItemFromId(event.personKeys[i]).name;
+            } else {
+              text = text +
+                  "、${store.getPersonItemFromId(event.personKeys[i]).name}";
+            }
           }
+          richLines.add(RichLine(
+            type: RichType.Related,
+            indent: 0,
+            content: text,
+            note: event,
+          ));
         }
-
-        richLines.add(RichLine(
-          type: RichType.Related,
-          content: text,
-          note: event,
-        ));
+        if (event.placeKeys.length > 0) {
+          print('加入地点引用');
+          String text;
+          for (int i = 0; i < event.placeKeys.length; i++) {
+            if (i == 0) {
+              text = store.getPlaceItemFromId(event.placeKeys[i]).title;
+            } else {
+              text = text +
+                  "、${store.getPlaceItemFromId(event.placeKeys[i]).title}";
+            }
+          }
+          richLines.add(RichLine(
+            type: RichType.Related,
+            indent: 1,
+            content: text,
+            note: event,
+          ));
+        }
+        if (event.tagKeys.length > 0) {
+          print('加入标签引用');
+          String text;
+          for (int i = 0; i < event.tagKeys.length; i++) {
+            if (i == 0) {
+              text = store.getPlaceItemFromId(event.tagKeys[i]).title;
+            } else {
+              text = text +
+                  "、${store.getPlaceItemFromId(event.tagKeys[i]).title}";
+            }
+          }
+          richLines.add(RichLine(
+            type: RichType.Related,
+            indent: 1,
+            content: text,
+            note: event,
+          ));
+        }
       }
     });
   }
@@ -355,9 +433,13 @@ class FocusEvent {
     this.focusItemBoxId = -1,
     String note = '',
     String personBoxIds,
+    String placeBoxIds,
+    String tagBoxIds,
   }) {
     noteLines = RichSource.getRichLinesFromJson(note);
     personKeys = StringExt.stringToListInt(personBoxIds);
+    placeKeys = StringExt.stringToListInt(placeBoxIds);
+    tagKeys = StringExt.stringToListInt(tagBoxIds);
   }
 
   int boxId;
@@ -365,8 +447,15 @@ class FocusEvent {
   int focusItemBoxId;
   List<RichLine> noteLines;
 
-  /// [persons]在内容[noteLines]里面提及的相关人员
+  /// [personKeys]在内容[noteLines]里面提及相关人员的boxId
   List<int> personKeys;
+
+  /// [placeKeys]在内容[noteLines]里面提及相关地点的boxId
+  List<int> placeKeys;
+
+  /// [tagKeys]在内容[noteLines]里面提及相关标签的boxId
+  List<int> tagKeys;
+
 
   void extractingPersonList(List<PersonItem> personList) {
     personKeys.clear();
@@ -388,6 +477,8 @@ class FocusEvent {
     focusItemBoxId = other.focusItemBoxId;
     noteLines = other.noteLines;
     personKeys = other.personKeys.sublist(0);
+    placeKeys = other.placeKeys.sublist(0);
+    tagKeys = other.tagKeys.sublist(0);
     //note = other.note;
   }
 
@@ -398,16 +489,20 @@ class FocusEvent {
       focusItemBoxId: json['focusItemBoxId'],
       note: json['note'],
       personBoxIds: json['personBoxIds'],
+      placeBoxIds: json['placeBoxIds'],
+      tagBoxIds: json['tagBoxIds'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'boxId': boxId,
-        'dayIndex': dayIndex,
-        'focusItemBoxId': focusItemBoxId,
-        'note': RichSource.getJsonFromRichLine(noteLines),
-        'personBoxIds': StringExt.listIntToString(personKeys),
-      };
+    'boxId': boxId,
+    'dayIndex': dayIndex,
+    'focusItemBoxId': focusItemBoxId,
+    'note': RichSource.getJsonFromRichLine(noteLines),
+    'personBoxIds': StringExt.listIntToString(personKeys),
+    'placeBoxIds': StringExt.listIntToString(placeKeys),
+    'tagBoxIds': StringExt.listIntToString(tagKeys),
+  };
 }
 
 mixin DetailsListMixin<T> {
