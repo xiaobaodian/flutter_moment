@@ -228,13 +228,13 @@ class RichNoteState extends State<RichNote> {
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutList(
             item.indent,
-            Text(item.leading, style: effectiveSytle),
+            Text(item.leading, style: effectiveSytle.merge(TextStyle(color: Colors.black54))),
             _buildTextField(index, effectiveSytle),
           );
         } else {
           paragraphWidget = layout.richLayoutList(
               item.indent,
-              Text(item.leading, style: effectiveSytle),
+              Text(item.leading, style: effectiveSytle.merge(TextStyle(color: Colors.black54))),
               Text(item.getContent(), style: effectiveSytle));
         }
         break;

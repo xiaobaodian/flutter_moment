@@ -213,14 +213,13 @@ class GlobalStoreState extends State<GlobalStore> {
         }
       } else {
         if (line.expandData != null) {
-          if (line.expandData is int) {
-            line.expandData = _taskItemMap[line.expandData];
-            assert(line.expandData != null);
-          }
-          TaskItem task = line.expandData;
-          if (task.boxId > 0) {
-            removeTaskItem(task);
-            print('批处理FocusEvent包含的任务，删除了Task：${task.title}');
+          var task = line.expandData;
+          if (task is TaskItem) {
+            //TaskItem task = line.expandData;
+            if (task.boxId > 0) {
+              removeTaskItem(task);
+              print('批处理FocusEvent包含的任务，删除了Task：${task.title}');
+            }
           }
           line.expandData = null;
         }

@@ -112,6 +112,8 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
                     print('person name is change');
                     for (var event in widget._personItem.detailsList) {
                       for (var line in event.noteLines) {
+                        print('line content: ${line.getContent()}');
+                        if (line.type == RichType.Task) print('line is task type');
                         String dec = line.getContent().replaceAll(oldName, newName);
                         line.setContent(dec);
                       }
