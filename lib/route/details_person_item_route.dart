@@ -106,6 +106,18 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
                 return EditerPersonItemRoute(widget._personItem);
               })).then((resultItem){
                 if (resultItem is PersonItem) {
+                  String oldName = widget._personItem.name;
+                  String newName = resultItem.name;
+                  if (oldName != newName) {
+                    print('person name is change');
+                    for (var event in widget._personItem.detailsList) {
+                      for (var line in event.noteLines) {
+                        String dec = line.getContent().replaceAll(oldName, newName);
+                        line.setContent(dec);
+                      }
+                      _store.changeFocusEventAndTasks(PassingObject(newObject: event));
+                    }
+                  }
                   widget._personItem.copyWith(resultItem);
                   _store.changePersonItem(widget._personItem);
                   //_platformDataSource.invokeMethod("PutPersonItem", json.encode(widget._personItem));

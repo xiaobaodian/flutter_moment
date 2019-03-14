@@ -213,6 +213,10 @@ class GlobalStoreState extends State<GlobalStore> {
         }
       } else {
         if (line.expandData != null) {
+          if (line.expandData is int) {
+            line.expandData = _taskItemMap[line.expandData];
+            assert(line.expandData != null);
+          }
           TaskItem task = line.expandData;
           if (task.boxId > 0) {
             removeTaskItem(task);
@@ -317,6 +321,16 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // FocusEvent
 
+  void loadTasksForFocusEvent(FocusEvent event) {
+    for (var line in event.noteLines) {
+      if (line.type == RichType.Task && line.expandData is int) {
+        int id = line.expandData;
+        line.expandData = _taskItemMap[id];
+        assert(line.expandData != null);
+      }
+    }
+  }
+
   void addFocusEventToSelectedDay(FocusEvent focusEvent) { //, int focusItemBoxId
     /// 获取FocusItem，引用增加一次，保存到数据库
     focusItemAddReferences(focusEvent.focusItemBoxId);
@@ -373,25 +387,27 @@ class GlobalStoreState extends State<GlobalStore> {
     FocusEvent oldFocus = passingObject.oldObject;
 
     int r = changeTaskItemFromFocusEvent(newFocus) * 100;
-    newFocus.extractingPersonList(personItemList);
 
-    // 下面比较人物的引用
-    List<int> newKeys = [];
-    for (var personKey in newFocus.personKeys) {
-      int keyIndex = oldFocus.personKeys.indexOf(personKey);
-      if (keyIndex == -1) {
-        newKeys.add(personKey);
-      } else {
-        oldFocus.personKeys.removeAt(keyIndex);
+    if (oldFocus != null) {
+      newFocus.extractingPersonList(personItemList);
+      // 下面比较人物的引用
+      List<int> newKeys = [];
+      for (var personKey in newFocus.personKeys) {
+        int keyIndex = oldFocus.personKeys.indexOf(personKey);
+        if (keyIndex == -1) {
+          newKeys.add(personKey);
+        } else {
+          oldFocus.personKeys.removeAt(keyIndex);
+        }
       }
+
+      // 测试用
+      newKeys.forEach((key) => print('新增人物引用：${getPersonItemFromId(key).name}'));
+      oldFocus.personKeys.forEach((key) => print('减少人物引用：${getPersonItemFromId(key).name}'));
+
+      newKeys.forEach((key) => personItemAddReferences(key));
+      oldFocus.personKeys.forEach((key) => personItemMinusReferences(key));
     }
-
-    // 测试用
-    newKeys.forEach((key) => print('新增人物引用：${getPersonItemFromId(key).name}'));
-    oldFocus.personKeys.forEach((key) => print('减少人物引用：${getPersonItemFromId(key).name}'));
-
-    newKeys.forEach((key) => personItemAddReferences(key));
-    oldFocus.personKeys.forEach((key) => personItemMinusReferences(key));
 
     Future.delayed(Duration(milliseconds: r), (){
       changeFocusEvent(newFocus);
@@ -450,6 +466,7 @@ class GlobalStoreState extends State<GlobalStore> {
     for (int i = everyDay.length - 1; i > 0; i--) {
       var day = everyDay[i];
       if (day.dailyRecord != null) {
+        day.dailyRecord.initRichList(this, true);
         day.dailyRecord.focusEvents.forEach((event){
           if (event.focusItemBoxId == id) {
             focusEvents.add(event);
@@ -466,6 +483,7 @@ class GlobalStoreState extends State<GlobalStore> {
     for (int i = everyDay.length - 1; i > 0; i--) {
       var day = everyDay[i];
       if (day.dailyRecord != null) {
+        day.dailyRecord.initRichList(this, true);
         day.dailyRecord.focusEvents.forEach((event){
           if (event.personKeys.indexOf(id) > -1) {
             focusEvents.add(event);

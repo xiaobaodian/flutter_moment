@@ -30,18 +30,19 @@ class EditerPersonItemRoute extends StatefulWidget {
 class EditerPersonItemRouteState extends State<EditerPersonItemRoute> {
   final _nameController = TextEditingController();
   final _focusNode = FocusNode();
-  PersonItem _editerPerson;
+  PersonItem _editerPerson = PersonItem();
 
   @override
   void initState() {
     super.initState();
     _nameController.text = widget._personItem.name;
-    _editerPerson = PersonItem(
-      name: widget._personItem.name,
-      gender: widget._personItem.gender,
-      birthday: widget._personItem.birthday,
-      photo: widget._personItem.photo,
-    );
+    _editerPerson.copyWith(widget._personItem);
+//    _editerPerson = PersonItem(
+//      name: widget._personItem.name,
+//      gender: widget._personItem.gender,
+//      birthday: widget._personItem.birthday,
+//      photo: widget._personItem.photo,
+//    );
   }
 
   @override

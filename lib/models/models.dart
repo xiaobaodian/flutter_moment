@@ -220,6 +220,7 @@ class PersonItem extends BaseItem
   void copyWith(PersonItem other) {
     name = other.name;
     gender = other.gender;
+    //birthday = DateTime(other.birthday.year, other.birthday.month, other.birthday.day);
     birthday = other.birthday;
     height = other.height;
     weight = other.weight;
@@ -277,6 +278,15 @@ class DailyRecord {
   bool get isNull {
     if (focusEvents == null) focusEvents = [];
     return weather.isEmpty && focusEvents.length == 0;
+  }
+
+  void initRichList(GlobalStoreState store, bool hasRelated) {
+    if (richLines == null) {
+      richLines = List<RichLine>();
+    }
+    if (richLines.isEmpty) {
+      buildRichList(store, hasRelated);
+    }
   }
 
   void buildRichList(GlobalStoreState store, bool hasRelated) {
@@ -353,7 +363,6 @@ class FocusEvent {
   int boxId;
   int dayIndex;
   int focusItemBoxId;
-  //String note;
   List<RichLine> noteLines;
 
   /// [persons]在内容[noteLines]里面提及的相关人员
