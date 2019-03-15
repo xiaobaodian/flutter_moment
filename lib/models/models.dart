@@ -123,7 +123,9 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
 }
 
 ///
-/// PlaceItem 定义
+/// [PlaceItem] “位置”的class定义，需要用到数据库和引用计数，所以扩展自[BoxItem]
+///
+/// “位置”有图片数据处理，所以混入了[BuildImageMixin]
 ///
 class PlaceItem extends BoxItem with BuildImageMixin {
   String title;
@@ -187,7 +189,7 @@ class PlaceItem extends BoxItem with BuildImageMixin {
 }
 
 ///
-/// TagItem 定义
+/// [TagItem] 标签项的class定义，需要用到数据库和引用计数，所以扩展自[BoxItem]
 ///
 class TagItem extends BoxItem {
   String title;
@@ -221,6 +223,8 @@ class TagItem extends BoxItem {
   };
 }
 
+///
+/// [PersonItem] 人物对象的class定义，需要用到数据库和引用计数，所以扩展自[BoxItem]
 ///
 /// [gender]数值: 0->Female, 1->Male, 2->None
 ///
