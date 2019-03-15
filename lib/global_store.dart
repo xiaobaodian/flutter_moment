@@ -28,12 +28,12 @@ class GlobalStore extends StatefulWidget {
   GlobalStoreState createState() => GlobalStoreState();
 }
 
-class ItemSet<T extends  BaseItem> {
+class ItemSet<T extends  BoxItem> {
   ItemSet({
-    this.dataSource,
-    this.loadCommand,
-    this.putCommand,
-    this.removeCommand,
+    @required this.dataSource,
+    @required this.loadCommand,
+    @required this.putCommand,
+    @required this.removeCommand,
   });
 
   final MethodChannel dataSource;
@@ -46,7 +46,18 @@ class ItemSet<T extends  BaseItem> {
 
   T getItemFromId(int id) => itemMap[id];
 
-  void addItemsFromBox(List<T> items) {
+  void loadItemsFromDataSource() {
+    dataSource.invokeMethod(loadCommand).then((result) {
+      List<dynamic> resultJson = json.decode(result) as List;
+      itemList = resultJson.map((jsonString) {
+        T item = BoxItem.itemFromJson(T, jsonString);
+        itemMap[item.boxId] = item;
+        return item;
+      }).toList();
+    });
+  }
+
+  void addItemsFromList(List<T> items) {
     for (T item in items) {
       itemList.add(item);
       itemMap[item.boxId] = item;
@@ -78,20 +89,60 @@ class ItemSet<T extends  BaseItem> {
     itemMap.remove(item.boxId);
     itemList.remove(item);
   }
+
+  int addReferences(T item) {
+    item.addReferences();
+    changeItem(item);
+    return item.references;
+  }
+
+  int minusReferences(T item) {
+    item.minusReferences();
+    changeItem(item);
+    return item.references;
+  }
+
+  void changeItemByBoxId(int id) {
+    T item = itemMap[id];
+    if (item != null) {
+      changeItem(item);
+    }
+  }
+
+  void removeItemByBoxId(int id) {
+    T item = itemMap[id];
+    if (item != null) {
+      removeItem(item);
+    }
+  }
 }
 
 class GlobalStoreState extends State<GlobalStore> {
   static const _platformDataSource = const MethodChannel('DataSource');
   String localDir;
   CalendarMap calendarMap = CalendarMap();
+
+  ItemSet<TagItem> tagSet = ItemSet(
+    dataSource: _platformDataSource,
+    loadCommand: 'LoadTagItems',
+    putCommand: 'PutTagItem',
+    removeCommand: 'RemoveTagItem',
+  );
+  ItemSet<PlaceItem> placeSet = ItemSet(
+    dataSource: _platformDataSource,
+    loadCommand: 'LoadPlaceItems',
+    putCommand: 'PutPlaceItem',
+    removeCommand: 'RemovePlaceItem',
+  );
+
   Map<int, FocusItem> _focusItemMap = Map<int, FocusItem>();
   Map<int, PersonItem> _personItemMap = Map<int, PersonItem>();
-  Map<int, PlaceItem> _placeItemMap = Map<int, PlaceItem>();
+  //Map<int, PlaceItem> _placeItemMap = Map<int, PlaceItem>();
   Map<int, TagItem> _tagItemMap = Map<int, TagItem>();
   Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
   List<FocusItem> focusItemList;
   List<PersonItem> personItemList;
-  List<PlaceItem> placeItemList;
+  //List<PlaceItem> placeItemList;
   List<TagItem> tagItemList;
   List<TaskItem> taskItemList;
 
@@ -107,7 +158,8 @@ class GlobalStoreState extends State<GlobalStore> {
     loadTaskItems();
     loadFocusItems();
     loadPersonItems();
-    loadPlaceItems();
+    placeSet.loadItemsFromDataSource();
+    //loadPlaceItems();
     //loadDailyRecords();
   }
 
@@ -145,16 +197,16 @@ class GlobalStoreState extends State<GlobalStore> {
     });
   }
 
-  void loadPlaceItems() {
-    _platformDataSource.invokeMethod('LoadPlaceItems').then((result) {
-      List<dynamic> resultJson = json.decode(result) as List;
-      placeItemList = resultJson.map((item) {
-        PlaceItem place = PlaceItem.fromJson(item);
-        _placeItemMap[place.boxId] = place;
-        return place;
-      }).toList();
-    });
-  }
+//  void loadPlaceItems() {
+//    _platformDataSource.invokeMethod('LoadPlaceItems').then((result) {
+//      List<dynamic> resultJson = json.decode(result) as List;
+//      placeItemList = resultJson.map((item) {
+//        PlaceItem place = PlaceItem.fromJson(item);
+//        _placeItemMap[place.boxId] = place;
+//        return place;
+//      }).toList();
+//    });
+//  }
 
   void loadDailyRecords() {
     _platformDataSource.invokeMethod('LoadDailyRecords').then((result) {
@@ -325,27 +377,27 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // place
 
-  PlaceItem getPlaceItemFromId(int id) => _placeItemMap[id];
+//  PlaceItem getPlaceItemFromId(int id) => _placeItemMap[id];
+//
+//  void addPlaceItem(PlaceItem place) {
+//    placeItemList.add(place);
+//    _platformDataSource
+//        .invokeMethod("PutPlaceItem", json.encode(place))
+//        .then((id) {
+//      place.boxId = id;
+//      _placeItemMap[id] = place;
+//    });
+//  }
 
-  void addPlaceItem(PlaceItem place) {
-    placeItemList.add(place);
-    _platformDataSource
-        .invokeMethod("PutPlaceItem", json.encode(place))
-        .then((id) {
-      place.boxId = id;
-      _placeItemMap[id] = place;
-    });
-  }
+//  void changePlaceItem(PlaceItem place) {
+//    _platformDataSource.invokeMethod("PutPlaceItem", json.encode(place));
+//  }
 
-  void changePlaceItem(PlaceItem place) {
-    _platformDataSource.invokeMethod("PutPlaceItem", json.encode(place));
-  }
-
-  void removePlaceItem(PlaceItem place) {
-    _platformDataSource.invokeMethod("RemovePlaceItem", place.boxId.toString());
-    _placeItemMap.remove(place.boxId);
-    placeItemList.remove(place);
-  }
+//  void removePlaceItem(PlaceItem place) {
+//    _platformDataSource.invokeMethod("RemovePlaceItem", place.boxId.toString());
+//    _placeItemMap.remove(place.boxId);
+//    placeItemList.remove(place);
+//  }
 
   // tag
 
@@ -428,6 +480,7 @@ class GlobalStoreState extends State<GlobalStore> {
     }
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
     focusEvent.extractingPersonList(personItemList);
+    focusEvent.extractingPlaceList(placeSet.itemList);
     focusEvent.personKeys.forEach((key) => personItemAddReferences(key));
     Future.delayed(Duration(milliseconds: r), () {
       putFocusEvent(focusEvent);

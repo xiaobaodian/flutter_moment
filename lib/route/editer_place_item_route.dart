@@ -16,12 +16,14 @@ class EditerPlaceItemRouteState extends State<EditerPlaceItemRoute> {
   final titleController = TextEditingController();
   final addressController = TextEditingController();
   final addressNode = FocusNode();
+  PlaceItem newPlace = PlaceItem();
 
   @override
   void initState() {
     super.initState();
     titleController.text = widget._placeItem.title;
     addressController.text = widget._placeItem.address;
+    newPlace.copyWith(widget._placeItem);
   }
 
   @override
@@ -47,10 +49,9 @@ class EditerPlaceItemRouteState extends State<EditerPlaceItemRoute> {
             icon: Icon(Icons.save),
             onPressed: (){
               if (titleController.text.length > 0) {
-                Navigator.of(context).pop(PlaceItem(
-                  title: titleController.text,
-                  address: addressController.text,
-                ));
+                newPlace.title = titleController.text;
+                newPlace.address = addressController.text;
+                Navigator.of(context).pop(newPlace);
               } else {
                 Navigator.of(context).pop(null);
               }

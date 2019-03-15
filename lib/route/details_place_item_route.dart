@@ -70,7 +70,8 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
         }
     ).then((result) {
       if (result != null) {
-        _store.removePlaceItem(widget._placeItem);
+        //_store.removePlaceItem(widget._placeItem);
+        _store.placeSet.removeItem(widget._placeItem);
         Navigator.of(context).pop();
       }
     });

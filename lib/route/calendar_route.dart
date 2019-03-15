@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_moment/calendar_map.dart';
 import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/global_store.dart';
+import 'package:flutter_moment/models/models.dart';
 
 class CalendarRoute extends StatefulWidget {
-
   @override
   CalendarRouteState createState() => CalendarRouteState();
-
 }
 
 class CalendarRouteState extends State<CalendarRoute> {
@@ -35,7 +34,6 @@ class CalendarRouteState extends State<CalendarRoute> {
 //    CalendarState.currentYear = this.today.year;
 //    CalendarState.firstItemYear = this.today.year;
 //    calendarTitle = ('${CalendarState.currentYear}年');
-
   }
 
   @override
@@ -47,7 +45,7 @@ class CalendarRouteState extends State<CalendarRoute> {
     _controller = ScrollController(
       initialScrollOffset: calendarMap.selectedDayOffset,
     );
-    _controller.addListener((){
+    _controller.addListener(() {
       if (CalendarRouteState.currentYear != 0) {
         setCalendarTitle();
       }
@@ -55,7 +53,7 @@ class CalendarRouteState extends State<CalendarRoute> {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _controller.dispose();
     super.dispose();
   }
@@ -65,8 +63,8 @@ class CalendarRouteState extends State<CalendarRoute> {
       setState(() {
         calendarTitle = ('$year年');
       });
-
-    } else if (CalendarRouteState.currentYear != CalendarRouteState.firstItemYear){
+    } else if (CalendarRouteState.currentYear !=
+        CalendarRouteState.firstItemYear) {
       CalendarRouteState.currentYear = CalendarRouteState.firstItemYear;
       setState(() {
         calendarTitle = ('${CalendarRouteState.currentYear}年');
@@ -76,41 +74,38 @@ class CalendarRouteState extends State<CalendarRoute> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
-          title: Text(calendarTitle),
-          bottom: getMonthWeekTitle(),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.today),
-              // 返回当前日期，需要设置CalendarState.currentYear = 0，这样在_controller.addListener和
-              // CalendarChildDelegate获取屏幕第一条item时就暂停处理，不然会因为动画延时导致年份显示不正确。
-              // 然后通过延时（这样贴合动态效果）直接设置年份标题为当前，并将设置CalendarState.currentYear
-              // 恢复为当前年份，_controller.addListener和CalendarChildDelegate就在执行中恢复了正常处理
-              onPressed: (){
-                CalendarRouteState.firstItemYear = 0;
-                CalendarRouteState.currentYear = 0;
-                _controller.animateTo(
-                  calendarMap.todayOffset,
-                  duration: Duration(milliseconds: 150),
-                  curve: Curves.easeIn
-                );
-                Future.delayed(const Duration(milliseconds: 250), () {
-                  setCalendarTitle(year: today.year);
-                  CalendarRouteState.currentYear = today.year;
-                  CalendarRouteState.firstItemYear = today.year;
-                });
-              },
-            ),
-          ],
+        title: Text(calendarTitle),
+        bottom: getMonthWeekTitle(),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.today),
+            // 返回当前日期，需要设置CalendarState.currentYear = 0，这样在_controller.addListener和
+            // CalendarChildDelegate获取屏幕第一条item时就暂停处理，不然会因为动画延时导致年份显示不正确。
+            // 然后通过延时（这样贴合动态效果）直接设置年份标题为当前，并将设置CalendarState.currentYear
+            // 恢复为当前年份，_controller.addListener和CalendarChildDelegate就在执行中恢复了正常处理
+            onPressed: () {
+              CalendarRouteState.firstItemYear = 0;
+              CalendarRouteState.currentYear = 0;
+              _controller.animateTo(calendarMap.todayOffset,
+                  duration: Duration(milliseconds: 150), curve: Curves.easeIn);
+              Future.delayed(const Duration(milliseconds: 250), () {
+                setCalendarTitle(year: today.year);
+                CalendarRouteState.currentYear = today.year;
+                CalendarRouteState.firstItemYear = today.year;
+              });
+            },
+          ),
+        ],
       ),
       body: ListView.custom(
         controller: _controller,
         cacheExtent: 0.0,
-        itemExtent:  calendarMap.monthBoxCellHeight,// CalendarState.monthBoxCellHeight,
+        itemExtent:
+            calendarMap.monthBoxCellHeight, // CalendarState.monthBoxCellHeight,
         childrenDelegate: CalendarChildDelegate(
-          (context, index){
+          (context, index) {
             return getWeekLineTable(calendarMap.everyWeekIndex[index]);
           },
           childCount: calendarMap.weeksTotal,
@@ -141,20 +136,17 @@ class CalendarRouteState extends State<CalendarRoute> {
 
   List<Widget> _getWeekTitleWidgets() {
     List<Widget> widgets = [];
-    const titles = ['一','二','三','四','五','六','日'];
+    const titles = ['一', '二', '三', '四', '五', '六', '日'];
     for (int i = 0; i < titles.length; i++) {
-      widgets.add(
-          SizedBox(
-            width: 24,
-            height: 16,
-            child: Text(titles[i],
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: i < 5 ? Colors.white : Colors.white70
-              ),
-            ),
-          )
-      );
+      widgets.add(SizedBox(
+        width: 24,
+        height: 16,
+        child: Text(
+          titles[i],
+          textAlign: TextAlign.center,
+          style: TextStyle(color: i < 5 ? Colors.white : Colors.white70),
+        ),
+      ));
     }
     return widgets;
   }
@@ -185,34 +177,29 @@ class CalendarRouteState extends State<CalendarRoute> {
       var monthTitle = List<Widget>();
       for (int i = 1; i < 8; i++) {
         if (i == dateExt.firstWeekDayOfMonth) {
-          monthTitle.add(
-              SizedBox(
-                width: calendarCellWidth,
-                height: calendarMap.monthBoxTitleHeight,
-                child: Container(
-                  //color: Colors.blue,
-                  alignment: Alignment.bottomCenter,
-                  child: Text('${weekIndex.month}月',
-                    style: Theme.of(context).textTheme.subhead,
-                  ),
-                ),
-              )
-          );
+          monthTitle.add(SizedBox(
+            width: calendarCellWidth,
+            height: calendarMap.monthBoxTitleHeight,
+            child: Container(
+              //color: Colors.blue,
+              alignment: Alignment.bottomCenter,
+              child: Text(
+                '${weekIndex.month}月',
+                style: Theme.of(context).textTheme.subhead,
+              ),
+            ),
+          ));
         } else {
           monthTitle.add(Text(''));
         }
       }
-      rows.add(
-          TableRow(
-            children: monthTitle,
-          )
-      );
+      rows.add(TableRow(
+        children: monthTitle,
+      ));
     } else {
-      rows.add(
-          TableRow(
-            children: getWeekOfMonth(dateExt, weekIndex.weeks),
-          )
-      );
+      rows.add(TableRow(
+        children: getWeekOfMonth(dateExt, weekIndex.weeks),
+      ));
     }
     return rows;
   }
@@ -220,7 +207,7 @@ class CalendarRouteState extends State<CalendarRoute> {
   List<Widget> getWeekOfMonth(DateTimeExt datetime, int weekIndex) {
     var days = datetime.getDaysOfWeek(weekIndex);
     var weekDaysWidget = List<Widget>();
-    days.forEach((day){
+    days.forEach((day) {
       weekDaysWidget.add(getDayCell(day));
     });
     return weekDaysWidget;
@@ -231,41 +218,72 @@ class CalendarRouteState extends State<CalendarRoute> {
       return Text('');
     }
 
-    Widget dayWidget;
+    List<Widget> widgets = [];
+    ThemeData themeData = Theme.of(context);
+
+    if (calendarMap.isSelectedDate(date)) {
+      widgets.add(CircleAvatar(
+        backgroundColor: Colors.black12,
+      ));
+    }
+
     if (calendarMap.isToday(date)) {
-      dayWidget = Text(date.day.toString(),
+      widgets.add(Text(
+        date.day.toString(),
         style: TextStyle(
-          color: Theme.of(context).primaryColor,
+          color: themeData.primaryColor,
           fontWeight: FontWeight.bold,
         ),
-      );
-    } else if (calendarMap.isSelectedDate(date)) {
-      dayWidget = CircleAvatar(
-        backgroundColor: Colors.black12,
-        child: Text(date.day.toString(),style: TextStyle(color: Colors.black),),
-      );
-    } else {
-      dayWidget = Text(date.day.toString(),
-        style: TextStyle(
-          color: date.weekday < 6 ? Colors.black : Colors.black54
+      ));
+      widgets.add(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 25, 0, 0),
+        child: Text(
+          '今天',
+          style: TextStyle(
+            color: themeData.primaryColor,
+            fontSize: 9,
+          ),
         ),
-      );
+      ));
+    } else {
+      widgets.add(Text(
+        date.day.toString(),
+        style:
+            TextStyle(color: date.weekday < 6 ? Colors.black : Colors.black54),
+      ));
     }
-    return dayWidget;
+
+    if (calendarMap.hasDailyRecord(date)) {
+      widgets.add(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 25),
+        child: CircleAvatar(
+          backgroundColor: Colors.black12,  //themeData.primaryColor
+          radius: 3,
+        ),
+      ));
+    }
+
+    return SizedBox(
+      height: calendarCellWidth,
+      width: calendarCellWidth,
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: widgets,
+      ),
+    );
   }
 
   Widget getDayCell(DateTime day) {
     return InkWell(
       child: SizedBox(
-        width: calendarCellWidth,
-        height: calendarMap.monthBoxCellHeight,
-        child: Container(
-          padding: EdgeInsets.all(3),
-          alignment: Alignment.center,
-          child: getDayWidget(day),
-        )
-      ),
-      onTap: (){
+          width: calendarCellWidth,
+          height: calendarMap.monthBoxCellHeight,
+          child: Container(
+            padding: EdgeInsets.all(3),
+            alignment: Alignment.center,
+            child: getDayWidget(day),
+          )),
+      onTap: () {
         Navigator.pop(context, day);
       },
     );
@@ -280,8 +298,7 @@ class DateIndex {
   }
 }
 
-class CalendarChildDelegate extends SliverChildBuilderDelegate{
-
+class CalendarChildDelegate extends SliverChildBuilderDelegate {
   CalendarMap calendarMap;
 
   CalendarChildDelegate(
@@ -291,13 +308,11 @@ class CalendarChildDelegate extends SliverChildBuilderDelegate{
     bool addRepaintBoundaries = true,
     CalendarMap calendarMap,
   }) : super(builder,
-      childCount: childCount,
-      addAutomaticKeepAlives: addAutomaticKeepAlive,
-      addRepaintBoundaries: addRepaintBoundaries)
-  {
+            childCount: childCount,
+            addAutomaticKeepAlives: addAutomaticKeepAlive,
+            addRepaintBoundaries: addRepaintBoundaries) {
     this.calendarMap = calendarMap;
   }
-
 
 //  @override
 //  Widget build(BuildContext context, int index) {
@@ -307,7 +322,8 @@ class CalendarChildDelegate extends SliverChildBuilderDelegate{
   @override
   void didFinishLayout(int firstIndex, int lastIndex) {
     if (CalendarRouteState.firstItemYear != 0) {
-      CalendarRouteState.firstItemYear = calendarMap.everyWeekIndex[firstIndex].year;
+      CalendarRouteState.firstItemYear =
+          calendarMap.everyWeekIndex[firstIndex].year;
     }
   }
 

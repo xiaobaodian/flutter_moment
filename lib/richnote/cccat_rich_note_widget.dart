@@ -276,11 +276,21 @@ class RichNoteState extends State<RichNote> {
       case RichType.Food:
         break;
       case RichType.Related:
+        IconData iconData;
+        if (item.indent == 0) {
+          iconData = Icons.people;
+        } else if (item.indent == 1) {
+          iconData = Icons.place;
+        } else if (item.indent == 2) {
+          iconData = Icons.bookmark;
+        } else {
+          iconData = Icons.favorite_border;
+        }
         paragraphWidget = Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.people,
+            Icon(iconData,
               color: Theme.of(context).accentColor,
             ),
             Text('   '),

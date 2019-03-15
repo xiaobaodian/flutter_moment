@@ -48,7 +48,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     _store = GlobalStore.of(context);
     focusList = _store.focusItemList;
     personList = _store.personItemList;
-    placeList = _store.placeItemList;
+    placeList = _store.placeSet.itemList;
   }
 
   @override
@@ -105,7 +105,8 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
                       return EditerPlaceItemRoute(PlaceItem());
                     })).then((resultItem) {
                       if (resultItem is PlaceItem) {
-                        _store.addPlaceItem(resultItem);
+                        //_store.addPlaceItem(resultItem);
+                        _store.placeSet.addItem(resultItem);
                       }
                     });
                     break;
@@ -275,7 +276,8 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
         })).then((resultItem) {
           if (resultItem is PlaceItem) {
             placeItem.copyWith(resultItem);
-            _store.changePlaceItem(placeItem);
+            //_store.changePlaceItem(placeItem);
+            _store.placeSet.changeItem(placeItem);
           }
         });
       },

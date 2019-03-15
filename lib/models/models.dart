@@ -17,19 +17,28 @@ class PassingObject<T> {
   T newObject;
 }
 
-abstract class BaseItem {
+class BoxItem {
   int boxId = 0;
   int references = 0;
-//  bool systemPresets = false;
-//  bool internal = false;
 
-  BaseItem({
+  BoxItem({
     this.boxId = 0,
     this.references = 0,
   });
 
-  factory BaseItem.itemFromJson(String type, Map<String, dynamic> json){
-    return PlaceItem.fromJson(json);
+  factory BoxItem.itemFromJson(Type type, Map<String, dynamic> json){
+    if (type == FocusItem) {
+      return FocusItem.fromJson(json);
+    } else if (type == PersonItem) {
+      return PersonItem.fromJson(json);
+    } else if (type == PlaceItem) {
+      return PlaceItem.fromJson(json);
+    } else if (type == PlaceItem) {
+      return PlaceItem.fromJson(json);
+    } else if (type == TagItem) {
+      return TagItem.fromJson(json);
+    }
+    return null;
   }
 
   bool get isReferences => references == 0;
@@ -46,7 +55,7 @@ abstract class BaseItem {
 
 }
 
-abstract class SystemBaseItem extends BaseItem {
+abstract class SystemBaseItem extends BoxItem {
   bool systemPresets = false;
   bool internal = false;
 
@@ -116,7 +125,7 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
 ///
 /// PlaceItem 定义
 ///
-class PlaceItem extends BaseItem with BuildImageMixin {
+class PlaceItem extends BoxItem with BuildImageMixin {
   String title;
   String address;
   double geography;
@@ -180,7 +189,7 @@ class PlaceItem extends BaseItem with BuildImageMixin {
 ///
 /// TagItem 定义
 ///
-class TagItem extends BaseItem {
+class TagItem extends BoxItem {
   String title;
 
   TagItem({
@@ -215,7 +224,7 @@ class TagItem extends BaseItem {
 ///
 /// [gender]数值: 0->Female, 1->Male, 2->None
 ///
-class PersonItem extends BaseItem
+class PersonItem extends BoxItem
     with
         BuildImageMixin,
         DetailsListMixin<FocusEvent>,
@@ -379,10 +388,11 @@ class DailyRecord {
           String text;
           for (int i = 0; i < event.placeKeys.length; i++) {
             if (i == 0) {
-              text = store.getPlaceItemFromId(event.placeKeys[i]).title;
+              //text = store.getPlaceItemFromId(event.placeKeys[i]).title;
+              text = store.placeSet.getItemFromId(event.placeKeys[i]).title;
             } else {
-              text = text +
-                  "、${store.getPlaceItemFromId(event.placeKeys[i]).title}";
+              //text = text + "、${store.getPlaceItemFromId(event.placeKeys[i]).title}";
+              text = text + "、${store.placeSet.getItemFromId(event.placeKeys[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -397,10 +407,11 @@ class DailyRecord {
           String text;
           for (int i = 0; i < event.tagKeys.length; i++) {
             if (i == 0) {
-              text = store.getPlaceItemFromId(event.tagKeys[i]).title;
+              //text = store.getPlaceItemFromId(event.tagKeys[i]).title;
+              text = store.tagSet.getItemFromId(event.tagKeys[i]).title;
             } else {
-              text = text +
-                  "、${store.getPlaceItemFromId(event.tagKeys[i]).title}";
+              //text = text + "、${store.getPlaceItemFromId(event.tagKeys[i]).title}";
+              text = text + "、${store.tagSet.getItemFromId(event.tagKeys[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -469,6 +480,21 @@ class FocusEvent {
           debugPrint('找到了：${person.name}');
           if (personKeys.indexOf(person.boxId) == -1) {
             personKeys.add(person.boxId);
+          }
+        }
+      }
+    }
+  }
+
+  void extractingPlaceList(List<PlaceItem> placeList) {
+    debugPrint('进入了位置匹配方法');
+    placeKeys.clear();
+    for (var line in noteLines) {
+      for (var place in placeList) {
+        if (line.getContent().contains(place.title)) {
+          debugPrint('找到了：${place.title}');
+          if (placeKeys.indexOf(place.boxId) == -1) {
+            placeKeys.add(place.boxId);
           }
         }
       }

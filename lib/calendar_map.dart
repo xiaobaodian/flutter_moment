@@ -169,6 +169,11 @@ class CalendarMap {
     return everyDayIndex[selectedDateIndex].dailyRecord;
   }
 
+  bool hasDailyRecord(DateTime date) {
+    int index = getDateIndex(date);
+    return getDailyRecordFromIndex(index) != null;
+  }
+
   List<FocusEvent> getFocusEventsFromSelectedDay() => getDailyRecordFromSelectedDay().focusEvents;
 
   List<FocusEvent> getFocusEventsFromDayIndex(int dayIndex) => getDailyRecordFromIndex(dayIndex).focusEvents;
