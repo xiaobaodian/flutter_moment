@@ -397,6 +397,17 @@ class GlobalStoreState extends State<GlobalStore> {
     return calendarMap.getDailyRecordFromIndex(task.createDate);
   }
 
+  void checkDailyRecord({int dayIndex}) {
+    if (dayIndex == null) {
+      if (selectedDailyRecord == null || selectedDailyRecord.richLines.isEmpty)
+        calendarMap.clearDailyRecordOfSelectedDay();
+    } else {
+      var dailyRecord = calendarMap.everyDayIndex[dayIndex].dailyRecord;
+      if (dailyRecord == null || dailyRecord.richLines.isEmpty)
+        calendarMap.clearDailyRecordOfDayIndex(dayIndex);
+    }
+  }
+
   void clearSelectedDayDailyRecord() {
     calendarMap.clearDailyRecordOfSelectedDay();
   }
@@ -437,14 +448,13 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   void addFocusEventToSelectedDay(FocusEvent focusEvent) {
-    //, int focusItemBoxId
     /// 获取FocusItem，引用增加一次，保存到数据库
     focusItemAddReferences(focusEvent.focusItemBoxId);
 
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = calendarMap.selectedDateIndex;
 
-    /// 获取选中日期的DailyRecord，
+    selectedDailyRecord.richLines.clear();
     selectedDailyRecord.focusEvents.add(focusEvent);
 
     /// 如果还没有保存过就加入到数据库
@@ -467,21 +477,6 @@ class GlobalStoreState extends State<GlobalStore> {
     });
   }
 
-  void changFocusEventForDailyEvent(
-      FocusEvent focusEvent, int focusEventsIndex, DailyRecord dailyRecord) {
-    /// 为focusEvent设置dayIndex值，重要
-    focusEvent.dayIndex = dailyRecord.dayIndex;
-
-    /// 获取给定日期的FocusEvents列表，然后替换掉index位置的记录
-    var dayEvents = dailyRecord.focusEvents;
-    dayEvents[focusEventsIndex] = focusEvent;
-    int i = changeTaskItemFromFocusEvent(focusEvent);
-    Future.delayed(Duration(milliseconds: 100 * i), () {
-      changeFocusEvent(focusEvent);
-    });
-    debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
-  }
-
   void changeFocusEventForDayIndex(
       FocusEvent focusEvent, int focusEventsIndex, int dayIndex) {
     /// 为focusEvent设置dayIndex值，重要
@@ -501,6 +496,8 @@ class GlobalStoreState extends State<GlobalStore> {
     FocusEvent newFocus = passingObject.newObject;
     FocusEvent oldFocus = passingObject.oldObject;
 
+    DailyRecord dailyRecord = getDailyRecord(newFocus.dayIndex);
+    dailyRecord.richLines.clear();
     int r = changeTaskItemFromFocusEvent(newFocus) * 100;
 
     if (oldFocus != null) {
@@ -587,9 +584,10 @@ class GlobalStoreState extends State<GlobalStore> {
         removeTaskItem(line.expandData);
       }
     });
-    focusEvent.personIds.forEach((key) => personItemMinusReferences(key));
+    focusEvent.personIds.forEach((id) => personItemMinusReferences(id));
     removeFocusEvent(focusEvent);
     DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
+    dailyRecord.richLines.clear();
     dailyRecord.focusEvents.remove(focusEvent);
 
     if (dailyRecord.isNull) {
@@ -650,6 +648,23 @@ class GlobalStoreState extends State<GlobalStore> {
         day.dailyRecord.initRichList(this, true);
         day.dailyRecord.focusEvents.forEach((event) {
           if (event.personIds.indexOf(id) > -1) {
+            focusEvents.add(event);
+          }
+        });
+      }
+    }
+    return focusEvents;
+  }
+
+  List<FocusEvent> getFocusEventsFromPlaceItemId(int id) {
+    List<FocusEvent> focusEvents = [];
+    var everyDay = calendarMap.everyDayIndex;
+    for (int i = everyDay.length - 1; i > 0; i--) {
+      var day = everyDay[i];
+      if (day.dailyRecord != null) {
+        day.dailyRecord.initRichList(this, true);
+        day.dailyRecord.focusEvents.forEach((event) {
+          if (event.placeIds.indexOf(id) > -1) {
             focusEvents.add(event);
           }
         });

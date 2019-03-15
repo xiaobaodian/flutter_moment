@@ -3,10 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/enums.dart';
 import 'package:flutter_moment/models/helper_file.dart';
 import 'package:flutter_moment/models/models.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_person_item_route.dart';
 import 'package:flutter_moment/route/editer_place_item_route.dart';
@@ -22,7 +26,6 @@ class PlaceItemDetailsRoute extends StatefulWidget {
 }
 
 class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
-  static const _platformDataSource = const MethodChannel('DataSource');
   GlobalStoreState _store;
   bool _hideDeleteButton;
 
@@ -36,6 +39,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
+    widget._placeItem.detailsList = _store.getFocusEventsFromPlaceItemId(widget._placeItem.boxId);
   }
 
   @override
@@ -70,7 +74,6 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
         }
     ).then((result) {
       if (result != null) {
-        //_store.removePlaceItem(widget._placeItem);
         _store.placeSet.removeItem(widget._placeItem);
         Navigator.of(context).pop();
       }
@@ -104,9 +107,22 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
                 return EditerPlaceItemRoute(widget._placeItem);
               })).then((resultItem){
                 if (resultItem is PlaceItem) {
+                  String oldTitle = widget._placeItem.title;
+                  String newTitle = resultItem.title;
+                  if (oldTitle != newTitle) {
+                    print('place title is change');
+                    for (var event in widget._placeItem.detailsList) {
+                      for (var line in event.noteLines) {
+                        print('line content: ${line.getContent()}');
+                        if (line.type == RichType.Task) print('line is task type');
+                        String dec = line.getContent().replaceAll(oldTitle, newTitle);
+                        line.setContent(dec);
+                      }
+                      _store.changeFocusEventAndTasks(PassingObject(newObject: event));
+                    }
+                  }
                   widget._placeItem.copyWith(resultItem);
                   _store.placeSet.changeItem(widget._placeItem);
-                  //_platformDataSource.invokeMethod("PutPlaceItem", json.encode(widget._placeItem));
                 }
               });
             },
@@ -122,136 +138,69 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
           ),
         ],
       ),
-      body: ListView(
-        children: <Widget>[
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
+      body: buildBody(context, _store),
+    );
+  }
+
+  Widget buildBody(BuildContext context, GlobalStoreState store) {
+    final detailsList = widget._placeItem.detailsList;
+    if (detailsList.isEmpty) {
+      return Center(child: Text('还没有记录'));
+    }
+    return ListView.separated(
+      itemCount: detailsList.length,
+      itemBuilder: (context, index){
+        final date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
+        final str = DateTimeExt.chineseDateString(date);
+        Widget content = RichNote.fixed(
+          store: _store,
+          richSource: RichSource(detailsList[index].noteLines),
+          onTapLine: (tapObject) {
+            var richLine = tapObject.richLine;
+            FocusEvent event = richLine.note;
+            //FocusEvent event = detailsList[index];
+            DailyRecord dailyRecord = store.getDailyRecord(event.dayIndex);
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return EditerFocusEventRoute(event);
+            })).then((resultItem) {
+              if (resultItem is PassingObject<FocusEvent>) {
+                dailyRecord.richLines.clear();
+                Future(() {
+                  store.changeFocusEventAndTasks(resultItem);
+                }).then((_) {
+                  event.copyWith(resultItem.newObject);
+                });
+              } else if (resultItem is int) {
+                dailyRecord.richLines.clear();
+                store.removeFocusEventAndTasks(event);
+              }
+            });
+          },
+        );
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                child: Text(str,
+                  style: TextStyle(fontSize: 12, color: Colors.black45),
+                ),
               ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: content,
               ),
-            ),
+              //Text(detailsList[index].note),
+            ],
           ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                    child: Text('2019/1/18',
-                      style: TextStyle(fontSize: 12, color: Colors.black45),
-                    ),
-                  ),
-                  Text('这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要，这里是内容提要'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
+      separatorBuilder: (context, index){
+        return Divider(height: 1,);
+      },
     );
   }
 

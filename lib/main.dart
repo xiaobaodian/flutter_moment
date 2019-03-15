@@ -428,9 +428,9 @@ Widget _buildFocusModelSheet(
                   ));
                 })).then((resultItem) {
                   if (resultItem is PassingObject<FocusEvent>) {
-                    dailyRecord.richLines.clear();
                     store.addFocusEventToSelectedDay(resultItem.newObject);
-                    //usableList[index].addReferences();
+                  } else {
+                    store.checkDailyRecord();
                   }
                 });
               },
@@ -492,14 +492,14 @@ Widget _getListView(BuildContext context, int dayIndex) {
         return EditerFocusEventRoute(event);
       })).then((resultItem) {
         if (resultItem is PassingObject<FocusEvent>) {
-          dailyRecord.richLines.clear();
+          //dailyRecord.richLines.clear();
           Future(() {
             store.changeFocusEventAndTasks(resultItem);
           }).then((_) {
             event.copyWith(resultItem.newObject);
           });
         } else if (resultItem is int) {
-          dailyRecord.richLines.clear();
+          //dailyRecord.richLines.clear();
           store.removeFocusEventAndTasks(event);
         }
       });

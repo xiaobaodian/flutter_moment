@@ -127,12 +127,7 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
 ///
 /// “位置”有图片数据处理，所以混入了[BuildImageMixin]
 ///
-class PlaceItem extends BoxItem with BuildImageMixin {
-  String title;
-  String address;
-  double geography;
-  String picture;
-
+class PlaceItem extends BoxItem with BuildImageMixin, DetailsListMixin<FocusEvent> {
   PlaceItem({
     this.title = '',
     this.address = '',
@@ -144,6 +139,11 @@ class PlaceItem extends BoxItem with BuildImageMixin {
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
   }
+
+  String title;
+  String address;
+  double geography;
+  String picture;
 
   bool hasTitle() => title.length > 0;
   bool hasPicture() => picture != null;
