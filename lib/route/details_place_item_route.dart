@@ -16,7 +16,6 @@ import 'package:flutter_moment/route/editer_person_item_route.dart';
 import 'package:flutter_moment/route/editer_place_item_route.dart';
 
 class PlaceItemDetailsRoute extends StatefulWidget {
-
   final PlaceItem _placeItem;
 
   PlaceItemDetailsRoute(this._placeItem);
@@ -39,7 +38,8 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
-    widget._placeItem.detailsList = _store.getFocusEventsFromPlaceItemId(widget._placeItem.boxId);
+    widget._placeItem.detailsList =
+        _store.getFocusEventsFromPlaceItemId(widget._placeItem.boxId);
   }
 
   @override
@@ -71,8 +71,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
               ),
             ],
           );
-        }
-    ).then((result) {
+        }).then((result) {
       if (result != null) {
         _store.placeSet.removeItem(widget._placeItem);
         Navigator.of(context).pop();
@@ -90,11 +89,12 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
               width: 32,
               height: 32,
               child: CircleAvatar(
-                backgroundImage: widget._placeItem.getImage(mode: EImageMode.Light).image,
+                backgroundImage:
+                    widget._placeItem.getImage(mode: EImageMode.Light).image,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16,0,0,0),
+              padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
               child: Text(widget._placeItem.title),
             ),
           ],
@@ -102,10 +102,11 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.edit),
-            onPressed: (){
-              Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (BuildContext context) {
                 return EditerPlaceItemRoute(widget._placeItem);
-              })).then((resultItem){
+              })).then((resultItem) {
                 if (resultItem is PlaceItem) {
                   String oldTitle = widget._placeItem.title;
                   String newTitle = resultItem.title;
@@ -114,11 +115,14 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
                     for (var event in widget._placeItem.detailsList) {
                       for (var line in event.noteLines) {
                         print('line content: ${line.getContent()}');
-                        if (line.type == RichType.Task) print('line is task type');
-                        String dec = line.getContent().replaceAll(oldTitle, newTitle);
+                        if (line.type == RichType.Task)
+                          print('line is task type');
+                        String dec =
+                            line.getContent().replaceAll(oldTitle, newTitle);
                         line.setContent(dec);
                       }
-                      _store.changeFocusEventAndTasks(PassingObject(newObject: event));
+                      _store.changeFocusEventAndTasks(
+                          PassingObject(newObject: event));
                     }
                   }
                   widget._placeItem.copyWith(resultItem);
@@ -149,8 +153,9 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
     }
     return ListView.separated(
       itemCount: detailsList.length,
-      itemBuilder: (context, index){
-        final date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
+      itemBuilder: (context, index) {
+        final date =
+            store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
         final str = DateTimeExt.chineseDateString(date);
         Widget content = RichNote.fixed(
           store: _store,
@@ -184,8 +189,9 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.fromLTRB(0,0,0,8),
-                child: Text(str,
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                child: Text(
+                  str,
                   style: TextStyle(fontSize: 12, color: Colors.black45),
                 ),
               ),
@@ -198,10 +204,11 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
           ),
         );
       },
-      separatorBuilder: (context, index){
-        return Divider(height: 1,);
+      separatorBuilder: (context, index) {
+        return Divider(
+          height: 1,
+        );
       },
     );
   }
-
 }

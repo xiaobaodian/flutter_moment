@@ -256,7 +256,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
   Widget getPlaceListViewItem(BuildContext context, int index) {
     var placeItem = placeList[index];
     var subTitle =
-        placeItem.references == 0 ? '未关注' : '去过 ${placeItem.references} 次';
+        placeItem.references == 0 ? '未关注' : '提到 ${placeItem.references} 次';
     return CatListTile(
       leading: Icon(Icons.ac_unit),
       title: Text(placeItem.title),
