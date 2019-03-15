@@ -365,15 +365,15 @@ class DailyRecord {
       richLines.addAll(event.noteLines);
 
       if (hasRelated) {
-        if (event.personKeys.length > 0) {
+        if (event.personIds.length > 0) {
           print('加入人物引用');
           String text;
-          for (int i = 0; i < event.personKeys.length; i++) {
+          for (int i = 0; i < event.personIds.length; i++) {
             if (i == 0) {
-              text = store.getPersonItemFromId(event.personKeys[i]).name;
+              text = store.getPersonItemFromId(event.personIds[i]).name;
             } else {
               text = text +
-                  "、${store.getPersonItemFromId(event.personKeys[i]).name}";
+                  "、${store.getPersonItemFromId(event.personIds[i]).name}";
             }
           }
           richLines.add(RichLine(
@@ -383,16 +383,16 @@ class DailyRecord {
             note: event,
           ));
         }
-        if (event.placeKeys.length > 0) {
+        if (event.placeIds.length > 0) {
           print('加入地点引用');
           String text;
-          for (int i = 0; i < event.placeKeys.length; i++) {
+          for (int i = 0; i < event.placeIds.length; i++) {
             if (i == 0) {
               //text = store.getPlaceItemFromId(event.placeKeys[i]).title;
-              text = store.placeSet.getItemFromId(event.placeKeys[i]).title;
+              text = store.placeSet.getItemFromId(event.placeIds[i]).title;
             } else {
               //text = text + "、${store.getPlaceItemFromId(event.placeKeys[i]).title}";
-              text = text + "、${store.placeSet.getItemFromId(event.placeKeys[i]).title}";
+              text = text + "、${store.placeSet.getItemFromId(event.placeIds[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -402,16 +402,16 @@ class DailyRecord {
             note: event,
           ));
         }
-        if (event.tagKeys.length > 0) {
+        if (event.tagIds.length > 0) {
           print('加入标签引用');
           String text;
-          for (int i = 0; i < event.tagKeys.length; i++) {
+          for (int i = 0; i < event.tagIds.length; i++) {
             if (i == 0) {
               //text = store.getPlaceItemFromId(event.tagKeys[i]).title;
-              text = store.tagSet.getItemFromId(event.tagKeys[i]).title;
+              text = store.tagSet.getItemFromId(event.tagIds[i]).title;
             } else {
               //text = text + "、${store.getPlaceItemFromId(event.tagKeys[i]).title}";
-              text = text + "、${store.tagSet.getItemFromId(event.tagKeys[i]).title}";
+              text = text + "、${store.tagSet.getItemFromId(event.tagIds[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -452,9 +452,9 @@ class FocusEvent {
     String tagBoxIds,
   }) {
     noteLines = RichSource.getRichLinesFromJson(note);
-    personKeys = StringExt.stringToListInt(personBoxIds);
-    placeKeys = StringExt.stringToListInt(placeBoxIds);
-    tagKeys = StringExt.stringToListInt(tagBoxIds);
+    personIds = StringExt.stringToListInt(personBoxIds);
+    placeIds = StringExt.stringToListInt(placeBoxIds);
+    tagIds = StringExt.stringToListInt(tagBoxIds);
   }
 
   int boxId;
@@ -462,24 +462,24 @@ class FocusEvent {
   int focusItemBoxId;
   List<RichLine> noteLines;
 
-  /// [personKeys]在内容[noteLines]里面提及相关人员的boxId
-  List<int> personKeys;
+  /// [personIds]在内容[noteLines]里面提及相关人员的boxId
+  List<int> personIds;
 
-  /// [placeKeys]在内容[noteLines]里面提及相关地点的boxId
-  List<int> placeKeys;
+  /// [placeIds]在内容[noteLines]里面提及相关地点的boxId
+  List<int> placeIds;
 
-  /// [tagKeys]在内容[noteLines]里面提及相关标签的boxId
-  List<int> tagKeys;
+  /// [tagIds]在内容[noteLines]里面提及相关标签的boxId
+  List<int> tagIds;
 
 
   void extractingPersonList(List<PersonItem> personList) {
-    personKeys.clear();
+    personIds.clear();
     for (var line in noteLines) {
       for (var person in personList) {
         if (line.getContent().indexOf(person.name) > -1) {
           debugPrint('找到了：${person.name}');
-          if (personKeys.indexOf(person.boxId) == -1) {
-            personKeys.add(person.boxId);
+          if (personIds.indexOf(person.boxId) == -1) {
+            personIds.add(person.boxId);
           }
         }
       }
@@ -487,14 +487,27 @@ class FocusEvent {
   }
 
   void extractingPlaceList(List<PlaceItem> placeList) {
-    debugPrint('进入了位置匹配方法');
-    placeKeys.clear();
+    placeIds.clear();
     for (var line in noteLines) {
       for (var place in placeList) {
         if (line.getContent().contains(place.title)) {
           debugPrint('找到了：${place.title}');
-          if (placeKeys.indexOf(place.boxId) == -1) {
-            placeKeys.add(place.boxId);
+          if (placeIds.indexOf(place.boxId) == -1) {
+            placeIds.add(place.boxId);
+          }
+        }
+      }
+    }
+  }
+
+  void extractingTagList(List<TagItem> tagList) {
+    tagIds.clear();
+    for (var line in noteLines) {
+      for (var tag in tagList) {
+        if (line.getContent().contains(tag.title)) {
+          debugPrint('找到了：${tag.title}');
+          if (tagIds.indexOf(tag.boxId) == -1) {
+            tagIds.add(tag.boxId);
           }
         }
       }
@@ -506,9 +519,9 @@ class FocusEvent {
     dayIndex = other.dayIndex;
     focusItemBoxId = other.focusItemBoxId;
     noteLines = other.noteLines;
-    personKeys = other.personKeys.sublist(0);
-    placeKeys = other.placeKeys.sublist(0);
-    tagKeys = other.tagKeys.sublist(0);
+    personIds = other.personIds.sublist(0);
+    placeIds = other.placeIds.sublist(0);
+    tagIds = other.tagIds.sublist(0);
     //note = other.note;
   }
 
@@ -529,9 +542,9 @@ class FocusEvent {
     'dayIndex': dayIndex,
     'focusItemBoxId': focusItemBoxId,
     'note': RichSource.getJsonFromRichLine(noteLines),
-    'personBoxIds': StringExt.listIntToString(personKeys),
-    'placeBoxIds': StringExt.listIntToString(placeKeys),
-    'tagBoxIds': StringExt.listIntToString(tagKeys),
+    'personBoxIds': StringExt.listIntToString(personIds),
+    'placeBoxIds': StringExt.listIntToString(placeIds),
+    'tagBoxIds': StringExt.listIntToString(tagIds),
   };
 }
 

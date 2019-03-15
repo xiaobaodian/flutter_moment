@@ -105,7 +105,8 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
               })).then((resultItem){
                 if (resultItem is PlaceItem) {
                   widget._placeItem.copyWith(resultItem);
-                  _platformDataSource.invokeMethod("PutPlaceItem", json.encode(widget._placeItem));
+                  _store.placeSet.changeItem(widget._placeItem);
+                  //_platformDataSource.invokeMethod("PutPlaceItem", json.encode(widget._placeItem));
                 }
               });
             },

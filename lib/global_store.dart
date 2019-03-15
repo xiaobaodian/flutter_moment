@@ -115,6 +115,24 @@ class ItemSet<T extends  BoxItem> {
       removeItem(item);
     }
   }
+
+  int addReferencesByBoxId(int id) {
+    int sum = 0;
+    T item = itemMap[id];
+    if (item != null) {
+      sum = addReferences(item);
+    }
+    return sum;
+  }
+
+  int minusReferencesByBoxId(int id) {
+    int sum = 0;
+    T item = itemMap[id];
+    if (item != null) {
+      sum = minusReferences(item);
+    }
+    return sum;
+  }
 }
 
 class GlobalStoreState extends State<GlobalStore> {
@@ -122,17 +140,18 @@ class GlobalStoreState extends State<GlobalStore> {
   String localDir;
   CalendarMap calendarMap = CalendarMap();
 
-  ItemSet<TagItem> tagSet = ItemSet(
-    dataSource: _platformDataSource,
-    loadCommand: 'LoadTagItems',
-    putCommand: 'PutTagItem',
-    removeCommand: 'RemoveTagItem',
-  );
   ItemSet<PlaceItem> placeSet = ItemSet(
     dataSource: _platformDataSource,
     loadCommand: 'LoadPlaceItems',
     putCommand: 'PutPlaceItem',
     removeCommand: 'RemovePlaceItem',
+  );
+
+  ItemSet<TagItem> tagSet = ItemSet(
+    dataSource: _platformDataSource,
+    loadCommand: 'LoadTagItems',
+    putCommand: 'PutTagItem',
+    removeCommand: 'RemoveTagItem',
   );
 
   Map<int, FocusItem> _focusItemMap = Map<int, FocusItem>();
@@ -159,6 +178,7 @@ class GlobalStoreState extends State<GlobalStore> {
     loadFocusItems();
     loadPersonItems();
     placeSet.loadItemsFromDataSource();
+    tagSet.loadItemsFromDataSource();
     //loadPlaceItems();
     //loadDailyRecords();
   }
@@ -196,17 +216,6 @@ class GlobalStoreState extends State<GlobalStore> {
       }).toList();
     });
   }
-
-//  void loadPlaceItems() {
-//    _platformDataSource.invokeMethod('LoadPlaceItems').then((result) {
-//      List<dynamic> resultJson = json.decode(result) as List;
-//      placeItemList = resultJson.map((item) {
-//        PlaceItem place = PlaceItem.fromJson(item);
-//        _placeItemMap[place.boxId] = place;
-//        return place;
-//      }).toList();
-//    });
-//  }
 
   void loadDailyRecords() {
     _platformDataSource.invokeMethod('LoadDailyRecords').then((result) {
@@ -375,42 +384,6 @@ class GlobalStoreState extends State<GlobalStore> {
     personItemList.remove(person);
   }
 
-  // place
-
-//  PlaceItem getPlaceItemFromId(int id) => _placeItemMap[id];
-//
-//  void addPlaceItem(PlaceItem place) {
-//    placeItemList.add(place);
-//    _platformDataSource
-//        .invokeMethod("PutPlaceItem", json.encode(place))
-//        .then((id) {
-//      place.boxId = id;
-//      _placeItemMap[id] = place;
-//    });
-//  }
-
-//  void changePlaceItem(PlaceItem place) {
-//    _platformDataSource.invokeMethod("PutPlaceItem", json.encode(place));
-//  }
-
-//  void removePlaceItem(PlaceItem place) {
-//    _platformDataSource.invokeMethod("RemovePlaceItem", place.boxId.toString());
-//    _placeItemMap.remove(place.boxId);
-//    placeItemList.remove(place);
-//  }
-
-  // tag
-
-  TagItem getTagItemFromId(int id) => _tagItemMap[id];
-
-  void addTagItem(TagItem tag) {
-    tagItemList.add(tag);
-    _platformDataSource.invokeMethod("PutTagItem", json.encode(tag)).then((id) {
-      tag.boxId = id;
-      _tagItemMap[id] = tag;
-    });
-  }
-
   // DailyRecords
 
   DailyRecord get selectedDailyRecord =>
@@ -479,9 +452,16 @@ class GlobalStoreState extends State<GlobalStore> {
       putDailyRecord(selectedDailyRecord);
     }
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
+
     focusEvent.extractingPersonList(personItemList);
+    focusEvent.personIds.forEach((key) => personItemAddReferences(key));
+
     focusEvent.extractingPlaceList(placeSet.itemList);
-    focusEvent.personKeys.forEach((key) => personItemAddReferences(key));
+    focusEvent.placeIds.forEach((id) => placeSet.addReferencesByBoxId(id));
+
+    focusEvent.extractingTagList(tagSet.itemList);
+    focusEvent.tagIds.forEach((id) => tagSet.addReferencesByBoxId(id));
+
     Future.delayed(Duration(milliseconds: r), () {
       putFocusEvent(focusEvent);
     });
@@ -525,25 +505,69 @@ class GlobalStoreState extends State<GlobalStore> {
 
     if (oldFocus != null) {
       newFocus.extractingPersonList(personItemList);
+      newFocus.extractingPlaceList(placeSet.itemList);
+      newFocus.extractingTagList(tagSet.itemList);
+      //focusEvent.tagIds.forEach((id) => tagSet.addReferencesByBoxId(id));
+
       // 下面比较人物的引用
-      List<int> newKeys = [];
-      for (var personKey in newFocus.personKeys) {
-        int keyIndex = oldFocus.personKeys.indexOf(personKey);
-        if (keyIndex == -1) {
-          newKeys.add(personKey);
+      List<int> newPersonIds = [];
+      for (var id in newFocus.personIds) {
+        int index = oldFocus.personIds.indexOf(id);
+        if (index == -1) {
+          newPersonIds.add(id);
         } else {
-          oldFocus.personKeys.removeAt(keyIndex);
+          oldFocus.personIds.removeAt(index);
         }
       }
 
       // 测试用
-      newKeys
-          .forEach((key) => print('新增人物引用：${getPersonItemFromId(key).name}'));
-      oldFocus.personKeys
-          .forEach((key) => print('减少人物引用：${getPersonItemFromId(key).name}'));
+      newPersonIds
+          .forEach((id) => print('新增人物引用：${getPersonItemFromId(id).name}'));
+      oldFocus.personIds
+          .forEach((id) => print('减少人物引用：${getPersonItemFromId(id).name}'));
 
-      newKeys.forEach((key) => personItemAddReferences(key));
-      oldFocus.personKeys.forEach((key) => personItemMinusReferences(key));
+      newPersonIds.forEach((id) => personItemAddReferences(id));
+      oldFocus.personIds.forEach((id) => personItemMinusReferences(id));
+
+      // 下面比较位置的引用
+      List<int> newPlaceIds = [];
+      for (var id in newFocus.placeIds) {
+        int index = oldFocus.placeIds.indexOf(id);
+        if (index == -1) {
+          newPlaceIds.add(id);
+        } else {
+          oldFocus.placeIds.removeAt(index);
+        }
+      }
+
+      // 测试用
+      newPlaceIds
+          .forEach((id) => print('新增位置引用：${placeSet.getItemFromId(id).title}'));
+      oldFocus.placeIds
+          .forEach((id) => print('减少位置引用：${placeSet.getItemFromId(id).title}'));
+
+      newPlaceIds.forEach((id) => placeSet.addReferencesByBoxId(id));
+      oldFocus.placeIds.forEach((id) => placeSet.minusReferencesByBoxId(id));
+
+      // 下面比较标签的引用
+      List<int> newTagIds = [];
+      for (var id in newFocus.tagIds) {
+        int index = oldFocus.tagIds.indexOf(id);
+        if (index == -1) {
+          newTagIds.add(id);
+        } else {
+          oldFocus.tagIds.removeAt(index);
+        }
+      }
+
+      // 测试用
+      newTagIds
+          .forEach((id) => print('新增标签引用：${tagSet.getItemFromId(id).title}'));
+      oldFocus.tagIds
+          .forEach((id) => print('减少标签引用：${tagSet.getItemFromId(id).title}'));
+
+      newTagIds.forEach((id) => tagSet.addReferencesByBoxId(id));
+      oldFocus.tagIds.forEach((id) => tagSet.minusReferencesByBoxId(id));
     }
 
     Future.delayed(Duration(milliseconds: r), () {
@@ -563,7 +587,7 @@ class GlobalStoreState extends State<GlobalStore> {
         removeTaskItem(line.expandData);
       }
     });
-    focusEvent.personKeys.forEach((key) => personItemMinusReferences(key));
+    focusEvent.personIds.forEach((key) => personItemMinusReferences(key));
     removeFocusEvent(focusEvent);
     DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
     dailyRecord.focusEvents.remove(focusEvent);
@@ -625,7 +649,7 @@ class GlobalStoreState extends State<GlobalStore> {
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
         day.dailyRecord.focusEvents.forEach((event) {
-          if (event.personKeys.indexOf(id) > -1) {
+          if (event.personIds.indexOf(id) > -1) {
             focusEvents.add(event);
           }
         });

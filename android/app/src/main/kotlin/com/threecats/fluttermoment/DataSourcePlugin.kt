@@ -30,7 +30,7 @@ object DataSourcePlugin {
                 }
                 "RemoveTaskItem" -> {
                     val id = (methodCall.arguments as String).toLong()
-                    DataSource.removeTaskItemFor(id)
+                    DataSource.removeTaskItemBy(id)
                     result.success(null)
                 }
                 "LoadFocusItems" -> {
@@ -44,7 +44,7 @@ object DataSourcePlugin {
                 }
                 "RemoveFocusItem" -> {
                     val id = (methodCall.arguments as String).toLong()
-                    DataSource.removeFocusItemFor(id)
+                    DataSource.removeFocusItemBy(id)
                     result.success(null)
                 }
                 "PutPersonItem" -> {
@@ -58,7 +58,7 @@ object DataSourcePlugin {
                 }
                 "RemovePersonItem" -> {
                     val id = (methodCall.arguments as String).toLong()
-                    DataSource.removePersonItemFor(id)
+                    DataSource.removePersonItemBy(id)
                     result.success(null)
                 }
 
@@ -72,7 +72,21 @@ object DataSourcePlugin {
                 }
                 "RemovePlaceItem" -> {
                     val id = (methodCall.arguments as String).toLong()
-                    DataSource.removePlaceItemFor(id)
+                    DataSource.removePlaceItemBy(id)
+                    result.success(null)
+                }
+
+                "LoadTagItems" -> {
+                    result.success(DataSource.getTagItemsOfJson())
+                }
+                "PutTagItem" -> {
+                    val json = methodCall.arguments as String
+                    val tagItem = Gson().fromJson(json, TagItem::class.java)
+                    result.success(DataSource.putTagItem(tagItem))
+                }
+                "RemoveTagItem" -> {
+                    val id = (methodCall.arguments as String).toLong()
+                    DataSource.removePlaceItemBy(id)
                     result.success(null)
                 }
 
@@ -90,13 +104,13 @@ object DataSourcePlugin {
                 "GetDailyRecord" -> {
                     // 获取参数
                     val dayIndex = methodCall.arguments as Int
-                    val dailyRecord = DataSource.getDailyRecordFrom(dayIndex)
+                    val dailyRecord = DataSource.getDailyRecordBy(dayIndex)
                     //Log.d("android", p.name)
                     result.success(dailyRecord)
                 }
                 "RemoveDailyRecord" -> {
                     val id = (methodCall.arguments as String).toLong()
-                    DataSource.removeDailyRecordFor(id)
+                    DataSource.removeDailyRecordBy(id)
                 }
                 "PutFocusEvent" -> {
                     val json = methodCall.arguments as String
@@ -105,7 +119,7 @@ object DataSourcePlugin {
                 }
                 "RemoveFocusEvent" -> {
                     val id = (methodCall.arguments as String).toLong()
-                    DataSource.removeFocusEventFor(id)
+                    DataSource.removeFocusEventBy(id)
                     result.success(null)
                 }
                 else -> result.notImplemented()

@@ -1,7 +1,6 @@
 package com.threecats.fluttermoment.models
 
 import android.content.Context
-import android.util.Log
 import com.google.gson.Gson
 import com.threecats.fluttermoment.MomentApplication
 import io.objectbox.Box
@@ -21,6 +20,7 @@ object DataSource {
     lateinit var focusItemBox:  Box<FocusItem>
     lateinit var personItemBox: Box<PersonItem>
     lateinit var placeItemBox:  Box<PlaceItem>
+    lateinit var tagItemBox:  Box<TagItem>
     lateinit var dailyRecordBox: Box<DailyRecord>
     lateinit var focusEventBox: Box<FocusEvent>
 
@@ -31,6 +31,7 @@ object DataSource {
         focusItemBox = app.boxStore.boxFor()
         personItemBox = app.boxStore.boxFor()
         placeItemBox = app.boxStore.boxFor()
+        tagItemBox = app.boxStore.boxFor()
         dailyRecordBox = app.boxStore.boxFor()
         focusEventBox = app.boxStore.boxFor()
     }
@@ -39,7 +40,7 @@ object DataSource {
 
     fun getTaskItemsFromJson(): String = Gson().toJson(taskItemBox.query().build().find())
     fun putTaskItem(item: TaskItem): Long = taskItemBox.put(item)
-    fun removeTaskItemFor(id: Long) = taskItemBox.remove(id)
+    fun removeTaskItemBy(id: Long) = taskItemBox.remove(id)
 
     // FocusItem
 
@@ -48,19 +49,26 @@ object DataSource {
         return Gson().toJson(focusItemBox.query().build().find())
     }
     fun putFocusItem(item: FocusItem): Long = focusItemBox.put(item)
-    fun removeFocusItemFor(id: Long) = focusItemBox.remove(id)
+    fun removeFocusItemBy(id: Long) = focusItemBox.remove(id)
 
     // PersonItem
 
     fun getPersonItemsOfJson(): String = Gson().toJson(personItemBox.query().build().find())
     fun putPersonItem(item: PersonItem): Long = personItemBox.put(item)
-    fun removePersonItemFor(id: Long) = personItemBox.remove(id)
+    fun removePersonItemBy(id: Long) = personItemBox.remove(id)
 
     // PlaceItem
 
     fun getPlaceItemsOfJson(): String = Gson().toJson(placeItemBox.query().build().find())
     fun putPlaceItem(item: PlaceItem): Long = placeItemBox.put(item)
-    fun removePlaceItemFor(id: Long) = placeItemBox.remove(id)
+    fun removePlaceItemBy(id: Long) = placeItemBox.remove(id)
+
+    // TagItem
+
+    fun getTagItemsOfJson(): String = Gson().toJson(tagItemBox.query().build().find())
+    fun putTagItem(item: TagItem): Long = tagItemBox.put(item)
+    fun removeTagItemBy(id: Long) = tagItemBox.remove(id)
+
 
     // DailyRecord
 
@@ -68,28 +76,28 @@ object DataSource {
     fun getDailyRecordsOfJson(): String {
         val recordList = dailyRecordBox.query().build().find()
         recordList.forEach { record ->
-            record.focusEvents = getFocusEventsFrom(record.dayIndex)
+            record.focusEvents = getFocusEventsBy(record.dayIndex)
         }
 
         return Gson().toJson(recordList)
     }
-    fun getDailyRecordFrom(dayIndex: Int): DailyRecord? {
+    fun getDailyRecordBy(dayIndex: Int): DailyRecord? {
         val dailyRecord = dailyRecordBox.query().equal(DailyRecord_.dayIndex, dayIndex.toLong()).build().findFirst()
-        dailyRecord?.focusEvents = getFocusEventsFrom(dayIndex)
+        dailyRecord?.focusEvents = getFocusEventsBy(dayIndex)
         return dailyRecord
     }
     fun putDailyRecord(dailyRecord: DailyRecord): Long = dailyRecordBox.put(dailyRecord)
-    fun removeDailyRecordFor(id: Long) = dailyRecordBox.remove(id)
+    fun removeDailyRecordBy(id: Long) = dailyRecordBox.remove(id)
 
     // FocusEvent
 
-    private fun getFocusEventsFrom(dayIndex: Int): List<FocusEvent> {
+    private fun getFocusEventsBy(dayIndex: Int): List<FocusEvent> {
         val focusEventQuery = focusEventBox.query()
         return focusEventQuery.equal(FocusEvent_.dayIndex, dayIndex.toLong()).build().find()
     }
 
     fun putFocusEvent(focusEvent: FocusEvent): Long = focusEventBox.put(focusEvent)
-    fun removeFocusEventFor(id: Long) = focusEventBox.remove(id)
+    fun removeFocusEventBy(id: Long) = focusEventBox.remove(id)
 
     private fun initFocusList() {
         focusItemBox.put(FocusItem("天气与心情", "今天的天气状况与我的心情。", systemPresets = true))
