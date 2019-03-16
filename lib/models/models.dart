@@ -17,7 +17,7 @@ class PassingObject<T> {
   T newObject;
 }
 
-class BoxItem {
+abstract class BoxItem {
   int boxId = 0;
   int references = 0;
 
@@ -43,6 +43,8 @@ class BoxItem {
 
   bool get isReferences => references == 0;
   bool get isNotReferences => references > 0;
+
+  String getLabel();
 
   void addReferences() {
     references++;
@@ -101,6 +103,8 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     //id = DateTime.now().millisecondsSinceEpoch.toString();
   }
 
+  String getLabel() => title;
+
   factory FocusItem.fromJson(Map<String, dynamic> json) {
     return FocusItem.build(
       boxId: json['boxId'],
@@ -147,6 +151,8 @@ class PlaceItem extends BoxItem with BuildImageMixin, DetailsListMixin<FocusEven
 
   bool hasTitle() => title.length > 0;
   bool hasPicture() => picture != null;
+
+  String getLabel() => title;
 
   Image getImage({EImageMode mode = EImageMode.Dark}) {
     return buildMixinImage(mode);
@@ -201,6 +207,7 @@ class TagItem extends BoxItem {
   }) : super(boxId: boxId, references: references);
 
   bool hasTitle() => title.isNotEmpty;
+  String getLabel() => title;
 
   void copyWith(TagItem other) {
     title = other.title;
@@ -253,6 +260,7 @@ class PersonItem extends BoxItem
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
   }
 
+  String getLabel() => name;
   String get photo => mixinImage;
   bool hasPhoto() => hasImage();
   bool hasBirthday() => birthday != null;

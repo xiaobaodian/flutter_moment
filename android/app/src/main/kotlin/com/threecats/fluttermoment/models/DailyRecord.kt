@@ -1,9 +1,7 @@
 package com.threecats.fluttermoment.models
 
-import io.objectbox.annotation.Backlink
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
-import java.util.Collections.list
 
 /**
  * 由 zhang 于 2019/1/27 创建

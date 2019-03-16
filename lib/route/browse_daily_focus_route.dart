@@ -257,12 +257,12 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     var placeItem = placeList[index];
     var subTitle =
         placeItem.references == 0 ? '未关注' : '提到 ${placeItem.references} 次';
-    return CatListTile(
+    return ListTile(
       leading: Icon(Icons.ac_unit),
       title: Text(placeItem.title),
       subtitle: Text(subTitle),
-      trailText: Text('aa'),
       trailing: Icon(Icons.arrow_right),
+      isThreeLine: true,
       onTap: () {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {

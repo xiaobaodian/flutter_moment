@@ -28,8 +28,9 @@ class GlobalStore extends StatefulWidget {
   GlobalStoreState createState() => GlobalStoreState();
 }
 
-class ItemSet<T extends  BoxItem> {
-  ItemSet({
+/// 标签管理类
+class LabelSet<T extends  BoxItem> {
+  LabelSet({
     @required this.dataSource,
     @required this.loadCommand,
     @required this.putCommand,
@@ -133,6 +134,21 @@ class ItemSet<T extends  BoxItem> {
     }
     return sum;
   }
+
+  List<int> extractingLabelByRichLines(List<RichLine> lines) {
+    List<int> list = [];
+    for (var line in lines) {
+      for (var item in itemList) {
+        if (line.getContent().contains(item.getLabel())) {
+          debugPrint('找到了：${item.getLabel()}');
+          if (list.indexOf(item.boxId) == -1) {
+            list.add(item.boxId);
+          }
+        }
+      }
+    }
+    return list;
+  }
 }
 
 class GlobalStoreState extends State<GlobalStore> {
@@ -140,14 +156,14 @@ class GlobalStoreState extends State<GlobalStore> {
   String localDir;
   CalendarMap calendarMap = CalendarMap();
 
-  ItemSet<PlaceItem> placeSet = ItemSet(
+  LabelSet<PlaceItem> placeSet = LabelSet(
     dataSource: _platformDataSource,
     loadCommand: 'LoadPlaceItems',
     putCommand: 'PutPlaceItem',
     removeCommand: 'RemovePlaceItem',
   );
 
-  ItemSet<TagItem> tagSet = ItemSet(
+  LabelSet<TagItem> tagSet = LabelSet(
     dataSource: _platformDataSource,
     loadCommand: 'LoadTagItems',
     putCommand: 'PutTagItem',

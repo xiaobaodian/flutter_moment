@@ -229,7 +229,7 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget = layout.richLayoutList(
             item.indent,
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 3, 0 ,0),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0 ,0),
               child: Text(item.leading,
                   style: effectiveSytle
                       .merge(TextStyle(color: Colors.black54, fontSize: 12))),
@@ -240,7 +240,7 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget = layout.richLayoutList(
               item.indent,
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 4.5, 0 ,0),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0 ,0),
                 child: Text(item.leading,
                     style: effectiveSytle
                         .merge(TextStyle(color: Colors.black54, fontSize: 10))),

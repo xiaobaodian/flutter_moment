@@ -35,8 +35,6 @@ class CalendarMap {
     this.monthBoxTitleHeight = 48,
     this.monthBoxCellHeight = 48,
   }) {
-
-    debugPrint('开始构建日历偏移映射表...');
     everyMonthOffset = Map<String, double>();
     everyWeekIndex = List<WeekProperty>();
     everyDayIndex = List<DateProperty>();
@@ -71,7 +69,6 @@ class CalendarMap {
         }
       }
     }
-
     currentDateIndexed = getDateIndex(currentDate.date);
 
     debugPrint('currentDateIndexed: $currentDateIndexed');
@@ -180,10 +177,6 @@ class CalendarMap {
 
   void clearDailyRecordOfSelectedDay() =>  everyDayIndex[selectedDateIndex].dailyRecord = null;
   void clearDailyRecordOfDayIndex(int dayIndex) => everyDayIndex[dayIndex].dailyRecord = null;
-
-//  DailyRecord getSelectedDayDailyEvents() {
-//    return everyDayIndex[selectedDateIndex].dailyRecord;
-//  }
 
 }
 

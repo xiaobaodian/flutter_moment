@@ -20,7 +20,6 @@ import 'package:flutter_moment/widgets/trim_picture_dialog.dart';
 void main() => runApp(GlobalStore(child: MyApp()));
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -34,7 +33,7 @@ class MyApp extends StatelessWidget {
       ],
       title: 'Today focus',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
       ),
       home: LaunchPage(),
       routes: <String, WidgetBuilder>{
@@ -46,9 +45,6 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
-  //HomeScreen({Key key, this.title}) : super(key: key);
-
-  //final String title;
   final homeStateKey = GlobalKey<_HomeScreenState>();
 
   @override
@@ -262,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Offstage(
             offstage: hideGoTodayButton,
             child: IconButton(
-              icon: Icon(Icons.home),
+              icon: Icon(Icons.trip_origin),
               onPressed: () {
                 jumpToCurrentPage();
               },

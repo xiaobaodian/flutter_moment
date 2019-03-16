@@ -93,7 +93,13 @@ class RichNoteLayout {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.fromLTRB(left[indent], 1, 12, 0),
-          child: leading,
+          child: Stack(
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              Text('猫', style: TextStyle(color: Colors.white12),),
+              leading,
+            ],
+          ),
         ),
         Expanded(
           child: content,
