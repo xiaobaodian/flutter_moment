@@ -218,7 +218,10 @@ class RichNoteState extends State<RichNote> {
           paragraphWidget = layout.richLayoutList(
               item.indent,
               Text(item.leading, style: effectiveSytle),
-              Text(item.getContent(), style: effectiveSytle));
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
+                child: Text(item.getContent(), style: effectiveSytle),
+              ));
         }
         break;
       case RichType.UnorderedList:
@@ -228,24 +231,21 @@ class RichNoteState extends State<RichNote> {
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutList(
             item.indent,
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0 ,0),
-              child: Text(item.leading,
-                  style: effectiveSytle
-                      .merge(TextStyle(color: Colors.black54, fontSize: 12))),
-            ),
+            Text(item.leading,
+                style: effectiveSytle
+                    .merge(TextStyle(color: Colors.black54, fontSize: 12))),
             _buildTextField(index, effectiveSytle),
           );
         } else {
           paragraphWidget = layout.richLayoutList(
               item.indent,
+              Text(item.leading,
+                  style: effectiveSytle
+                      .merge(TextStyle(color: Colors.black54, fontSize: 10))),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0 ,0),
-                child: Text(item.leading,
-                    style: effectiveSytle
-                        .merge(TextStyle(color: Colors.black54, fontSize: 10))),
-              ),
-              Text(item.getContent(), style: effectiveSytle));
+                padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
+                child: Text(item.getContent(), style: effectiveSytle),
+              ));
         }
         break;
       case RichType.Reference:
@@ -318,13 +318,22 @@ class RichNoteState extends State<RichNote> {
     TextStyle mergeStyle;
     switch (style) {
       case RichStyle.Normal:
-        mergeStyle = TextStyle(fontWeight: FontWeight.normal);
+        mergeStyle = TextStyle(
+          fontWeight: FontWeight.normal,
+          textBaseline: TextBaseline.ideographic,
+        );
         break;
       case RichStyle.Bold:
-        mergeStyle = TextStyle(fontWeight: FontWeight.bold);
+        mergeStyle = TextStyle(
+          fontWeight: FontWeight.bold,
+          textBaseline: TextBaseline.ideographic,
+        );
         break;
       case RichStyle.Italic:
-        mergeStyle = TextStyle(fontStyle: FontStyle.italic);
+        mergeStyle = TextStyle(
+          fontStyle: FontStyle.italic,
+          textBaseline: TextBaseline.ideographic,
+        );
     }
     return mergeStyle;
   }
@@ -361,7 +370,7 @@ class RichNoteState extends State<RichNote> {
     int index = -1;
     for (int i = 0; i < widget.richSource.richLineList.length; i++) {
       RichItem item = (widget.richSource.richLineList[i]);
-      if (item.node.hasFocus) {
+      if (item.focusNode.hasFocus) {
         index = i;
         break;
       }
@@ -394,7 +403,7 @@ class RichNoteState extends State<RichNote> {
           affinity: TextAffinity.downstream,
           offset: 1,
         ));
-        _requestFocus(item?.node);
+        _requestFocus(item?.focusNode);
       });
     }
   }
@@ -426,7 +435,7 @@ class RichNoteState extends State<RichNote> {
         item.changeTypeTo(type);
       });
       Future.delayed(const Duration(milliseconds: 100), () {
-        _requestFocus(item?.node);
+        _requestFocus(item?.focusNode);
       });
     }
   }
@@ -445,13 +454,13 @@ class RichNoteState extends State<RichNote> {
         }
       });
       Future.delayed(const Duration(milliseconds: 100), () {
-        _requestFocus(item?.node);
+        _requestFocus(item?.focusNode);
       });
     }
   }
 
   void calculationOrderedList() {
-    const unorderedLeading = ['●', '•']; // • ▪ ●
+    const unorderedLeading = ['●', '■']; // • ▪ ● • ■
     int ybh = 1, ebh = 1;
     widget.richSource.richLineList?.forEach((line) {
       if (line.type == RichType.OrderedLists) {
@@ -478,7 +487,7 @@ class RichNoteState extends State<RichNote> {
     RichItem tempLine = widget.richSource.richLineList[index];
     if (index > 0) {
       setState(() {
-        tempLine.node.unfocus();
+        tempLine.focusNode.unfocus();
         RichItem upLine = widget.richSource.richLineList[index - 1];
         var p = upLine.controller.text.length;
         var newText = upLine.controller.text + text;
@@ -487,7 +496,7 @@ class RichNoteState extends State<RichNote> {
         upLine.controller.selection = TextSelection.fromPosition(
           TextPosition(affinity: TextAffinity.downstream, offset: p),
         );
-        _requestFocus(upLine.node);
+        _requestFocus(upLine.focusNode);
         if (tempLine.type == RichType.Task) {
           TaskItem task = tempLine.expandData;
           if (task.boxId > 0) {
@@ -499,6 +508,14 @@ class RichNoteState extends State<RichNote> {
       Future.delayed(const Duration(milliseconds: 200), () {
         tempLine.dispose();
       });
+    } else {
+      tempLine.canChanged = false;
+      String text = tempLine.controller.text.replaceAll('\u0000', '');
+      tempLine.controller.text = '\u0000' + text;
+      tempLine.controller.selection = TextSelection.fromPosition(TextPosition(
+        affinity: TextAffinity.downstream,
+        offset: 1,
+      ));
     }
   }
 
@@ -526,13 +543,8 @@ class RichNoteState extends State<RichNote> {
         //item.canChanged = true;
       });
     } else {
+      //以后转换成识别是否拥有焦点然后处理内容后去掉一下这句 ???存疑
       oldItem.canChanged = false;
-      // '\u0000' + lines[0] 是错误的方法，lines[0]已经包含了'\u0000'
-      oldItem.controller.text = lines[0];
-      oldItem.controller.selection = TextSelection.fromPosition(TextPosition(
-        affinity: TextAffinity.downstream,
-        offset: oldItem.controller.text.length,
-      ));
       if (oldItem.type == RichType.Title ||
           oldItem.type == RichType.SubTitle ||
           oldItem.type == RichType.Reference ||
@@ -545,22 +557,28 @@ class RichNoteState extends State<RichNote> {
           indent = oldItem.indent;
         }
       }
-      setState(() {
-        newItem = RichItem(
-          source: widget.richSource,
-          type: newType,
-          content: lines[1], // '\u0000' +
-        );
-        newItem.canChanged = false;
-        widget.richSource.richLineList.insert(index + 1, newItem);
-        Future.delayed(const Duration(milliseconds: 100), () {
-          _requestFocus(newItem?.node);
-          newItem.controller.selection =
-              TextSelection.fromPosition(TextPosition(
+      newItem = RichItem(
+        source: widget.richSource,
+        type: newType,
+        content: lines[1], // 加入'\u0000'在RichItem内部完成
+      );
+      newItem.controller.selection =
+          TextSelection.fromPosition(TextPosition(
             affinity: TextAffinity.downstream,
             offset: 1,
           ));
-        });
+      newItem.indent = indent;
+      newItem.canChanged = false;
+      setState(() {
+        oldItem.controller.text = lines[0];
+        oldItem.controller.selection = TextSelection.fromPosition(TextPosition(
+          affinity: TextAffinity.downstream,
+          offset: oldItem.controller.text.length,
+        ));
+        widget.richSource.richLineList.insert(index + 1, newItem);
+      });
+      Future.delayed(const Duration(milliseconds: 300),(){
+        _requestFocus(newItem?.focusNode);
       });
     }
   }
@@ -568,10 +586,10 @@ class RichNoteState extends State<RichNote> {
   Widget _buildTextField(int index, TextStyle effectiveSytle) {
     var item = widget.richSource.richLineList[index] as RichItem;
     assert(item.controller != null);
-    assert(item.node != null);
+    assert(item.focusNode != null);
     return TextField(
       key: item.textkey,
-      focusNode: item.node,
+      focusNode: item.focusNode,
       controller: item.controller,
       maxLines: null,
       inputFormatters: [
@@ -579,13 +597,17 @@ class RichNoteState extends State<RichNote> {
       ],
       style: effectiveSytle,
       autofocus: true,
-      textAlign: TextAlign.justify,
+      textAlign: TextAlign.start,
       textInputAction: TextInputAction.newline,
       decoration: InputDecoration(
-          border: InputBorder.none, contentPadding: EdgeInsets.all(0)),
+          border: InputBorder.none, contentPadding: EdgeInsets.fromLTRB(0, 3, 0 ,3)),
       onChanged: (text) {
+        /// 当item不具有焦点的时候退出，这回调只处理当前具有焦点的item
+        //if (!item.node.hasFocus) return;
+
         debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
         debugPrint('内容长度: ${text.length}');
+
         if (text.length == 0 || (text.substring(0, 1) != '\u0000')) {
           mergeUPLine(index, text ?? '');
         } else if (item.canChanged) {

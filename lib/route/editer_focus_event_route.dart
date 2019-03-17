@@ -125,7 +125,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
                 );
                 Navigator.of(context).pop(focusEventPassingObject);
               } else {
-                Navigator.of(context).pop(null);
+                Navigator.of(context).pop(-1);
               }
             },
           ),

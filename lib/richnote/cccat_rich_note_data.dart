@@ -125,10 +125,29 @@ class RichItem extends RichLine {
     }
     textkey = GlobalKey();
     controller = TextEditingController();
+    controller.addListener((){
+      var a = controller.selection.start;
+      var b = controller.selection.end;
+      debugPrint('controller selection.start = $a  $b');
+      if (a == 0) {
+        if (a == b) {
+          controller.selection = TextSelection.fromPosition(TextPosition(
+            affinity: TextAffinity.downstream,
+            offset: 1,
+          ));
+        } else {
+          controller.selection = TextSelection(
+              baseOffset: 1,
+              extentOffset: controller.selection.extentOffset
+          );
+        }
+      }
+    });
+
     controller.text = buildEditerText(content);
-    node = FocusNode();
-    node.addListener(() {
-      if (node.hasFocus) {
+    focusNode = FocusNode();
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
         canChanged = true;
       }
     });
@@ -139,13 +158,31 @@ class RichItem extends RichLine {
     @required this.source,
   }): super(type: richLine.type){
     textkey = GlobalKey();
-    node = FocusNode();
-    node.addListener(() {
-      if (node.hasFocus) {
+    focusNode = FocusNode();
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
         canChanged = true;
       }
     });
     controller = TextEditingController();
+    controller.addListener((){
+      var a = controller.selection.start;
+      var b = controller.selection.end;
+      debugPrint('controller selection.start = $a  $b');
+      if (a == 0) {
+        if (a == b) {
+          controller.selection = TextSelection.fromPosition(TextPosition(
+            affinity: TextAffinity.downstream,
+            offset: 1,
+          ));
+        } else {
+          controller.selection = TextSelection(
+              baseOffset: 1,
+              extentOffset: controller.selection.extentOffset
+          );
+        }
+      }
+    });
     type = richLine.type;
     style = richLine.style;
     indent = richLine.indent;
@@ -171,13 +208,13 @@ class RichItem extends RichLine {
 
   Key textkey;
   TextEditingController controller;
-  FocusNode node;
+  FocusNode focusNode;
 
   String get editContent => type == RichType.Image ? image : controller.text;
 
   void dispose() {
     controller?.dispose();
-    node?.dispose();
+    focusNode?.dispose();
   }
 
   String buildEditerText(String text) {

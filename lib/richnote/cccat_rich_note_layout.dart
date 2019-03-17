@@ -5,7 +5,7 @@ class RichNoteLayout {
   RichNoteLayout(
     BuildContext context, {
     this.segmentSpacing = 9.0,
-    this.listLineSpacing = 5.0,
+    this.listLineSpacing = 0.0,
     this.leadingSymbols = '•',
     this.titleStyle,
     this.subTitleStyle,
@@ -58,7 +58,7 @@ class RichNoteLayout {
   Widget richLayoutTask(Widget checkbox, Widget task, Widget time) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
@@ -74,10 +74,10 @@ class RichNoteLayout {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               task,
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                child: time,
-              ),
+              //Padding(
+              //  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+              //  child: time,
+              //),
             ],
           ),
         ),
@@ -92,7 +92,7 @@ class RichNoteLayout {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.fromLTRB(left[indent], 1, 12, 0),
+          padding: EdgeInsets.fromLTRB(left[indent], 4, 12, 0),
           child: Stack(
             alignment: AlignmentDirectional.center,
             children: <Widget>[

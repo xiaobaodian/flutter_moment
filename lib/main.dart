@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       ],
       title: 'Today focus',
       theme: ThemeData(
-        primarySwatch: Colors.indigo,
+        primarySwatch: Colors.blueGrey,
       ),
       home: LaunchPage(),
       routes: <String, WidgetBuilder>{
