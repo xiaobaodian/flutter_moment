@@ -58,7 +58,7 @@ class RichNoteLayout {
   Widget richLayoutTask(Widget checkbox, Widget task, Widget time) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
@@ -73,7 +73,10 @@ class RichNoteLayout {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              task,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5.5, 0, 0),
+                child: task,
+              ),
               //Padding(
               //  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
               //  child: time,

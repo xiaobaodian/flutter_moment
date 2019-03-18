@@ -253,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       appBar: AppBar(
-        title: Text('今日时光'),
+        title: Text('今日焦点'),
         actions: <Widget>[
           Offstage(
             offstage: hideGoTodayButton,
@@ -323,9 +323,10 @@ class _HomeScreenState extends State<HomeScreen> {
               _store.calendarMap.getFocusEventsFromSelectedDay();
           var list = List<FocusItem>();
           if (selectedDayEvents.length == 0) {
-            list.addAll(_store.focusItemList);
+            //list.addAll(_store.focusItemList);
+            list.addAll(_store.focusItemSet.itemList);
           } else {
-            _store.focusItemList.forEach((focus) {
+            _store.focusItemSet.itemList.forEach((focus) {
               if (!selectedDayEvents
                   .any((event) => event.focusItemBoxId == focus.boxId)) {
                 list.add(focus);

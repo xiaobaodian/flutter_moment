@@ -55,7 +55,8 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
           // focusItem是编辑路由新生成的实例，只携带了修改的数据，所以必须对widget._focusItem进行修改
           widget._focusItem.title = focusItem.title;
           widget._focusItem.comment = focusItem.comment;
-          _store.changeFocusItem(widget._focusItem);
+//          _store.changeFocusItem(widget._focusItem);
+          _store.focusItemSet.changeItem(widget._focusItem);
         }
       }
     });
@@ -88,7 +89,8 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
       }
     ).then((result) {
       if (result != null) {
-        _store.removeFocusItem(widget._focusItem);
+//        _store.removeFocusItem(widget._focusItem);
+        _store.focusItemSet.removeItem(widget._focusItem);
         Navigator.of(context).pop();
       }
     });

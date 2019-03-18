@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_moment/calendar_map.dart';
 import 'package:flutter_moment/models/data_services.dart';
 import 'package:flutter_moment/models/helper_file.dart';
+import 'package:flutter_moment/models/label_management.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/task/TaskItem.dart';
@@ -28,133 +29,17 @@ class GlobalStore extends StatefulWidget {
   GlobalStoreState createState() => GlobalStoreState();
 }
 
-/// 标签管理类
-class LabelSet<T extends  BoxItem> {
-  LabelSet({
-    @required this.dataSource,
-    @required this.loadCommand,
-    @required this.putCommand,
-    @required this.removeCommand,
-  });
-
-  final MethodChannel dataSource;
-  final String loadCommand;
-  final String putCommand;
-  final String removeCommand;
-
-  Map<int, T> itemMap = Map();
-  List<T> itemList = [];
-
-  T getItemFromId(int id) => itemMap[id];
-
-  void loadItemsFromDataSource() {
-    dataSource.invokeMethod(loadCommand).then((result) {
-      List<dynamic> resultJson = json.decode(result) as List;
-      itemList = resultJson.map((jsonString) {
-        T item = BoxItem.itemFromJson(T, jsonString);
-        itemMap[item.boxId] = item;
-        return item;
-      }).toList();
-    });
-  }
-
-  void addItemsFromList(List<T> items) {
-    for (T item in items) {
-      itemList.add(item);
-      itemMap[item.boxId] = item;
-    }
-  }
-
-  void addItems(List<T> items) {
-    for (T item in items) {
-      addItem(item);
-    }
-  }
-
-  void addItem(T item) {
-    itemList.add(item);
-    dataSource
-        .invokeMethod(putCommand, json.encode(item))
-        .then((id) {
-      item.boxId = id;
-      itemMap[id] = item;
-    });
-  }
-
-  void changeItem(T item) {
-    dataSource.invokeMethod(putCommand, json.encode(item));
-  }
-
-  void removeItem(T item) {
-    dataSource.invokeMethod(removeCommand, item.boxId.toString());
-    itemMap.remove(item.boxId);
-    itemList.remove(item);
-  }
-
-  int addReferences(T item) {
-    item.addReferences();
-    changeItem(item);
-    return item.references;
-  }
-
-  int minusReferences(T item) {
-    item.minusReferences();
-    changeItem(item);
-    return item.references;
-  }
-
-  void changeItemByBoxId(int id) {
-    T item = itemMap[id];
-    if (item != null) {
-      changeItem(item);
-    }
-  }
-
-  void removeItemByBoxId(int id) {
-    T item = itemMap[id];
-    if (item != null) {
-      removeItem(item);
-    }
-  }
-
-  int addReferencesByBoxId(int id) {
-    int sum = 0;
-    T item = itemMap[id];
-    if (item != null) {
-      sum = addReferences(item);
-    }
-    return sum;
-  }
-
-  int minusReferencesByBoxId(int id) {
-    int sum = 0;
-    T item = itemMap[id];
-    if (item != null) {
-      sum = minusReferences(item);
-    }
-    return sum;
-  }
-
-  List<int> extractingLabelByRichLines(List<RichLine> lines) {
-    List<int> list = [];
-    for (var line in lines) {
-      for (var item in itemList) {
-        if (line.getContent().contains(item.getLabel())) {
-          debugPrint('找到了：${item.getLabel()}');
-          if (list.indexOf(item.boxId) == -1) {
-            list.add(item.boxId);
-          }
-        }
-      }
-    }
-    return list;
-  }
-}
-
 class GlobalStoreState extends State<GlobalStore> {
   static const _platformDataSource = const MethodChannel('DataSource');
   String localDir;
   CalendarMap calendarMap = CalendarMap();
+
+  LabelSet<FocusItem> focusItemSet = LabelSet(
+    dataSource: _platformDataSource,
+    loadCommand: 'LoadFocusItems',
+    putCommand: 'PutFocusItem',
+    removeCommand: 'RemoveFocusItem',
+  );
 
   LabelSet<PlaceItem> placeSet = LabelSet(
     dataSource: _platformDataSource,
@@ -170,14 +55,10 @@ class GlobalStoreState extends State<GlobalStore> {
     removeCommand: 'RemoveTagItem',
   );
 
-  Map<int, FocusItem> _focusItemMap = Map<int, FocusItem>();
   Map<int, PersonItem> _personItemMap = Map<int, PersonItem>();
-  //Map<int, PlaceItem> _placeItemMap = Map<int, PlaceItem>();
   Map<int, TagItem> _tagItemMap = Map<int, TagItem>();
   Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
-  List<FocusItem> focusItemList;
   List<PersonItem> personItemList;
-  //List<PlaceItem> placeItemList;
   List<TagItem> tagItemList;
   List<TaskItem> taskItemList;
 
@@ -191,11 +72,10 @@ class GlobalStoreState extends State<GlobalStore> {
     });
 
     loadTaskItems();
-    loadFocusItems();
     loadPersonItems();
+    focusItemSet.loadItemsFromDataSource();
     placeSet.loadItemsFromDataSource();
     tagSet.loadItemsFromDataSource();
-    //loadPlaceItems();
     //loadDailyRecords();
   }
 
@@ -208,17 +88,6 @@ class GlobalStoreState extends State<GlobalStore> {
         return task;
       }).toList();
       loadDailyRecords();
-    });
-  }
-
-  void loadFocusItems() {
-    _platformDataSource.invokeMethod('LoadFocusItems').then((result) {
-      List<dynamic> resultJson = json.decode(result) as List;
-      focusItemList = resultJson.map((item) {
-        FocusItem focus = FocusItem.fromJson(item);
-        _focusItemMap[focus.boxId] = focus;
-        return focus;
-      }).toList();
     });
   }
 
@@ -260,42 +129,8 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // FocusItem
 
-  String getFocusTitleFrom(int id) => _focusItemMap[id]?.title;
-  FocusItem getFocusItemFromId(int id) => _focusItemMap[id];
-
-  void focusItemAddReferences(int id) {
-    FocusItem focusItem = _focusItemMap[id];
-    focusItem.addReferences();
-    changeFocusItem(focusItem);
-  }
-
-  void focusItemMinusReferences(int id) {
-    FocusItem focusItem = _focusItemMap[id];
-    focusItem.minusReferences();
-    changeFocusItem(focusItem);
-  }
-
-  void addFocusItem(FocusItem focus) {
-    focusItemList.add(focus);
-    _platformDataSource
-        .invokeMethod("PutFocusItem", json.encode(focus))
-        .then((id) {
-      print('新的焦点条目已加入，boxId: $id');
-      focus.boxId = id;
-      _focusItemMap[id] = focus;
-    });
-  }
-
-  void changeFocusItem(FocusItem focus) {
-    _platformDataSource.invokeMethod("PutFocusItem", json.encode(focus));
-  }
-
-  void removeFocusItem(FocusItem focus) {
-    _platformDataSource.invokeMethod("RemoveFocusItem", focus.boxId.toString());
-    debugPrint('执行删除 focus item : ${focus.boxId}');
-    _focusItemMap.remove(focus.boxId);
-    focusItemList.remove(focus);
-  }
+  String getFocusTitleFrom(int id) => focusItemSet.getItemFromId(id)?.title;
+  FocusItem getFocusItemFromId(int id) => focusItemSet.getItemFromId(id);
 
   // task
 
@@ -465,7 +300,8 @@ class GlobalStoreState extends State<GlobalStore> {
 
   void addFocusEventToSelectedDay(FocusEvent focusEvent) {
     /// 获取FocusItem，引用增加一次，保存到数据库
-    focusItemAddReferences(focusEvent.focusItemBoxId);
+    //focusItemAddReferences(focusEvent.focusItemBoxId);
+    focusItemSet.addReferencesByBoxId(focusEvent.focusItemBoxId);
 
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = calendarMap.selectedDateIndex;
@@ -592,7 +428,8 @@ class GlobalStoreState extends State<GlobalStore> {
     print('开始执行: removeFocusEventAndTasks');
 
     /// 获取FocusItem，引用减少一次
-    focusItemMinusReferences(focusEvent.focusItemBoxId);
+    //focusItemMinusReferences(focusEvent.focusItemBoxId);
+    focusItemSet.minusReferencesByBoxId(focusEvent.focusItemBoxId);
 
     /// 删除index位置focusEvent记录里面的TaskItem
     focusEvent.noteLines.forEach((line) {

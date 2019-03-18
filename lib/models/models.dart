@@ -67,10 +67,9 @@ abstract class SystemBaseItem extends BoxItem {
     systemPresets = false,
     internal = false,
   }) : super(
-          boxId: boxId,
-          references: references,
-        );
-
+    boxId: boxId,
+    references: references,
+  );
 }
 
 // user.g.dart 将在我们运行生成命令后自动生成
@@ -96,10 +95,10 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     bool systemPresets = false,
     bool internal = false,
   }) : super(
-            boxId: boxId,
-            references: references,
-            systemPresets: systemPresets,
-            internal: internal) {
+    boxId: boxId,
+    references: references,
+    systemPresets: systemPresets,
+    internal: internal) {
     //id = DateTime.now().millisecondsSinceEpoch.toString();
   }
 
