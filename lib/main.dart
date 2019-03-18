@@ -480,8 +480,7 @@ Widget _getListView(BuildContext context, int dayIndex) {
   RichNote richNote = RichNote(
     richSource: richSource,
     store: store,
-    onTapLine: (tapObject) {
-      //var richLine = dailyRecord.richLines[tapObject.index];
+    onTap: (tapObject) {
       var richLine = tapObject.richLine;
       FocusEvent event = richLine.note;
       Navigator.of(context)
@@ -489,24 +488,21 @@ Widget _getListView(BuildContext context, int dayIndex) {
         return EditerFocusEventRoute(event);
       })).then((resultItem) {
         if (resultItem is PassingObject<FocusEvent>) {
-          //dailyRecord.richLines.clear();
           Future(() {
             store.changeFocusEventAndTasks(resultItem);
           }).then((_) {
             event.copyWith(resultItem.newObject);
           });
         } else if (resultItem is int) {
-          //dailyRecord.richLines.clear();
           store.removeFocusEventAndTasks(event);
         }
       });
     },
-    onLongTapLine: (tapObject) {
-      //var richLine = dailyRecord.richLines[index];
+    onLongTap: (tapObject) {
       var richLine = tapObject.richLine;
       if (richLine.type == RichType.FocusTitle) {
         FocusEvent event = richLine.note;
-        var focusItem = store.getFocusItemFromId(event.focusItemBoxId);
+        var focusItem = store.getFocusItemBy(event.focusItemBoxId);
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
           return FocusItemDetailsRoute(focusItem);

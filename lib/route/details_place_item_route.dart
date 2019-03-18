@@ -160,7 +160,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
         Widget content = RichNote.fixed(
           store: _store,
           richSource: RichSource(detailsList[index].noteLines),
-          onTapLine: (tapObject) {
+          onTap: (tapObject) {
             var richLine = tapObject.richLine;
             FocusEvent event = richLine.note;
             //FocusEvent event = detailsList[index];

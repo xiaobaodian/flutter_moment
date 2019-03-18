@@ -10,6 +10,7 @@ import 'package:flutter_moment/models/helper_chinese_string.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
+import 'package:flutter_moment/task/TaskItem.dart';
 
 class PassingObject<T> {
   PassingObject({this.oldObject, this.newObject});
@@ -18,13 +19,8 @@ class PassingObject<T> {
 }
 
 abstract class BoxItem {
-  int boxId = 0;
-  int references = 0;
-
-  BoxItem({
-    this.boxId = 0,
-    this.references = 0,
-  });
+  BoxItem({this.boxId = 0});
+  int boxId;
 
   factory BoxItem.itemFromJson(Type type, Map<String, dynamic> json){
     if (type == FocusItem) {
@@ -37,10 +33,20 @@ abstract class BoxItem {
       return PlaceItem.fromJson(json);
     } else if (type == TagItem) {
       return TagItem.fromJson(json);
+    } else if (type == TaskItem) {
+      return TaskItem.fromJson(json);
     }
     return null;
   }
+}
 
+abstract class ReferencesBoxItem extends BoxItem{
+  ReferencesBoxItem({
+    boxId = 0,
+    this.references = 0,
+  }): super(boxId: boxId);
+
+  int references = 0;
   bool get isReferences => references == 0;
   bool get isNotReferences => references > 0;
 
@@ -57,7 +63,7 @@ abstract class BoxItem {
 
 }
 
-abstract class SystemBaseItem extends BoxItem {
+abstract class SystemBaseItem extends ReferencesBoxItem {
   bool systemPresets = false;
   bool internal = false;
 
@@ -126,11 +132,11 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
 }
 
 ///
-/// [PlaceItem] “位置”的class定义，需要用到数据库和引用计数，所以扩展自[BoxItem]
+/// [PlaceItem] “位置”的class定义，需要用到数据库和引用计数，所以扩展自[ReferencesBoxItem]
 ///
 /// “位置”有图片数据处理，所以混入了[BuildImageMixin]
 ///
-class PlaceItem extends BoxItem with BuildImageMixin, DetailsListMixin<FocusEvent> {
+class PlaceItem extends ReferencesBoxItem with BuildImageMixin, DetailsListMixin<FocusEvent> {
   PlaceItem({
     this.title = '',
     this.address = '',
@@ -194,9 +200,9 @@ class PlaceItem extends BoxItem with BuildImageMixin, DetailsListMixin<FocusEven
 }
 
 ///
-/// [TagItem] 标签项的class定义，需要用到数据库和引用计数，所以扩展自[BoxItem]
+/// [TagItem] 标签项的class定义，需要用到数据库和引用计数，所以扩展自[ReferencesBoxItem]
 ///
-class TagItem extends BoxItem {
+class TagItem extends ReferencesBoxItem {
   String title;
 
   TagItem({
@@ -230,11 +236,11 @@ class TagItem extends BoxItem {
 }
 
 ///
-/// [PersonItem] 人物对象的class定义，需要用到数据库和引用计数，所以扩展自[BoxItem]
+/// [PersonItem] 人物对象的class定义，需要用到数据库和引用计数，所以扩展自[ReferencesBoxItem]
 ///
 /// [gender]数值: 0->Female, 1->Male, 2->None
 ///
-class PersonItem extends BoxItem
+class PersonItem extends ReferencesBoxItem
     with
         BuildImageMixin,
         DetailsListMixin<FocusEvent>,

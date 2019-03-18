@@ -173,7 +173,7 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
         Widget content = RichNote.fixed(
           store: _store,
           richSource: RichSource(detailsList[index].noteLines),
-          onTapLine: (tapObject) {
+          onTap: (tapObject) {
             print('tap rich line');
             var richLine = tapObject.richLine;
             FocusEvent event = richLine.note;

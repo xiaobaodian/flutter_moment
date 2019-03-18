@@ -23,8 +23,8 @@ class RichNote extends StatefulWidget {
     @required this.store,
     @required this.richSource,
     this.richNoteLayout,
-    this.onTapLine,
-    this.onLongTapLine,
+    this.onTap,
+    this.onLongTap,
   })  : isEditable = false,
         isFixed = false,
         assert(richSource.richLineList != null) {
@@ -35,8 +35,8 @@ class RichNote extends StatefulWidget {
     @required this.store,
     @required this.richSource,
     this.richNoteLayout,
-    this.onTapLine,
-    this.onLongTapLine,
+    this.onTap,
+    this.onLongTap,
   })  : isEditable = true,
         isFixed = false {
     richSource.richNote = this;
@@ -48,8 +48,8 @@ class RichNote extends StatefulWidget {
     @required this.store,
     @required this.richSource,
     this.richNoteLayout,
-    this.onTapLine,
-    this.onLongTapLine,
+    this.onTap,
+    this.onLongTap,
   })  : isFixed = true,
         isEditable = false {
     richSource.richNote = this;
@@ -57,8 +57,8 @@ class RichNote extends StatefulWidget {
 
   final bool isEditable;
   final bool isFixed;
-  final ValueChanged<RichNoteTapObject> onTapLine;
-  final ValueChanged<RichNoteTapObject> onLongTapLine;
+  final ValueChanged<RichNoteTapObject> onTap;
+  final ValueChanged<RichNoteTapObject> onLongTap;
   final RichNoteLayout richNoteLayout;
   final RichSource richSource;
   final GlobalStoreState store;
@@ -121,7 +121,7 @@ class RichNoteState extends State<RichNote> {
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = layout.richLayoutTitle(Text(
-              widget.store.getFocusTitleFrom(int.parse(item.getContent())),
+              widget.store.getFocusTitleBy(int.parse(item.getContent())),
               style: effectiveSytle));
         }
         break;
@@ -167,42 +167,36 @@ class RichNoteState extends State<RichNote> {
         break;
       case RichType.Task:
         TaskItem task = item.expandData;
+        Widget checkBox = Checkbox(
+          value: task.state == TaskState.Complete,
+          onChanged: (isSelected) {
+            setState(() {
+              task.state =
+              isSelected ? TaskState.Complete : TaskState.StandBy;
+            });
+          }
+        );
         var effectiveSytle = layout.taskStyle == null
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.taskStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutTask(
-              Checkbox(
-                  //key: task.checkBoxKey ,
-                  value: task.state == TaskState.Complete,
-                  onChanged: (isSelected) {
-                    setState(() {
-                      task.state =
-                          isSelected ? TaskState.Complete : TaskState.StandBy;
-                    });
-                  }),
-              _buildTextField(index, effectiveSytle),
-              Text(
-                '全天',
-                style: textTheme.caption,
-              ));
+            checkBox,
+            _buildTextField(index, effectiveSytle),
+            Text(
+              '全天',
+              style: textTheme.caption,
+            )
+          );
         } else {
           paragraphWidget = layout.richLayoutTask(
-              Checkbox(
-                  //key: task.checkBoxKey,
-                  value: task.state == TaskState.Complete,
-                  onChanged: (isSelected) {
-                    setState(() {
-                      task.state =
-                          isSelected ? TaskState.Complete : TaskState.StandBy;
-                      widget.store.changeTaskItem(task);
-                    });
-                  }),
-              Text(item.getContent(), style: effectiveSytle),
-              Text(
-                '全天',
-                style: textTheme.caption,
-              ));
+            checkBox,
+            Text(item.getContent(), style: effectiveSytle),
+            Text(
+              '全天',
+              style: textTheme.caption,
+            )
+          );
         }
         break;
       case RichType.OrderedLists:
@@ -211,17 +205,19 @@ class RichNoteState extends State<RichNote> {
             : layout.orderedListsStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutList(
-              item.indent,
-              Text(item.leading, style: effectiveSytle),
-              _buildTextField(index, effectiveSytle));
+            item.indent,
+            Text(item.leading, style: effectiveSytle),
+            _buildTextField(index, effectiveSytle)
+          );
         } else {
           paragraphWidget = layout.richLayoutList(
-              item.indent,
-              Text(item.leading, style: effectiveSytle),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
-                child: Text(item.getContent(), style: effectiveSytle),
-              ));
+            item.indent,
+            Text(item.leading, style: effectiveSytle),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
+              child: Text(item.getContent(), style: effectiveSytle),
+            )
+          );
         }
         break;
       case RichType.UnorderedList:
@@ -389,7 +385,9 @@ class RichNoteState extends State<RichNote> {
     if (index > -1) {
       RichItem tempItem = widget.richSource.richLineList[index];
       if (tempItem.type == RichType.Task) {
-        widget.store.removeTaskItem(tempItem.expandData);
+        //widget.store.removeTaskItem(tempItem.expandData);
+        TaskItem task = tempItem.expandData;
+        widget.store.taskSet.removeItem(task);
       }
       setState(() {
         widget.richSource.richLineList.removeAt(index);
@@ -460,7 +458,7 @@ class RichNoteState extends State<RichNote> {
   }
 
   void calculationOrderedList() {
-    const unorderedLeading = ['●', '■']; // • ▪ ● • ■
+    const unorderedLeading = ['●', '○']; // ■ ○●◇◆
     int ybh = 1, ebh = 1;
     widget.richSource.richLineList?.forEach((line) {
       if (line.type == RichType.OrderedLists) {
@@ -595,12 +593,14 @@ class RichNoteState extends State<RichNote> {
       inputFormatters: [
         LengthLimitingTextInputFormatter(300),
       ],
-      style: effectiveSytle,
+      style: effectiveSytle.merge(TextStyle(locale: const Locale('zh', 'CH'))),
       autofocus: true,
       textAlign: TextAlign.start,
       textInputAction: TextInputAction.newline,
       decoration: InputDecoration(
-          border: InputBorder.none, contentPadding: EdgeInsets.fromLTRB(0, 3, 0 ,3)),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.fromLTRB(0, 3, 0 ,3)
+      ),
       onChanged: (text) {
         /// 当item不具有焦点的时候退出，这回调只处理当前具有焦点的item
         //if (!item.node.hasFocus) return;
@@ -627,14 +627,14 @@ class RichNoteState extends State<RichNote> {
       bodyItems.add(InkWell(
         child: buildLineLayoutWidget(index),
         onTap: () {
-          if (widget.onTapLine != null) {
-            widget.onTapLine(RichNoteTapObject(
+          if (widget.onTap != null) {
+            widget.onTap(RichNoteTapObject(
                 index, widget.richSource.richLineList[index]));
           }
         },
         onLongPress: () {
-          if (widget.onLongTapLine != null) {
-            widget.onLongTapLine(RichNoteTapObject(
+          if (widget.onLongTap != null) {
+            widget.onLongTap(RichNoteTapObject(
                 index, widget.richSource.richLineList[index]));
           }
         },
@@ -653,14 +653,14 @@ class RichNoteState extends State<RichNote> {
           return InkWell(
             child: buildLineLayoutWidget(index),
             onTap: () {
-              if (widget.onTapLine != null) {
-                widget.onTapLine(RichNoteTapObject(
+              if (widget.onTap != null) {
+                widget.onTap(RichNoteTapObject(
                     index, widget.richSource.richLineList[index]));
               }
             },
             onLongPress: () {
-              if (widget.onLongTapLine != null) {
-                widget.onLongTapLine(RichNoteTapObject(
+              if (widget.onLongTap != null) {
+                widget.onLongTap(RichNoteTapObject(
                     index, widget.richSource.richLineList[index]));
               }
             },

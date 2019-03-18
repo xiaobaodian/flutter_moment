@@ -47,7 +47,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
     focusList = _store.focusItemSet.itemList;
-    personList = _store.personItemList;
+    personList = _store.personSet.itemList;
     placeList = _store.placeSet.itemList;
   }
 
@@ -86,7 +86,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
                       return EditerPersonItemRoute(PersonItem());
                     })).then((resultItem) {
                       if (resultItem is PersonItem) {
-                        Future(() => _store.addPersonItem(resultItem)).then((v){
+                        Future(() => _store.personSet.addItem(resultItem)).then((v){
                           setState(() {
 
                           });
@@ -134,7 +134,6 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
             },
             separatorBuilder: (context, index) {
               return Divider(
-                height: 3,
                 indent: 16,
               );
             },
@@ -171,7 +170,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     FocusItem focusItem = focusList[index];
     var subTitle =
         focusItem.references == 0 ? '未关注' : '已关注 ${focusItem.references} 次';
-    return CatListTile(
+    return ListTile(
       title: Text(
         focusItem.title,
         softWrap: false,
@@ -190,6 +189,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
           fontSize: 14,
         ),
       ),
+      isThreeLine: true,
       trailing: Icon(Icons.arrow_right),
       onTap: () {
         Navigator.of(context)
@@ -220,7 +220,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     var personItem = personList[index];
     var subTitle =
         personItem.references == 0 ? '未关注' : '在 ${personItem.references} 个焦点中';
-    return CatListTile(
+    return ListTile(
       leading: SizedBox(
         height: 36,
         width: 36,
@@ -232,6 +232,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
         softWrap: false,
         overflow: TextOverflow.ellipsis,
       ),
+      isThreeLine: true,
       trailing: Icon(Icons.arrow_right),
       onTap: () {
         //PersonDetailsRoute
@@ -247,7 +248,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
         })).then((resultItem) {
           if (resultItem is PersonItem) {
             personItem.copyWith(resultItem);
-            _store.changePersonItem(personItem);
+            _store.personSet.changeItem(personItem);
             // 从上页返回后，好像自动执行了setState，下面语句不用了
           }
         });

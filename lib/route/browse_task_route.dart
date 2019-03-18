@@ -84,11 +84,11 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
   }
 
   Widget buildBody(BuildContext context, GlobalStoreState store) {
-    store.taskItemList.sort((a,b) => b.createDate.compareTo(a.createDate));
+    store.taskSet.itemList.sort((a,b) => b.createDate.compareTo(a.createDate));
     return ListView.separated(
-      itemCount: _store.taskItemList.length,
+      itemCount: store.taskSet.itemList.length,
       itemBuilder: (context, index){
-        var task = _store.taskItemList[index];
+        var task = store.taskSet.itemList[index];
         print('task createDate: ${task.title} - ${task.createDate}');
         final date = store.calendarMap.getDateFromIndex(task.createDate);
         final str = DateTimeExt.chineseDateString(date);
@@ -102,7 +102,8 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
                 setState(() {
                   task.state =
                   isSelected ? TaskState.Complete : TaskState.StandBy;
-                  store.changeTaskItem(task);
+                  //store.changeTaskItem(task);
+                  store.taskSet.changeItem(task);
                 });
               }
             ),

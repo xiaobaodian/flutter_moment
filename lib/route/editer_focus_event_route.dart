@@ -34,7 +34,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     var store = GlobalStore.of(context);
-    routeTitle = store.getFocusTitleFrom(widget._focusEvent.focusItemBoxId);
+    routeTitle = store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
     dateTitle = store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
     richSource = RichSource(widget._focusEvent.noteLines,
       focusItemBoxId: widget._focusEvent.focusItemBoxId,

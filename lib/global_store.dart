@@ -36,31 +36,31 @@ class GlobalStoreState extends State<GlobalStore> {
 
   LabelSet<FocusItem> focusItemSet = LabelSet(
     dataSource: _platformDataSource,
-    loadCommand: 'LoadFocusItems',
-    putCommand: 'PutFocusItem',
-    removeCommand: 'RemoveFocusItem',
+    command: 'Focus',
+  );
+
+  LabelSet<PersonItem> personSet = LabelSet(
+    dataSource: _platformDataSource,
+    command: 'Person',
   );
 
   LabelSet<PlaceItem> placeSet = LabelSet(
     dataSource: _platformDataSource,
-    loadCommand: 'LoadPlaceItems',
-    putCommand: 'PutPlaceItem',
-    removeCommand: 'RemovePlaceItem',
+    command: 'Place',
   );
 
   LabelSet<TagItem> tagSet = LabelSet(
     dataSource: _platformDataSource,
-    loadCommand: 'LoadTagItems',
-    putCommand: 'PutTagItem',
-    removeCommand: 'RemoveTagItem',
+    command: 'Tag',
   );
 
-  Map<int, PersonItem> _personItemMap = Map<int, PersonItem>();
-  Map<int, TagItem> _tagItemMap = Map<int, TagItem>();
-  Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
-  List<PersonItem> personItemList;
-  List<TagItem> tagItemList;
-  List<TaskItem> taskItemList;
+  BoxSet<TaskItem> taskSet = BoxSet(
+    dataSource: _platformDataSource,
+    command: 'Task',
+  );
+
+  //Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
+  //List<TaskItem> taskItemList;
 
   @override
   void initState() {
@@ -71,36 +71,29 @@ class GlobalStoreState extends State<GlobalStore> {
       localDir = path;
     });
 
-    loadTaskItems();
-    loadPersonItems();
+    //loadTaskItems();
+    //loadPersonItems();
+    taskSet.loadItemsFromDataSource().then((_){
+      loadDailyRecords();
+    });
     focusItemSet.loadItemsFromDataSource();
+    personSet.loadItemsFromDataSource();
     placeSet.loadItemsFromDataSource();
     tagSet.loadItemsFromDataSource();
     //loadDailyRecords();
   }
 
-  void loadTaskItems() {
-    _platformDataSource.invokeMethod('LoadTaskItems').then((result) {
-      List<dynamic> resultJson = json.decode(result) as List;
-      taskItemList = resultJson.map((item) {
-        TaskItem task = TaskItem.fromJson(item);
-        _taskItemMap[task.boxId] = task;
-        return task;
-      }).toList();
-      loadDailyRecords();
-    });
-  }
-
-  void loadPersonItems() {
-    _platformDataSource.invokeMethod('LoadPersonItems').then((result) {
-      List<dynamic> resultJson = json.decode(result) as List;
-      personItemList = resultJson.map((item) {
-        PersonItem person = PersonItem.fromJson(item);
-        _personItemMap[person.boxId] = person;
-        return person;
-      }).toList();
-    });
-  }
+//  void loadTaskItems() {
+//    _platformDataSource.invokeMethod('LoadTaskItems').then((result) {
+//      List<dynamic> resultJson = json.decode(result) as List;
+//      taskItemList = resultJson.map((item) {
+//        TaskItem task = TaskItem.fromJson(item);
+//        _taskItemMap[task.boxId] = task;
+//        return task;
+//      }).toList();
+//      loadDailyRecords();
+//    });
+//  }
 
   void loadDailyRecords() {
     _platformDataSource.invokeMethod('LoadDailyRecords').then((result) {
@@ -113,7 +106,8 @@ class GlobalStoreState extends State<GlobalStore> {
           event.noteLines.forEach((line) {
             if (line.type == RichType.Task) {
               int id = line.expandData;
-              line.expandData = _taskItemMap[id];
+              //line.expandData = _taskItemMap[id];
+              line.expandData = taskSet.getItemFromId(id);
             }
           });
         });
@@ -129,44 +123,44 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // FocusItem
 
-  String getFocusTitleFrom(int id) => focusItemSet.getItemFromId(id)?.title;
-  FocusItem getFocusItemFromId(int id) => focusItemSet.getItemFromId(id);
+  String getFocusTitleBy(int id) => focusItemSet.getItemFromId(id)?.title;
+  FocusItem getFocusItemBy(int id) => focusItemSet.getItemFromId(id);
 
   // task
+//
+//  void addTaskItem(TaskItem task) {
+//    taskItemList.add(task);
+//    debugPrint('加入Task到Store列表中: ${task.title}');
+//    _platformDataSource
+//        .invokeMethod("PutTaskItem", json.encode(task))
+//        .then((id) {
+//      debugPrint('加入Task到数据库中: ${task.title}');
+//      task.boxId = id;
+//      _taskItemMap[id] = task;
+//    });
+//  }
 
-  void addTaskItem(TaskItem task) {
-    taskItemList.add(task);
-    debugPrint('加入Task到Store列表中: ${task.title}');
-    _platformDataSource
-        .invokeMethod("PutTaskItem", json.encode(task))
-        .then((id) {
-      debugPrint('加入Task到数据库中: ${task.title}');
-      task.boxId = id;
-      _taskItemMap[id] = task;
-    });
-  }
-
-  void changeTaskItem(TaskItem task) {
-    int p = taskItemList.indexOf(_taskItemMap[task.boxId]);
-    taskItemList[p] = task;
-    _taskItemMap[task.boxId] = task;
-    _platformDataSource.invokeMethod("PutTaskItem", json.encode(task));
-    debugPrint('在数据库中修改了Task: ${task.title}');
-  }
-
-  void removeTaskItem(TaskItem task) {
-    if (task == null) return;
-    var oldTask = _taskItemMap[task.boxId];
-    taskItemList.remove(oldTask);
-    _taskItemMap.remove(task.boxId);
-    debugPrint('从Store列表中删除了Task: ${task.title}');
-    _platformDataSource.invokeMethod("RemoveTaskItem", task.boxId.toString());
-    debugPrint('从数据库中删除了Task: ${task.title}');
-  }
-
-  void removeTaskItemFromId(int id) {
-    removeTaskItem(_taskItemMap[id]);
-  }
+//  void changeTaskItem(TaskItem task) {
+//    int p = taskItemList.indexOf(_taskItemMap[task.boxId]);
+//    taskItemList[p] = task;
+//    _taskItemMap[task.boxId] = task;
+//    _platformDataSource.invokeMethod("PutTaskItem", json.encode(task));
+//    debugPrint('在数据库中修改了Task: ${task.title}');
+//  }
+//
+//  void removeTaskItem(TaskItem task) {
+//    if (task == null) return;
+//    var oldTask = _taskItemMap[task.boxId];
+//    taskItemList.remove(oldTask);
+//    _taskItemMap.remove(task.boxId);
+//    debugPrint('从Store列表中删除了Task: ${task.title}');
+//    _platformDataSource.invokeMethod("RemoveTaskItem", task.boxId.toString());
+//    debugPrint('从数据库中删除了Task: ${task.title}');
+//  }
+//
+//  void removeTaskItemFromId(int id) {
+//    removeTaskItem(_taskItemMap[id]);
+//  }
 
   int changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
     int s = 0;
@@ -175,19 +169,21 @@ class GlobalStoreState extends State<GlobalStore> {
         TaskItem task = line.expandData;
         if (task.boxId == 0) {
           print('批处理FocusEvent包含的任务，未入库Task：${task.title}');
-          addTaskItem(task);
+          //addTaskItem(task);
+          taskSet.addItem(task);
           s++;
         } else {
-          changeTaskItem(task);
+          //changeTaskItem(task);
+          taskSet.changeItem(task);
           print('批处理FocusEvent包含的任务，修改了Task：${task.title}');
         }
       } else {
         if (line.expandData != null) {
-          var task = line.expandData;
-          if (task is TaskItem) {
-            //TaskItem task = line.expandData;
+          if (line.expandData is TaskItem) {
+            TaskItem task = line.expandData;
             if (task.boxId > 0) {
-              removeTaskItem(task);
+              //removeTaskItem(task);
+              taskSet.removeItem(task);
               print('批处理FocusEvent包含的任务，删除了Task：${task.title}');
             }
           }
@@ -200,40 +196,41 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // person
 
-  PersonItem getPersonItemFromId(int id) => _personItemMap[id];
+//  PersonItem getPersonItemFromId(int id) => _personItemMap[id];
+  PersonItem getPersonItemFromId(int id) => personSet.getItemFromId(id);
 
-  void personItemAddReferences(int id) {
-    PersonItem person = _personItemMap[id];
-    person.addReferences();
-    changePersonItem(person);
-  }
+//  void personItemAddReferences(int id) {
+//    PersonItem person = _personItemMap[id];
+//    person.addReferences();
+//    changePersonItem(person);
+//  }
 
-  void personItemMinusReferences(int id) {
-    PersonItem person = _personItemMap[id];
-    person.minusReferences();
-    changePersonItem(person);
-  }
-
-  void addPersonItem(PersonItem person) {
-    personItemList.add(person);
-    _platformDataSource
-        .invokeMethod("PutPersonItem", json.encode(person))
-        .then((id) {
-      person.boxId = id;
-      _personItemMap[id] = person;
-    });
-  }
-
-  void changePersonItem(PersonItem person) {
-    _platformDataSource.invokeMethod("PutPersonItem", json.encode(person));
-  }
-
-  void removePersonItem(PersonItem person) {
-    _platformDataSource.invokeMethod(
-        "RemovePersonItem", person.boxId.toString());
-    _personItemMap.remove(person.boxId);
-    personItemList.remove(person);
-  }
+//  void personItemMinusReferences(int id) {
+//    PersonItem person = _personItemMap[id];
+//    person.minusReferences();
+//    changePersonItem(person);
+//  }
+//
+//  void addPersonItem(PersonItem person) {
+//    personItemList.add(person);
+//    _platformDataSource
+//        .invokeMethod("PutPersonItem", json.encode(person))
+//        .then((id) {
+//      person.boxId = id;
+//      _personItemMap[id] = person;
+//    });
+//  }
+//
+//  void changePersonItem(PersonItem person) {
+//    _platformDataSource.invokeMethod("PutPersonItem", json.encode(person));
+//  }
+//
+//  void removePersonItem(PersonItem person) {
+//    _platformDataSource.invokeMethod(
+//        "RemovePersonItem", person.boxId.toString());
+//    _personItemMap.remove(person.boxId);
+//    personItemList.remove(person);
+//  }
 
   // DailyRecords
 
@@ -292,7 +289,8 @@ class GlobalStoreState extends State<GlobalStore> {
     for (var line in event.noteLines) {
       if (line.type == RichType.Task && line.expandData is int) {
         int id = line.expandData;
-        line.expandData = _taskItemMap[id];
+        //line.expandData = _taskItemMap[id];
+        line.expandData = taskSet.getItemFromId(id);
         assert(line.expandData != null);
       }
     }
@@ -315,8 +313,8 @@ class GlobalStoreState extends State<GlobalStore> {
     }
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
 
-    focusEvent.extractingPersonList(personItemList);
-    focusEvent.personIds.forEach((key) => personItemAddReferences(key));
+    focusEvent.extractingPersonList(personSet.itemList);
+    focusEvent.personIds.forEach((key) => personSet.addReferencesByBoxId(key));
 
     focusEvent.extractingPlaceList(placeSet.itemList);
     focusEvent.placeIds.forEach((id) => placeSet.addReferencesByBoxId(id));
@@ -353,7 +351,7 @@ class GlobalStoreState extends State<GlobalStore> {
     int r = changeTaskItemFromFocusEvent(newFocus) * 100;
 
     if (oldFocus != null) {
-      newFocus.extractingPersonList(personItemList);
+      newFocus.extractingPersonList(personSet.itemList);
       newFocus.extractingPlaceList(placeSet.itemList);
       newFocus.extractingTagList(tagSet.itemList);
       //focusEvent.tagIds.forEach((id) => tagSet.addReferencesByBoxId(id));
@@ -375,8 +373,8 @@ class GlobalStoreState extends State<GlobalStore> {
       oldFocus.personIds
           .forEach((id) => print('减少人物引用：${getPersonItemFromId(id).name}'));
 
-      newPersonIds.forEach((id) => personItemAddReferences(id));
-      oldFocus.personIds.forEach((id) => personItemMinusReferences(id));
+      newPersonIds.forEach((id) => personSet.addReferencesByBoxId(id));
+      oldFocus.personIds.forEach((id) => personSet.minusReferencesByBoxId(id));
 
       // 下面比较位置的引用
       List<int> newPlaceIds = [];
@@ -434,10 +432,12 @@ class GlobalStoreState extends State<GlobalStore> {
     /// 删除index位置focusEvent记录里面的TaskItem
     focusEvent.noteLines.forEach((line) {
       if (line.expandData is TaskItem) {
-        removeTaskItem(line.expandData);
+        //removeTaskItem(line.expandData);
+        TaskItem task = line.expandData;
+        taskSet.removeItem(task);
       }
     });
-    focusEvent.personIds.forEach((id) => personItemMinusReferences(id));
+    focusEvent.personIds.forEach((id) => personSet.minusReferencesByBoxId(id));
     removeFocusEvent(focusEvent);
     DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
     dailyRecord.richLines.clear();

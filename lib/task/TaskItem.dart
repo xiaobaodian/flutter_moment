@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_moment/models/models.dart';
 
 enum TaskState {
   StandBy,
@@ -29,9 +30,9 @@ class CycleDate {
   int cycleWeekDay;
 }
 
-class TaskItem {
+class TaskItem extends BoxItem {
   TaskItem({
-    this.boxId = 0,
+    boxId = 0,
     this.focusItemId = 0,
     this.title = '',
     this.comment = '',
@@ -51,7 +52,7 @@ class TaskItem {
     this.shareTo = '',
     this.author = 0,
     this.delegate = 0,
-  }){
+  }): super(boxId: boxId) {
     checkBoxKey = GlobalKey();
   }
 
@@ -78,7 +79,6 @@ class TaskItem {
     this.delegate = other.delegate;
   }
 
-  int boxId;
   int focusItemId;
   String title;
   String comment;

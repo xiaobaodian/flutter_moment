@@ -56,6 +56,10 @@ class RichNoteLayout {
   }
 
   Widget richLayoutTask(Widget checkbox, Widget task, Widget time) {
+    double p = 5.5;
+    if (task is TextField) {
+      p = 2.5;
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +78,7 @@ class RichNoteLayout {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 5.5, 0, 0),
+                padding: EdgeInsets.fromLTRB(0, p, 0, 0),
                 child: task,
               ),
               //Padding(
@@ -90,16 +94,24 @@ class RichNoteLayout {
 
   Widget richLayoutList(int indent, Widget leading, Widget content) {
     const left = const [3.0, 30.0, 53.0];
+    TextStyle textStyle;
+    if (content is Text) {
+      textStyle = content.style.merge(TextStyle(color: Colors.white12));
+    } else if (content is TextField) {
+      textStyle = content.style.merge(TextStyle(color: Colors.white12));
+    } else {
+      textStyle = TextStyle(color: Colors.white12);
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.fromLTRB(left[indent], 4, 12, 0),
+          padding: EdgeInsets.fromLTRB(left[indent], 2.5, 12, 0),
           child: Stack(
             alignment: AlignmentDirectional.center,
             children: <Widget>[
-              Text('猫', style: TextStyle(color: Colors.white12),),
+              Text('猫', style: textStyle,),
               leading,
             ],
           ),

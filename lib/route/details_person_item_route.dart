@@ -73,7 +73,7 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
         }
     ).then((result) {
       if (result != null) {
-        _store.removePersonItem(widget._personItem);
+        _store.personSet.removeItem(widget._personItem);
         Navigator.of(context).pop();
       }
     });
@@ -121,7 +121,7 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
                     }
                   }
                   widget._personItem.copyWith(resultItem);
-                  _store.changePersonItem(widget._personItem);
+                  _store.personSet.changeItem(widget._personItem);
                   //_platformDataSource.invokeMethod("PutPersonItem", json.encode(widget._personItem));
                 }
               });
@@ -156,7 +156,7 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
         Widget content = RichNote.fixed(
           store: _store,
           richSource: RichSource(detailsList[index].noteLines),
-          onTapLine: (tapObject) {
+          onTap: (tapObject) {
             var richLine = tapObject.richLine;
             FocusEvent event = richLine.note;
             //FocusEvent event = detailsList[index];
