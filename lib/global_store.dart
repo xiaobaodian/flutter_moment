@@ -73,27 +73,27 @@ class GlobalStoreState extends State<GlobalStore> {
 
     //loadTaskItems();
     //loadPersonItems();
-    taskSet.loadItemsFromDataSource().then((_){
+
+    Future.wait([
+      taskSet.loadItemsFromDataSource(),
+      focusItemSet.loadItemsFromDataSource(),
+      personSet.loadItemsFromDataSource(),
+      placeSet.loadItemsFromDataSource(),
+      tagSet.loadItemsFromDataSource()
+    ]).then((_){
       loadDailyRecords();
     });
-    focusItemSet.loadItemsFromDataSource();
-    personSet.loadItemsFromDataSource();
-    placeSet.loadItemsFromDataSource();
-    tagSet.loadItemsFromDataSource();
+
+//    taskSet.loadItemsFromDataSource().then((_){
+//      loadDailyRecords();
+//    });
+//    focusItemSet.loadItemsFromDataSource();
+//    personSet.loadItemsFromDataSource();
+//    placeSet.loadItemsFromDataSource();
+//    tagSet.loadItemsFromDataSource();
     //loadDailyRecords();
   }
 
-//  void loadTaskItems() {
-//    _platformDataSource.invokeMethod('LoadTaskItems').then((result) {
-//      List<dynamic> resultJson = json.decode(result) as List;
-//      taskItemList = resultJson.map((item) {
-//        TaskItem task = TaskItem.fromJson(item);
-//        _taskItemMap[task.boxId] = task;
-//        return task;
-//      }).toList();
-//      loadDailyRecords();
-//    });
-//  }
 
   void loadDailyRecords() {
     _platformDataSource.invokeMethod('LoadDailyRecords').then((result) {
@@ -125,42 +125,6 @@ class GlobalStoreState extends State<GlobalStore> {
 
   String getFocusTitleBy(int id) => focusItemSet.getItemFromId(id)?.title;
   FocusItem getFocusItemBy(int id) => focusItemSet.getItemFromId(id);
-
-  // task
-//
-//  void addTaskItem(TaskItem task) {
-//    taskItemList.add(task);
-//    debugPrint('加入Task到Store列表中: ${task.title}');
-//    _platformDataSource
-//        .invokeMethod("PutTaskItem", json.encode(task))
-//        .then((id) {
-//      debugPrint('加入Task到数据库中: ${task.title}');
-//      task.boxId = id;
-//      _taskItemMap[id] = task;
-//    });
-//  }
-
-//  void changeTaskItem(TaskItem task) {
-//    int p = taskItemList.indexOf(_taskItemMap[task.boxId]);
-//    taskItemList[p] = task;
-//    _taskItemMap[task.boxId] = task;
-//    _platformDataSource.invokeMethod("PutTaskItem", json.encode(task));
-//    debugPrint('在数据库中修改了Task: ${task.title}');
-//  }
-//
-//  void removeTaskItem(TaskItem task) {
-//    if (task == null) return;
-//    var oldTask = _taskItemMap[task.boxId];
-//    taskItemList.remove(oldTask);
-//    _taskItemMap.remove(task.boxId);
-//    debugPrint('从Store列表中删除了Task: ${task.title}');
-//    _platformDataSource.invokeMethod("RemoveTaskItem", task.boxId.toString());
-//    debugPrint('从数据库中删除了Task: ${task.title}');
-//  }
-//
-//  void removeTaskItemFromId(int id) {
-//    removeTaskItem(_taskItemMap[id]);
-//  }
 
   int changeTaskItemFromFocusEvent(FocusEvent focusEvent) {
     int s = 0;

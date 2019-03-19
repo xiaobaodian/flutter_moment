@@ -133,7 +133,7 @@ class RichItem extends RichLine {
         if (a == b) {
           controller.selection = TextSelection.fromPosition(TextPosition(
             affinity: TextAffinity.downstream,
-            offset: 1,
+            offset: controller.text.length,
           ));
         } else {
           controller.selection = TextSelection(

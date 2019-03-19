@@ -284,18 +284,19 @@ class _HomeScreenState extends State<HomeScreen> {
         child: PageView.builder(
           controller: _pageController,
           itemBuilder: (context, index) {
-            var dailyRecord = _store.calendarMap.getDailyRecordFromIndex(index);
+            var dailyRecord = _store.getDailyRecord(index);
             if (dailyRecord != null) {
               if (dailyRecord.richLines == null ||
                   dailyRecord.richLines.length == 0) {
-                //  || dailyRecord.richLines.length == 0
-                Future(() => buildDailyEventNote(dailyRecord)).then((length) {
-                  if (length > 0) {
-                    setState(() {
-                      debugPrint('延迟生成daily record rich list 完成...');
-                    });
-                  }
-                });
+                buildDailyEventNote(dailyRecord);
+                //延后调用会形成界面闪烁，暂时不用。
+//                Future(() => buildDailyEventNote(dailyRecord)).then((length) {
+//                  if (length > 0) {
+//                    setState(() {
+//                      debugPrint('延迟生成daily record rich list 完成...');
+//                    });
+//                  }
+//                });
               }
             }
             return getDayNote(context, index);

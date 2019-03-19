@@ -179,6 +179,13 @@ class RichNoteState extends State<RichNote> {
         var effectiveSytle = layout.taskStyle == null
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.taskStyle;
+        if (task.state == TaskState.Complete) {
+          effectiveSytle = effectiveSytle.merge(TextStyle(
+              color: Colors.black45,
+              decoration: TextDecoration.lineThrough,
+              decorationStyle: TextDecorationStyle.double,
+          ));
+        }
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutTask(
             checkBox,
@@ -485,7 +492,7 @@ class RichNoteState extends State<RichNote> {
     RichItem tempLine = widget.richSource.richLineList[index];
     if (index > 0) {
       setState(() {
-        tempLine.focusNode.unfocus();
+        //tempLine.focusNode.unfocus();
         RichItem upLine = widget.richSource.richLineList[index - 1];
         var p = upLine.controller.text.length;
         var newText = upLine.controller.text + text;
@@ -543,6 +550,11 @@ class RichNoteState extends State<RichNote> {
     } else {
       //以后转换成识别是否拥有焦点然后处理内容后去掉一下这句 ???存疑
       oldItem.canChanged = false;
+      oldItem.controller.text = lines[0];
+      oldItem.controller.selection = TextSelection.fromPosition(TextPosition(
+        affinity: TextAffinity.downstream,
+        offset: oldItem.controller.text.length,
+      ));
       if (oldItem.type == RichType.Title ||
           oldItem.type == RichType.SubTitle ||
           oldItem.type == RichType.Reference ||
@@ -568,14 +580,9 @@ class RichNoteState extends State<RichNote> {
       newItem.indent = indent;
       newItem.canChanged = false;
       setState(() {
-        oldItem.controller.text = lines[0];
-        oldItem.controller.selection = TextSelection.fromPosition(TextPosition(
-          affinity: TextAffinity.downstream,
-          offset: oldItem.controller.text.length,
-        ));
         widget.richSource.richLineList.insert(index + 1, newItem);
       });
-      Future.delayed(const Duration(milliseconds: 300),(){
+      Future.delayed(const Duration(milliseconds: 100),(){
         _requestFocus(newItem?.focusNode);
       });
     }
