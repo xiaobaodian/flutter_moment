@@ -139,7 +139,7 @@ class GlobalStoreState extends State<GlobalStore> {
         } else {
           //changeTaskItem(task);
           taskSet.changeItem(task);
-          print('批处理FocusEvent包含的任务，修改了Task：${task.title}');
+          print('批处理FocusEvent包含的任务，修改了Task(${task.boxId})：${task.title}');
         }
       } else {
         if (line.expandData != null) {
@@ -278,7 +278,8 @@ class GlobalStoreState extends State<GlobalStore> {
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
 
     focusEvent.extractingPersonList(personSet.itemList);
-    focusEvent.personIds.forEach((key) => personSet.addReferencesByBoxId(key));
+    //focusEvent.personIds.forEach((key) => personSet.addReferencesByBoxId(key));
+    focusEvent.personKeys.list.forEach((key) => personSet.addReferencesByBoxId(key));
 
     focusEvent.extractingPlaceList(placeSet.itemList);
     focusEvent.placeIds.forEach((id) => placeSet.addReferencesByBoxId(id));
@@ -321,24 +322,32 @@ class GlobalStoreState extends State<GlobalStore> {
       //focusEvent.tagIds.forEach((id) => tagSet.addReferencesByBoxId(id));
 
       // 下面比较人物的引用
-      List<int> newPersonIds = [];
-      for (var id in newFocus.personIds) {
-        int index = oldFocus.personIds.indexOf(id);
-        if (index == -1) {
-          newPersonIds.add(id);
-        } else {
-          oldFocus.personIds.removeAt(index);
-        }
-      }
+//      List<int> newPersonIds = [];
+//      for (var id in newFocus.personIds) {
+//        int index = oldFocus.personIds.indexOf(id);
+//        if (index == -1) {
+//          newPersonIds.add(id);
+//        } else {
+//          oldFocus.personIds.removeAt(index);
+//        }
+//      }
+
+      DiffKeysResult result = LabelKeys.diffKeys(oldFocus.personKeys.list, newFocus.personKeys.list);
+
 
       // 测试用
-      newPersonIds
+      result.newKeys
           .forEach((id) => print('新增人物引用：${getPersonItemFromId(id).name}'));
-      oldFocus.personIds
+      result.unusedKeys
           .forEach((id) => print('减少人物引用：${getPersonItemFromId(id).name}'));
 
-      newPersonIds.forEach((id) => personSet.addReferencesByBoxId(id));
-      oldFocus.personIds.forEach((id) => personSet.minusReferencesByBoxId(id));
+//      newPersonIds
+//          .forEach((id) => print('新增人物引用：${getPersonItemFromId(id).name}'));
+//      oldFocus.personIds
+//          .forEach((id) => print('减少人物引用：${getPersonItemFromId(id).name}'));
+
+      result.newKeys.forEach((id) => personSet.addReferencesByBoxId(id));
+      result.unusedKeys.forEach((id) => personSet.minusReferencesByBoxId(id));
 
       // 下面比较位置的引用
       List<int> newPlaceIds = [];
@@ -401,7 +410,7 @@ class GlobalStoreState extends State<GlobalStore> {
         taskSet.removeItem(task);
       }
     });
-    focusEvent.personIds.forEach((id) => personSet.minusReferencesByBoxId(id));
+    focusEvent.personKeys.list.forEach((id) => personSet.minusReferencesByBoxId(id));
     removeFocusEvent(focusEvent);
     DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
     dailyRecord.richLines.clear();
@@ -464,7 +473,7 @@ class GlobalStoreState extends State<GlobalStore> {
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
         day.dailyRecord.focusEvents.forEach((event) {
-          if (event.personIds.indexOf(id) > -1) {
+          if (event.personKeys.list.indexOf(id) > -1) {
             focusEvents.add(event);
           }
         });

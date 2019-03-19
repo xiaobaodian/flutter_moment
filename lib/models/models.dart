@@ -7,6 +7,7 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/enums.dart';
 import 'package:flutter_moment/models/helper_image.dart';
 import 'package:flutter_moment/models/helper_chinese_string.dart';
+import 'package:flutter_moment/models/label_management.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
@@ -382,15 +383,15 @@ class DailyRecord {
       richLines.addAll(event.noteLines);
 
       if (hasRelated) {
-        if (event.personIds.length > 0) {
-          print('加入人物引用');
+        if (event.personKeys.hasKeys()) {
+          debugPrint('加入人物引用');
           String text;
-          for (int i = 0; i < event.personIds.length; i++) {
+          for (int i = 0; i < event.personKeys.list.length; i++) {
             if (i == 0) {
-              text = store.getPersonItemFromId(event.personIds[i]).name;
+              text = store.getPersonItemFromId(event.personKeys.list[i]).name;
             } else {
               text = text +
-                  "、${store.getPersonItemFromId(event.personIds[i]).name}";
+                  "、${store.getPersonItemFromId(event.personKeys.list[i]).name}";
             }
           }
           richLines.add(RichLine(
@@ -400,6 +401,26 @@ class DailyRecord {
             note: event,
           ));
         }
+
+
+//        if (event.personIds.length > 0) {
+//          print('加入人物引用');
+//          String text;
+//          for (int i = 0; i < event.personIds.length; i++) {
+//            if (i == 0) {
+//              text = store.getPersonItemFromId(event.personIds[i]).name;
+//            } else {
+//              text = text +
+//                  "、${store.getPersonItemFromId(event.personIds[i]).name}";
+//            }
+//          }
+//          richLines.add(RichLine(
+//            type: RichType.Related,
+//            indent: 0,
+//            content: text,
+//            note: event,
+//          ));
+//        }
         if (event.placeIds.length > 0) {
           print('加入地点引用');
           String text;
@@ -469,7 +490,8 @@ class FocusEvent {
     String tagBoxIds,
   }) {
     noteLines = RichSource.getRichLinesFromJson(note);
-    personIds = StringExt.stringToListInt(personBoxIds);
+    //personIds = StringExt.stringToListInt(personBoxIds);
+    personKeys.fromString(personBoxIds);
     placeIds = StringExt.stringToListInt(placeBoxIds);
     tagIds = StringExt.stringToListInt(tagBoxIds);
   }
@@ -480,7 +502,8 @@ class FocusEvent {
   List<RichLine> noteLines;
 
   /// [personIds]在内容[noteLines]里面提及相关人员的boxId
-  List<int> personIds;
+  //List<int> personIds;
+  LabelKeys personKeys = LabelKeys();
 
   /// [placeIds]在内容[noteLines]里面提及相关地点的boxId
   List<int> placeIds;
@@ -490,17 +513,18 @@ class FocusEvent {
 
 
   void extractingPersonList(List<PersonItem> personList) {
-    personIds.clear();
-    for (var line in noteLines) {
-      for (var person in personList) {
-        if (line.getContent().indexOf(person.name) > -1) {
-          debugPrint('找到了：${person.name}');
-          if (personIds.indexOf(person.boxId) == -1) {
-            personIds.add(person.boxId);
-          }
-        }
-      }
-    }
+    personKeys.fromExtracting(noteLines, personList);
+//    personIds.clear();
+//    for (var line in noteLines) {
+//      for (var person in personList) {
+//        if (line.getContent().indexOf(person.name) > -1) {
+//          debugPrint('找到了：${person.name}');
+//          if (personIds.indexOf(person.boxId) == -1) {
+//            personIds.add(person.boxId);
+//          }
+//        }
+//      }
+//    }
   }
 
   void extractingPlaceList(List<PlaceItem> placeList) {
@@ -536,7 +560,8 @@ class FocusEvent {
     dayIndex = other.dayIndex;
     focusItemBoxId = other.focusItemBoxId;
     noteLines = other.noteLines;
-    personIds = other.personIds.sublist(0);
+    //personIds = other.personIds.sublist(0);
+    personKeys.copyWith(other.personKeys);
     placeIds = other.placeIds.sublist(0);
     tagIds = other.tagIds.sublist(0);
     //note = other.note;
@@ -559,7 +584,8 @@ class FocusEvent {
     'dayIndex': dayIndex,
     'focusItemBoxId': focusItemBoxId,
     'note': RichSource.getJsonFromRichLine(noteLines),
-    'personBoxIds': StringExt.listIntToString(personIds),
+    //'personBoxIds': StringExt.listIntToString(personIds),
+    'personBoxIds': personKeys.toString(),
     'placeBoxIds': StringExt.listIntToString(placeIds),
     'tagBoxIds': StringExt.listIntToString(tagIds),
   };

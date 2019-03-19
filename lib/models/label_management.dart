@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/task/TaskItem.dart';
 
 
 class BoxSet<T extends BoxItem> {
@@ -58,9 +59,20 @@ class BoxSet<T extends BoxItem> {
 
   void changeItem(T item) {
     T temp = _itemMap[item.boxId];
+    if (item.runtimeType == TaskItem) {
+      var oo = temp as TaskItem;
+      var nn = item as TaskItem;
+      debugPrint('old task(${oo.boxId}) -> (${oo.title})');
+      debugPrint('new task(${nn.boxId}) -> (${nn.title})');
+    }
     if (temp != item) {
       int position = itemList.indexOf(temp);
-      itemList[position] = item;
+      if (position == -1) {
+        debugPrint('index error ! -> ${item.boxId} (${item.runtimeType})');
+      } else {
+        itemList[position] = item;
+        _itemMap[item.boxId] = item;
+      }
     }
     dataSource.invokeMethod(_putCommand, json.encode(item));
   }
@@ -127,25 +139,10 @@ class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
     }
     return sum;
   }
-
-  List<int> extractingLabelByRichLines(List<RichLine> lines) {
-    List<int> list = [];
-    for (var line in lines) {
-      for (var item in itemList) {
-//        if (line.getContent().contains(item.getLabel())) {
-//          debugPrint('找到了：${item.getLabel()}');
-//          if (list.indexOf(item.boxId) == -1) {
-//            list.add(item.boxId);
-//          }
-//        }
-      }
-    }
-    return list;
-  }
 }
 
-class LabelKeyDiffResult {
-  LabelKeyDiffResult({
+class DiffKeysResult {
+  DiffKeysResult({
     this.newKeys,
     this.oldKeys,
     this.unusedKeys,
@@ -177,6 +174,8 @@ class LabelKeys {
   void removeAt(int index) => _keys.removeAt(index);
   bool contains(int key) => _keys.contains(key);
 
+  bool hasKeys() => _keys.length > 0;
+
   /// 将[_keys]转换成字符串：'1|2|3|4|5'
   String toString() {
     String str;
@@ -197,7 +196,7 @@ class LabelKeys {
     }
   }
 
-  LabelKeyDiffResult diffKeys(List<int> oldKeys, List<int> newKeys) {
+  static DiffKeysResult diffKeys(List<int> oldKeys, List<int> newKeys) {
     List<int> unusedList = oldKeys.sublist(0);
     List<int> newList = [];
     List<int> oldList = [];
@@ -208,7 +207,23 @@ class LabelKeys {
         newList.add(newKey);
       }
     }
-    return LabelKeyDiffResult(
+    return DiffKeysResult(
         newKeys: newList, oldKeys: oldList, unusedKeys: unusedList);
+  }
+
+  void fromExtracting(List<RichLine> lines, List<ReferencesBoxItem> objectList) {
+    _keys.clear();
+    for (var line in lines) {
+      for (var obj in objectList) {
+        if (line.getContent().contains(obj.getLabel())) {
+          debugPrint('找到了：${obj.getLabel()}');
+          add(obj.boxId);
+        }
+      }
+    }
+  }
+
+  void copyWith(LabelKeys other){
+    _keys = other._keys.sublist(0);
   }
 }

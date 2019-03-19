@@ -181,7 +181,7 @@ class RichNoteState extends State<RichNote> {
             : layout.taskStyle;
         if (task.state == TaskState.Complete) {
           effectiveSytle = effectiveSytle.merge(TextStyle(
-              color: Colors.black45,
+              color: Colors.black54,
               decoration: TextDecoration.lineThrough,
               decorationStyle: TextDecorationStyle.double,
           ));
