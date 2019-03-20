@@ -9,9 +9,11 @@ import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/route/details_focus_item_route.dart';
 import 'package:flutter_moment/route/details_person_item_route.dart';
 import 'package:flutter_moment/route/details_place_item_route.dart';
+import 'package:flutter_moment/route/details_tag_item_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_person_item_route.dart';
 import 'package:flutter_moment/route/editer_place_item_route.dart';
+import 'package:flutter_moment/route/editer_tage_item_route.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class BrowseDailyFocusRoute extends StatefulWidget {
@@ -30,9 +32,10 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
   List<FocusItem> focusList;
   List<PersonItem> personList;
   List<PlaceItem> placeList;
+  List<TagItem> tagList;
   TabController _controller;
 
-  final List<String> tabLabel = ['焦点', '人物', '位置', '图片', '标签'];
+  final List<String> tabLabel = ['焦点', '人物', '位置', '标签', '图片'];
 
   @override
   void initState() {
@@ -49,6 +52,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     focusList = _store.focusItemSet.itemList;
     personList = _store.personSet.itemList;
     placeList = _store.placeSet.itemList;
+    tagList = _store.tagSet.itemList;
   }
 
   @override
@@ -114,6 +118,15 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
                   }
                 case 3:
                   {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) {
+                          return EditerTagItemRoute(TagItem());
+                        })).then((resultItem) {
+                      if (resultItem is TagItem) {
+                        //_store.addPlaceItem(resultItem);
+                        _store.tagSet.addItem(resultItem);
+                      }
+                    });
                     break;
                   }
                 case 4:
@@ -159,8 +172,19 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
             },
             itemCount: placeList.length,
           ),
-          Text('图片，待扩充'),
-          Text('标签, 待扩充'),
+          ListView.separated(
+            itemBuilder: (context, index) {
+              return getTagListViewItem(
+                  context, index); //buildPlaceListViewItem(context, index);
+            },
+            separatorBuilder: (context, index) {
+              return Divider(
+                indent: 18,
+              );
+            },
+            itemCount: tagList.length,
+          ),
+          Text('图片, 待扩充'),
         ],
       ),
     );
@@ -170,26 +194,24 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     FocusItem focusItem = focusList[index];
     var subTitle =
         focusItem.references == 0 ? '未关注' : '已关注 ${focusItem.references} 次';
-    return ListTile(
+    var gz =
+        focusItem.references == 0 ? '' : '${focusItem.references} ';
+    return CatListTile(
       title: Text(
         focusItem.title,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: Colors.black87,
-          fontSize: 18,
-        ),
       ),
-      subtitle: Text(
-        subTitle,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: Colors.black45,
-          fontSize: 14,
-        ),
-      ),
-      isThreeLine: true,
+//      subtitle: Text(
+//        subTitle,
+//        softWrap: false,
+//        overflow: TextOverflow.ellipsis,
+//        style: TextStyle(
+//          color: Colors.black45,
+//          fontSize: 14,
+//        ),
+//      ),
+      trailText: Text(gz),
       trailing: Icon(Icons.arrow_right),
       onTap: () {
         Navigator.of(context)
@@ -220,19 +242,21 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     var personItem = personList[index];
     var subTitle =
         personItem.references == 0 ? '未关注' : '在 ${personItem.references} 个焦点中';
-    return ListTile(
+    var gz =
+    personItem.references == 0 ? '' : '${personItem.references} ';
+    return CatListTile(
       leading: SizedBox(
         height: 36,
         width: 36,
         child: ClipOval(child: personItem.getImage()),
       ),
       title: Text(personItem.name),
-      subtitle: Text(
-        subTitle,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-      ),
-      isThreeLine: true,
+//      subtitle: Text(
+//        subTitle,
+//        softWrap: false,
+//        overflow: TextOverflow.ellipsis,
+//      ),
+      trailText: Text(gz),
       trailing: Icon(Icons.arrow_right),
       onTap: () {
         //PersonDetailsRoute
@@ -281,6 +305,34 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
             placeItem.copyWith(resultItem);
             //_store.changePlaceItem(placeItem);
             _store.placeSet.changeItem(placeItem);
+          }
+        });
+      },
+    );
+  }
+
+  Widget getTagListViewItem(BuildContext context, int index) {
+    var tagItem = tagList[index];
+    var gz = tagItem.references == 0 ? '' : '${tagItem.references} ';
+    return CatListTile(
+      title: Text(tagItem.title),
+      trailText: Text(gz),
+      trailing: Icon(Icons.arrow_right),
+      onTap: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (BuildContext context) {
+          return TagItemDetailsRoute(tagItem);
+        }));
+      },
+      onLongPress: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (BuildContext context) {
+          return EditerTagItemRoute(tagItem);
+        })).then((resultItem) {
+          if (resultItem is TagItem) {
+            tagItem.copyWith(resultItem);
+            //_store.changePlaceItem(placeItem);
+            _store.tagSet.changeItem(tagItem);
           }
         });
       },

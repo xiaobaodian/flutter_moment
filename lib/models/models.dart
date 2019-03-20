@@ -203,7 +203,7 @@ class PlaceItem extends ReferencesBoxItem with BuildImageMixin, DetailsListMixin
 ///
 /// [TagItem] 标签项的class定义，需要用到数据库和引用计数，所以扩展自[ReferencesBoxItem]
 ///
-class TagItem extends ReferencesBoxItem {
+class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
   String title;
 
   TagItem({
@@ -402,35 +402,16 @@ class DailyRecord {
           ));
         }
 
-
-//        if (event.personIds.length > 0) {
-//          print('加入人物引用');
-//          String text;
-//          for (int i = 0; i < event.personIds.length; i++) {
-//            if (i == 0) {
-//              text = store.getPersonItemFromId(event.personIds[i]).name;
-//            } else {
-//              text = text +
-//                  "、${store.getPersonItemFromId(event.personIds[i]).name}";
-//            }
-//          }
-//          richLines.add(RichLine(
-//            type: RichType.Related,
-//            indent: 0,
-//            content: text,
-//            note: event,
-//          ));
-//        }
-        if (event.placeIds.length > 0) {
+        if (event.placeKeys.hasKeys()) {
           print('加入地点引用');
           String text;
-          for (int i = 0; i < event.placeIds.length; i++) {
+          for (int i = 0; i < event.placeKeys.list.length; i++) {
             if (i == 0) {
               //text = store.getPlaceItemFromId(event.placeKeys[i]).title;
-              text = store.placeSet.getItemFromId(event.placeIds[i]).title;
+              text = store.placeSet.getItemFromId(event.placeKeys.list[i]).title;
             } else {
               //text = text + "、${store.getPlaceItemFromId(event.placeKeys[i]).title}";
-              text = text + "、${store.placeSet.getItemFromId(event.placeIds[i]).title}";
+              text = text + "、${store.placeSet.getItemFromId(event.placeKeys.list[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -440,16 +421,14 @@ class DailyRecord {
             note: event,
           ));
         }
-        if (event.tagIds.length > 0) {
+        if (event.tagKeys.hasKeys()) {
           print('加入标签引用');
           String text;
-          for (int i = 0; i < event.tagIds.length; i++) {
+          for (int i = 0; i < event.tagKeys.list.length; i++) {
             if (i == 0) {
-              //text = store.getPlaceItemFromId(event.tagKeys[i]).title;
-              text = store.tagSet.getItemFromId(event.tagIds[i]).title;
+              text = store.tagSet.getItemFromId(event.tagKeys.list[i]).title;
             } else {
-              //text = text + "、${store.getPlaceItemFromId(event.tagKeys[i]).title}";
-              text = text + "、${store.tagSet.getItemFromId(event.tagIds[i]).title}";
+              text = text + "、${store.tagSet.getItemFromId(event.tagKeys.list[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -489,11 +468,15 @@ class FocusEvent {
     String placeBoxIds,
     String tagBoxIds,
   }) {
-    noteLines = RichSource.getRichLinesFromJson(note);
     //personIds = StringExt.stringToListInt(personBoxIds);
+    //placeIds = StringExt.stringToListInt(placeBoxIds);
+    //tagIds = StringExt.stringToListInt(tagBoxIds);
+    noteLines = RichSource.getRichLinesFromJson(note);
+
     personKeys.fromString(personBoxIds);
-    placeIds = StringExt.stringToListInt(placeBoxIds);
-    tagIds = StringExt.stringToListInt(tagBoxIds);
+    placeKeys.fromString(placeBoxIds);
+    tagKeys.fromString(tagBoxIds);
+
   }
 
   int boxId;
@@ -506,53 +489,24 @@ class FocusEvent {
   LabelKeys personKeys = LabelKeys();
 
   /// [placeIds]在内容[noteLines]里面提及相关地点的boxId
-  List<int> placeIds;
+  LabelKeys placeKeys = LabelKeys();
+  //List<int> placeIds;
 
   /// [tagIds]在内容[noteLines]里面提及相关标签的boxId
-  List<int> tagIds;
+  LabelKeys tagKeys = LabelKeys();
+  //List<int> tagIds;
 
 
   void extractingPersonList(List<PersonItem> personList) {
     personKeys.fromExtracting(noteLines, personList);
-//    personIds.clear();
-//    for (var line in noteLines) {
-//      for (var person in personList) {
-//        if (line.getContent().indexOf(person.name) > -1) {
-//          debugPrint('找到了：${person.name}');
-//          if (personIds.indexOf(person.boxId) == -1) {
-//            personIds.add(person.boxId);
-//          }
-//        }
-//      }
-//    }
   }
 
   void extractingPlaceList(List<PlaceItem> placeList) {
-    placeIds.clear();
-    for (var line in noteLines) {
-      for (var place in placeList) {
-        if (line.getContent().contains(place.title)) {
-          debugPrint('找到了：${place.title}');
-          if (placeIds.indexOf(place.boxId) == -1) {
-            placeIds.add(place.boxId);
-          }
-        }
-      }
-    }
+    placeKeys.fromExtracting(noteLines, placeList);
   }
 
   void extractingTagList(List<TagItem> tagList) {
-    tagIds.clear();
-    for (var line in noteLines) {
-      for (var tag in tagList) {
-        if (line.getContent().contains(tag.title)) {
-          debugPrint('找到了：${tag.title}');
-          if (tagIds.indexOf(tag.boxId) == -1) {
-            tagIds.add(tag.boxId);
-          }
-        }
-      }
-    }
+    tagKeys.fromExtracting(noteLines, tagList);
   }
 
   void copyWith(FocusEvent other) {
@@ -562,8 +516,8 @@ class FocusEvent {
     noteLines = other.noteLines;
     //personIds = other.personIds.sublist(0);
     personKeys.copyWith(other.personKeys);
-    placeIds = other.placeIds.sublist(0);
-    tagIds = other.tagIds.sublist(0);
+    placeKeys.copyWith(other.placeKeys);
+    tagKeys.copyWith(other.tagKeys);
     //note = other.note;
   }
 
@@ -586,8 +540,8 @@ class FocusEvent {
     'note': RichSource.getJsonFromRichLine(noteLines),
     //'personBoxIds': StringExt.listIntToString(personIds),
     'personBoxIds': personKeys.toString(),
-    'placeBoxIds': StringExt.listIntToString(placeIds),
-    'tagBoxIds': StringExt.listIntToString(tagIds),
+    'placeBoxIds': placeKeys.toString(),
+    'tagBoxIds': tagKeys.toString(),
   };
 }
 

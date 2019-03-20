@@ -57,39 +57,43 @@ class BoxSet<T extends BoxItem> {
     });
   }
 
+  /// 修改[item]的时候传进来的可能是一个副本，只有[boxId]是可靠的，所以先
+  /// 通过[_itemMap]找到[itemList]中原来的实例，进行对比，如果是同一个对象，就不用
+  /// 处理。否则，通过indexOf方法定位到index，然后进行替换，并把[_itemMap]也进行
+  /// 替换。
   void changeItem(T item) {
     T temp = _itemMap[item.boxId];
-    if (item.runtimeType == TaskItem) {
-      var oo = temp as TaskItem;
-      var nn = item as TaskItem;
-      debugPrint('old task(${oo.boxId}) -> (${oo.title})');
-      debugPrint('new task(${nn.boxId}) -> (${nn.title})');
-    }
+    assert(temp != null);
+//    if (item.runtimeType == TaskItem) {
+//      var oo = temp as TaskItem;
+//      var nn = item as TaskItem;
+//      debugPrint('old task(${oo.boxId}) -> (${oo.title})');
+//      debugPrint('new task(${nn.boxId}) -> (${nn.title})');
+//    }
     if (temp != item) {
       int position = itemList.indexOf(temp);
-      if (position == -1) {
-        debugPrint('index error ! -> ${item.boxId} (${item.runtimeType})');
-      } else {
-        itemList[position] = item;
-        _itemMap[item.boxId] = item;
-      }
+      assert(position != -1);
+      itemList[position] = item;
+      _itemMap[item.boxId] = item;
+//      if (position == -1) {
+//        debugPrint('index error ! -> ${item.boxId} (${item.runtimeType})');
+//      } else {
+//        itemList[position] = item;
+//        _itemMap[item.boxId] = item;
+//      }
     }
     dataSource.invokeMethod(_putCommand, json.encode(item));
   }
 
   /// 删除item的时候，传进来的可能是一个全新的副本，直接删除是有可能出错的。
-  /// 所以先通过传进来的[item.boxId]获取[itemList]中的实例，然后执行删除才能保证
-  /// 正确执行。
+  /// 所以需要通过传进来的[item.boxId]执行删除才能保证正确执行。
   void removeItem(T item) {
-    T temp = _itemMap[item.boxId];
-    assert(temp != null);
-    itemList.remove(temp);
-    _itemMap.remove(item.boxId);
-    dataSource.invokeMethod(_removeCommand, item.boxId.toString());
+    removeItemByBoxId(item.boxId);
   }
 
   void changeItemByBoxId(int id) {
     T item = _itemMap[id];
+    assert(item != null);
     if (item != null) {
       dataSource.invokeMethod(_putCommand, item.boxId.toString());
     }
@@ -97,8 +101,11 @@ class BoxSet<T extends BoxItem> {
 
   void removeItemByBoxId(int id) {
     T item = _itemMap[id];
+    assert(item != null);
     if (item != null) {
-      removeItem(item);
+      itemList.remove(item);
+      _itemMap.remove(item.boxId);
+      dataSource.invokeMethod(_removeCommand, item.boxId.toString());
     }
   }
 }

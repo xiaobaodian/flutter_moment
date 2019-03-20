@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 navigator.pop(context);
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseDailyFocusRoute(3);
+                  return BrowseDailyFocusRoute(4);
                 }));
               },
             ),
@@ -228,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 navigator.pop(context);
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseDailyFocusRoute(4);
+                  return BrowseDailyFocusRoute(3);
                 }));
               },
             ),
