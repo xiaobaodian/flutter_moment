@@ -8,7 +8,7 @@ import 'package:flutter_moment/models/helper_file.dart';
 import 'package:flutter_moment/models/label_management.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
-import 'package:flutter_moment/task/TaskItem.dart';
+import 'package:flutter_moment/task/task_item.dart';
 
 class GlobalStore extends StatefulWidget {
   final Widget child;

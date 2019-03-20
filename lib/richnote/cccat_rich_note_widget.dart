@@ -7,7 +7,7 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
-import 'package:flutter_moment/task/TaskItem.dart';
+import 'package:flutter_moment/task/task_item.dart';
 
 class RichNoteTapObject {
   RichNoteTapObject(

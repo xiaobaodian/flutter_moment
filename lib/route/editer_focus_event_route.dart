@@ -6,6 +6,7 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
+import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class EditerFocusEventRoute extends StatefulWidget {
   final FocusEvent _focusEvent;
@@ -18,6 +19,7 @@ class EditerFocusEventRoute extends StatefulWidget {
 
 class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   //final focusEventController = TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   String routeTitle;
   RichSource richSource;
   RichNote richNote;
@@ -51,6 +53,26 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     super.dispose();
     //focusEventController.dispose();
     richSource.dispose();
+  }
+
+  void openEndDrawer() {
+    //_scaffoldKey.currentState.openEndDrawer();
+//    _scaffoldKey.currentState.showSnackBar(
+//        SnackBar(
+//          content: Text('hello'),
+//          backgroundColor: Colors.yellow,
+//        )
+//    );
+    print('q = w');
+    Builder(
+      builder: (BuildContext context) {
+        var q = Scaffold.of(context);
+        var w = _scaffoldKey.currentState;
+        print('q = w ?');
+        print('q = w ? => ${q==w}');
+      },
+    );
+    //Scaffold.of(context).openEndDrawer();
   }
 
   void removeFocusEventItem(BuildContext context) {
@@ -90,6 +112,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   Widget build(BuildContext context) {
     debugPrint('生成编辑窗');
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -106,9 +129,14 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: Icon(Icons.place),
             onPressed: () {
-              removeFocusEventItem(context);
+              _scaffoldKey.currentState.openEndDrawer();
+//              Builder(
+//                builder: (BuildContext context) {
+//                  Scaffold.of(context).openEndDrawer();
+//                },
+//              );
             },
           ),
           IconButton(
@@ -129,9 +157,86 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
               }
             },
           ),
+          PopupMenuButton(
+            onSelected: (int v){
+              if (v == 1) {
+                removeFocusEventItem(context);
+              } else if (v == 2) {
+                openEndDrawer();
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<int>>[
+                PopupMenuItem(
+                  value: 1,
+                  //enabled: !_hideEditButton,
+                  child: CatListTile(
+                    leading: Icon(Icons.delete),
+                    leadingSpace: 24,
+                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
+                    title: Text('删除'),
+                  ),
+                ),
+                PopupMenuDivider(height: 1),
+                PopupMenuItem(
+                  value: 2,
+                  //enabled: !_hideDeleteButton,
+                  child: CatListTile(
+                    leading: Icon(Icons.people),
+                    leadingSpace: 24,
+                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
+                    title: Text(''),
+                    trailText: Text('2'),
+                  ),
+                ),
+                PopupMenuDivider(height: 1),
+                PopupMenuItem(
+                  value: 3,
+                  //enabled: !_hideDeleteButton,
+                  child: CatListTile(
+                    leading: Icon(Icons.place),
+                    leadingSpace: 24,
+                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
+                    title: Text(''),
+                    trailText: Text('2'),
+                  ),
+                ),
+                PopupMenuDivider(height: 1),
+                PopupMenuItem(
+                  value: 4,
+                  //enabled: !_hideDeleteButton,
+                  child: CatListTile(
+                    leading: Icon(Icons.label),
+                    leadingSpace: 24,
+                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
+                    title: Text(''),
+                    trailText: Text('2'),
+                  ),
+                ),
+              ];
+            },
+          ),
         ],
       ),
       body: richNote,
+      endDrawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            ListTile(
+              title: Text('ksdkjshdjksds'),
+            ),
+            ListTile(
+              title: Text('ksdkjshdjksds'),
+            ),
+            ListTile(
+              title: Text('ksdkjshdjksds'),
+            ),
+            ListTile(
+              title: Text('ksdkjshdjksds'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

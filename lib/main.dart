@@ -341,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           );
         },
-        child: Icon(Icons.filter_center_focus),
+        child: Icon(Icons.edit),
       ),
     );
   }
