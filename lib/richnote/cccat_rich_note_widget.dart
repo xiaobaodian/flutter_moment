@@ -18,6 +18,11 @@ class RichNoteTapObject {
   RichLine richLine;
 }
 
+enum BarType {
+  FormatBar,
+  LabelBar
+}
+
 class RichNote extends StatefulWidget {
   RichNote({
     @required this.store,
@@ -75,10 +80,12 @@ class RichNote extends StatefulWidget {
 class RichNoteState extends State<RichNote> {
   TextTheme textTheme;
   RichNoteLayout layout;
+  BarType barType;
 
   @override
   void initState() {
     super.initState();
+    barType = BarType.FormatBar;
   }
 
   @override
@@ -651,6 +658,185 @@ class RichNoteState extends State<RichNote> {
     return bodyItems;
   }
 
+  Widget _buildFormatIconsBar() {
+    return ListView(
+      scrollDirection: Axis.horizontal,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.clear_all),
+          color: Colors.black87,
+          tooltip: '删除当前段落文本',
+          onPressed: () {
+            removeCurrentLine();
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.reorder),
+          color: Colors.black87,
+          onPressed: () {
+            changeParagraphTypeTo(RichType.Text);
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.format_bold),
+          color: Colors.black87,
+          onPressed: () {
+            changeLineStyleTo(RichStyle.Bold);
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.format_list_numbered),
+          color: Colors.black87,
+          onPressed: () {
+            final item = getCurrentRichItem();
+            if (item.type == RichType.OrderedLists) {
+              changeParagraphTypeTo(RichType.Text);
+            } else {
+              changeParagraphTypeTo(RichType.OrderedLists);
+            }
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.format_list_bulleted),
+          color: Colors.black87,
+          onPressed: () {
+            final item = getCurrentRichItem();
+            if (item.type == RichType.UnorderedList) {
+              changeParagraphTypeTo(RichType.Text);
+            } else {
+              changeParagraphTypeTo(RichType.UnorderedList);
+            }
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.format_indent_increase),
+          color: Colors.black87,
+          onPressed: () {
+            var item = getCurrentRichItem();
+            if (item.type == RichType.OrderedLists ||
+                item.type == RichType.UnorderedList) {
+              if (item.indent < widget._maxIndent) {
+                setState(() {
+                  item.indent++;
+                });
+              }
+            }
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.format_indent_decrease),
+          color: Colors.black87,
+          onPressed: () {
+            var item = getCurrentRichItem();
+            if (item.type == RichType.OrderedLists ||
+                item.type == RichType.UnorderedList) {
+              if (item.indent > 0) {
+                setState(() {
+                  item.indent--;
+                });
+              }
+            }
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.insert_comment),
+          color: Colors.black87,
+          onPressed: () {
+            final item = getCurrentRichItem();
+            if (item.type == RichType.Comment) {
+              changeParagraphTypeTo(RichType.Text);
+            } else {
+              changeParagraphTypeTo(RichType.Comment);
+            }
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.check_box),
+          color: Colors.black87,
+          onPressed: () {
+            final item = getCurrentRichItem();
+            if (item.type == RichType.Task) {
+              changeParagraphTypeTo(RichType.Text);
+            } else {
+              changeParagraphTypeTo(RichType.Task);
+            }
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.photo),
+          color: Colors.black87,
+          onPressed: () {
+            //getContentList();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabelIconsBar() {
+    return ListView(
+      scrollDirection: Axis.horizontal,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.people),
+          onPressed: (){
+
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.place),
+          onPressed: (){
+
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.label),
+          onPressed: (){
+
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _getIconsBar() {
+    Widget bar;
+    if (barType == BarType.FormatBar) {
+      bar = Row(
+        children: <Widget>[
+          Expanded(
+            child: _buildFormatIconsBar(),
+          ),
+          IconButton(
+            icon: Icon(Icons.arrow_forward_ios),
+            onPressed: (){
+              setState(() {
+                barType = BarType.LabelBar;
+              });
+            },
+          ),
+        ],
+      );
+    } else {
+      bar = Row(
+        children: <Widget>[
+          IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: (){
+              setState(() {
+                barType = BarType.FormatBar;
+              });
+            },
+          ),
+          Expanded(
+            child: _buildLabelIconsBar(),
+          ),
+        ],
+      );
+    }
+    return bar;
+  }
+
   List<Widget> _buildBody() {
     List<Widget> bodyItems = [];
     bodyItems.add(Expanded(
@@ -687,118 +873,7 @@ class RichNoteState extends State<RichNote> {
         SizedBox(
           height: 48,
           width: double.infinity,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.clear_all),
-                color: Colors.black87,
-                tooltip: '删除当前段落文本',
-                onPressed: () {
-                  removeCurrentLine();
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.reorder),
-                color: Colors.black87,
-                onPressed: () {
-                  changeParagraphTypeTo(RichType.Text);
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.format_bold),
-                color: Colors.black87,
-                onPressed: () {
-                  changeLineStyleTo(RichStyle.Bold);
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.format_list_numbered),
-                color: Colors.black87,
-                onPressed: () {
-                  final item = getCurrentRichItem();
-                  if (item.type == RichType.OrderedLists) {
-                    changeParagraphTypeTo(RichType.Text);
-                  } else {
-                    changeParagraphTypeTo(RichType.OrderedLists);
-                  }
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.format_list_bulleted),
-                color: Colors.black87,
-                onPressed: () {
-                  final item = getCurrentRichItem();
-                  if (item.type == RichType.UnorderedList) {
-                    changeParagraphTypeTo(RichType.Text);
-                  } else {
-                    changeParagraphTypeTo(RichType.UnorderedList);
-                  }
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.format_indent_increase),
-                color: Colors.black87,
-                onPressed: () {
-                  var item = getCurrentRichItem();
-                  if (item.type == RichType.OrderedLists ||
-                      item.type == RichType.UnorderedList) {
-                    if (item.indent < widget._maxIndent) {
-                      setState(() {
-                        item.indent++;
-                      });
-                    }
-                  }
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.format_indent_decrease),
-                color: Colors.black87,
-                onPressed: () {
-                  var item = getCurrentRichItem();
-                  if (item.type == RichType.OrderedLists ||
-                      item.type == RichType.UnorderedList) {
-                    if (item.indent > 0) {
-                      setState(() {
-                        item.indent--;
-                      });
-                    }
-                  }
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.insert_comment),
-                color: Colors.black87,
-                onPressed: () {
-                  final item = getCurrentRichItem();
-                  if (item.type == RichType.Comment) {
-                    changeParagraphTypeTo(RichType.Text);
-                  } else {
-                    changeParagraphTypeTo(RichType.Comment);
-                  }
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.check_box),
-                color: Colors.black87,
-                onPressed: () {
-                  final item = getCurrentRichItem();
-                  if (item.type == RichType.Task) {
-                    changeParagraphTypeTo(RichType.Text);
-                  } else {
-                    changeParagraphTypeTo(RichType.Task);
-                  }
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.photo),
-                color: Colors.black87,
-                onPressed: () {
-                  //getContentList();
-                },
-              ),
-            ],
-          ),
+          child: _getIconsBar(),
         ),
       );
     }
