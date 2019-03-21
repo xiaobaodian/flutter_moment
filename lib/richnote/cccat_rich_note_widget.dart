@@ -739,7 +739,7 @@ class RichNoteState extends State<RichNote> {
           },
         ),
         IconButton(
-          icon: Icon(Icons.insert_comment),
+          icon: Icon(Icons.aspect_ratio),
           color: Colors.black87,
           onPressed: () {
             final item = getCurrentRichItem();
@@ -807,27 +807,52 @@ class RichNoteState extends State<RichNote> {
           Expanded(
             child: _buildFormatIconsBar(),
           ),
-          Divider(),
-          IconButton(
-            icon: Icon(Icons.arrow_forward_ios),
-            onPressed: (){
-              setState(() {
-                barType = BarType.LabelBar;
-              });
-            },
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  offset: Offset(-8, 0),
+                  color: Colors.black54,
+                  spreadRadius: -8,
+                  blurRadius: 5.0,
+                ),
+              ]
+            ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_forward_ios),
+              onPressed: (){
+                setState(() {
+                  barType = BarType.LabelBar;
+                });
+              },
+            ),
           ),
         ],
       );
     } else {
       bar = Row(
         children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: (){
-              setState(() {
-                barType = BarType.FormatBar;
-              });
-            },
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    offset: Offset(8, 0),
+                    color: Colors.black54,
+                    spreadRadius: -8,
+                    blurRadius: 5.0,
+                  ),
+                ]
+            ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back_ios),
+              onPressed: (){
+                setState(() {
+                  barType = BarType.FormatBar;
+                });
+              },
+            ),
           ),
           Expanded(
             child: _buildLabelIconsBar(),

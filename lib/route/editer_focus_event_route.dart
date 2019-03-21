@@ -167,7 +167,18 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
                     title: Text('删除'),
                   ),
                 ),
-                //PopupMenuDivider(height: 1),
+                PopupMenuDivider(height: 1),
+                PopupMenuItem(
+                  value: 2,
+                  //enabled: !_hideEditButton,
+                  height: 64,
+                  child: CatListTile(
+                    leading: Icon(Icons.add_to_home_screen),
+                    leadingSpace: 24,
+                    contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    title: Text('移动'),
+                  ),
+                ),
               ];
             },
           ),
