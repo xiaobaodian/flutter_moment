@@ -129,17 +129,6 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.place),
-            onPressed: () {
-              _scaffoldKey.currentState.openEndDrawer();
-//              Builder(
-//                builder: (BuildContext context) {
-//                  Scaffold.of(context).openEndDrawer();
-//                },
-//              );
-            },
-          ),
-          IconButton(
             icon: Icon(Icons.save),
             onPressed: () {
               if (richSource.hasNote()) {
@@ -170,49 +159,15 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
                 PopupMenuItem(
                   value: 1,
                   //enabled: !_hideEditButton,
+                  height: 64,
                   child: CatListTile(
                     leading: Icon(Icons.delete),
                     leadingSpace: 24,
-                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
+                    contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                     title: Text('删除'),
                   ),
                 ),
-                PopupMenuDivider(height: 1),
-                PopupMenuItem(
-                  value: 2,
-                  //enabled: !_hideDeleteButton,
-                  child: CatListTile(
-                    leading: Icon(Icons.people),
-                    leadingSpace: 24,
-                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
-                    title: Text(''),
-                    trailText: Text('2'),
-                  ),
-                ),
-                PopupMenuDivider(height: 1),
-                PopupMenuItem(
-                  value: 3,
-                  //enabled: !_hideDeleteButton,
-                  child: CatListTile(
-                    leading: Icon(Icons.place),
-                    leadingSpace: 24,
-                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
-                    title: Text(''),
-                    trailText: Text('2'),
-                  ),
-                ),
-                PopupMenuDivider(height: 1),
-                PopupMenuItem(
-                  value: 4,
-                  //enabled: !_hideDeleteButton,
-                  child: CatListTile(
-                    leading: Icon(Icons.label),
-                    leadingSpace: 24,
-                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
-                    title: Text(''),
-                    trailText: Text('2'),
-                  ),
-                ),
+                //PopupMenuDivider(height: 1),
               ];
             },
           ),

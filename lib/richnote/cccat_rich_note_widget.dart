@@ -807,6 +807,7 @@ class RichNoteState extends State<RichNote> {
           Expanded(
             child: _buildFormatIconsBar(),
           ),
+          Divider(),
           IconButton(
             icon: Icon(Icons.arrow_forward_ios),
             onPressed: (){
