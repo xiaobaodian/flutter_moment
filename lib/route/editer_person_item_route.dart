@@ -37,12 +37,6 @@ class EditerPersonItemRouteState extends State<EditerPersonItemRoute> {
     super.initState();
     _nameController.text = widget._personItem.name;
     _editerPerson.copyWith(widget._personItem);
-//    _editerPerson = PersonItem(
-//      name: widget._personItem.name,
-//      gender: widget._personItem.gender,
-//      birthday: widget._personItem.birthday,
-//      photo: widget._personItem.photo,
-//    );
   }
 
   @override

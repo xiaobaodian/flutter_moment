@@ -253,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       appBar: AppBar(
-        title: Text('今日焦点'),
+        title: Text('时光'),
         actions: <Widget>[
           Offstage(
             offstage: hideGoTodayButton,

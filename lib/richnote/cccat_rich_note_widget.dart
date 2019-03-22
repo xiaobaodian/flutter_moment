@@ -8,6 +8,7 @@ import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 import 'package:flutter_moment/task/task_item.dart';
+import 'package:flutter_moment/widgets/gender_label_choice_dialog.dart';
 
 class RichNoteTapObject {
   RichNoteTapObject(
@@ -180,6 +181,9 @@ class RichNoteState extends State<RichNote> {
             setState(() {
               task.state =
               isSelected ? TaskState.Complete : TaskState.StandBy;
+              if (widget.isNotEditable) {
+                widget.store.taskSet.changeItem(task);
+              }
             });
           }
         );
@@ -773,6 +777,97 @@ class RichNoteState extends State<RichNote> {
     );
   }
 
+  void editPersonLabel(String title, List<ReferencesBoxItem> labels) {
+    bool offstageAddButton = true;
+    List<ReferencesBoxItem> resultList = [];
+    resultList.addAll(labels);
+    TextEditingController controller = TextEditingController();
+    showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          double width = MediaQuery.of(context).size.width * 0.85;
+          double height = MediaQuery.of(context).size.height * 0.7;
+          return AlertDialog(
+            content: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  children: <Widget>[
+                    Text(title),
+                    Divider(),
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: TextField(
+                            controller: controller,
+                            autofocus: true,
+                            decoration: InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.fromLTRB(0, 3, 0, 3)
+                            ),
+                            onChanged: (text){
+                              debugPrint(text);
+                              if (text.isEmpty) {
+                                setState((){
+                                  resultList.addAll(labels);
+                                });
+                              } else {
+                                resultList.clear();
+                                labels.forEach((label){
+                                  if (label.getLabel().contains(controller.text)) {
+                                    resultList.add(label);
+                                  }
+                                });
+                                if (resultList.isEmpty) {
+                                  offstageAddButton = false;
+                                } else {
+                                  offstageAddButton = true;
+                                }
+                                setState((){});
+                              }
+                            },
+                          ),
+                        ),
+                        Offstage(
+                          offstage: offstageAddButton,
+                          child: IconButton(
+                            icon: Icon(Icons.add),
+                            onPressed: (){
+                              debugPrint('可以执行加入数据');
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(height: 2.0,),
+                    Expanded(
+                      child: Container(
+                        width: width,
+                        height: height,
+                        child: ListView.builder(
+                          itemCount: resultList.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(resultList[index].getLabel()),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            ),
+          );
+        }
+    ).then((result) {
+      if (result != null) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+
   Widget _buildLabelIconsBar() {
     return ListView(
       scrollDirection: Axis.horizontal,
@@ -780,19 +875,19 @@ class RichNoteState extends State<RichNote> {
         IconButton(
           icon: Icon(Icons.people),
           onPressed: (){
-
+            editPersonLabel('人物', widget.store.personSet.itemList);
           },
         ),
         IconButton(
           icon: Icon(Icons.place),
           onPressed: (){
-
+            editPersonLabel('位置', widget.store.placeSet.itemList);
           },
         ),
         IconButton(
           icon: Icon(Icons.label),
           onPressed: (){
-
+            editPersonLabel('标签', widget.store.tagSet.itemList);
           },
         ),
       ],
