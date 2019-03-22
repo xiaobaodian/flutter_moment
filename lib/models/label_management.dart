@@ -108,6 +108,10 @@ class BoxSet<T extends BoxItem> {
       dataSource.invokeMethod(_removeCommand, item.boxId.toString());
     }
   }
+
+  bool findId(int id) {
+    return _itemMap.containsKey(id);
+  }
 }
 
 /// 标签管理类

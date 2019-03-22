@@ -789,57 +789,74 @@ class RichNoteState extends State<RichNote> {
           double width = MediaQuery.of(context).size.width * 0.85;
           double height = MediaQuery.of(context).size.height * 0.7;
           return AlertDialog(
+            contentPadding: EdgeInsets.all(0),
             content: StatefulBuilder(
               builder: (context, setState) {
                 return Column(
                   children: <Widget>[
-                    Text(title),
-                    Divider(),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: TextField(
-                            controller: controller,
-                            autofocus: true,
-                            decoration: InputDecoration(
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.fromLTRB(0, 3, 0, 3)
-                            ),
-                            onChanged: (text){
-                              debugPrint(text);
-                              if (text.isEmpty) {
-                                setState((){
-                                  resultList.addAll(labels);
-                                });
-                              } else {
-                                resultList.clear();
-                                labels.forEach((label){
-                                  if (label.getLabel().contains(controller.text)) {
-                                    resultList.add(label);
+                    Container(
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: TextField(
+                                controller: controller,
+                                autofocus: true,
+                                decoration: InputDecoration(
+                                  hintText: '输入或选择$title',
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.fromLTRB(0, 3, 0, 3)
+                                ),
+                                onChanged: (text){
+                                  debugPrint(text);
+                                  if (text.isEmpty) {
+                                    setState((){
+                                      resultList.addAll(labels);
+                                      offstageAddButton = true;
+                                    });
+                                  } else {
+                                    resultList.clear();
+                                    labels.forEach((label){
+                                      if (label.getLabel().contains(controller.text)) {
+                                        resultList.add(label);
+                                      }
+                                    });
+                                    if (resultList.isEmpty) {
+                                      offstageAddButton = false;
+                                    } else {
+                                      offstageAddButton = true;
+                                    }
+                                    setState((){});
                                   }
-                                });
-                                if (resultList.isEmpty) {
-                                  offstageAddButton = false;
-                                } else {
-                                  offstageAddButton = true;
-                                }
-                                setState((){});
-                              }
-                            },
+                                },
+                              ),
+                            ),
                           ),
-                        ),
-                        Offstage(
-                          offstage: offstageAddButton,
-                          child: IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: (){
-                              debugPrint('可以执行加入数据');
-                            },
+                          Offstage(
+                            offstage: offstageAddButton,
+                            child: FlatButton(
+                              child: Text('加入',
+                                style: TextStyle(color: Theme.of(context).accentColor),
+                              ),
+                              onPressed: (){
+                                debugPrint('可以执行加入数据');
+                              },
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 5.0
+                          ),
+                        ],
+                      ),
                     ),
-                    Divider(height: 2.0,),
                     Expanded(
                       child: Container(
                         width: width,
@@ -847,8 +864,11 @@ class RichNoteState extends State<RichNote> {
                         child: ListView.builder(
                           itemCount: resultList.length,
                           itemBuilder: (context, index) {
+                            var item = resultList[index];
+                            //bool isSelected = widget..findId(item.boxId);
                             return ListTile(
                               title: Text(resultList[index].getLabel()),
+                              //selected: isSelected,
                             );
                           },
                         ),
