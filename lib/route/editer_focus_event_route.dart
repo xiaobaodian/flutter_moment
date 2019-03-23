@@ -19,7 +19,7 @@ class EditerFocusEventRoute extends StatefulWidget {
 
 class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   //final focusEventController = TextEditingController();
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String routeTitle;
   RichSource richSource;
   RichNote richNote;
@@ -43,6 +43,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
       dayIndex: widget._focusEvent.dayIndex,
     );
     richNote = RichNote.editable(
+      focusEvent: widget._focusEvent,
       richSource: richSource,
       store: store,
     );

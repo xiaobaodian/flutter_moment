@@ -33,6 +33,7 @@ class RichNote extends StatefulWidget {
     this.onLongTap,
   })  : isEditable = false,
         isFixed = false,
+        focusEvent = null,
         assert(richSource.richLineList != null) {
     richSource.richNote = this;
   }
@@ -40,6 +41,7 @@ class RichNote extends StatefulWidget {
   RichNote.editable({
     @required this.store,
     @required this.richSource,
+    @required this.focusEvent,
     this.richNoteLayout,
     this.onTap,
     this.onLongTap,
@@ -57,7 +59,8 @@ class RichNote extends StatefulWidget {
     this.onTap,
     this.onLongTap,
   })  : isFixed = true,
-        isEditable = false {
+        isEditable = false,
+        focusEvent = null {
     richSource.richNote = this;
   }
 
@@ -68,6 +71,7 @@ class RichNote extends StatefulWidget {
   final RichNoteLayout richNoteLayout;
   final RichSource richSource;
   final GlobalStoreState store;
+  final FocusEvent focusEvent;
 
   final _maxIndent = 1;
   bool get isNotEditable => !isEditable;

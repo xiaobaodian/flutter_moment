@@ -242,11 +242,11 @@ class RichItem extends RichLine {
 
 class RichSource {
   RichSource(
-    paragraphList, {
+    lineList, {
     this.focusItemBoxId,
     this.dayIndex,
-  }) : assert(paragraphList != null) {
-    this.richLineList = paragraphList ?? [];
+  }) : assert(lineList != null) {
+    this.richLineList = lineList ?? [];
   }
 
   RichSource.fromJson(
