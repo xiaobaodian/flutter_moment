@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_moment/global_store.dart';
+import 'package:flutter_moment/models/helper_chinese_string.dart';
+import 'package:flutter_moment/models/label_management.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
@@ -22,6 +24,12 @@ class RichNoteTapObject {
 enum BarType {
   FormatBar,
   LabelBar
+}
+
+enum LabelType {
+  Person,
+  Place,
+  Tag
 }
 
 class RichNote extends StatefulWidget {
@@ -198,7 +206,7 @@ class RichNoteState extends State<RichNote> {
           effectiveSytle = effectiveSytle.merge(TextStyle(
               color: Colors.black54,
               decoration: TextDecoration.lineThrough,
-              decorationStyle: TextDecorationStyle.double,
+              decorationStyle: TextDecorationStyle.solid,
           ));
         }
         if (widget.isEditable) {
@@ -781,7 +789,29 @@ class RichNoteState extends State<RichNote> {
     );
   }
 
-  void editPersonLabel(String title, List<ReferencesBoxItem> labels) {
+  void editLabels(LabelType type) {
+    String title;
+    List<ReferencesBoxItem> labels;
+    LabelKeys labelKeys;
+    Map<int, String> titleMap = Map<int, String>();
+    String clipText = '';
+    switch (type) {
+      case LabelType.Person:
+        title = '人物';
+        labels = widget.store.personSet.itemList;
+        labelKeys = widget.focusEvent.personKeys;
+        break;
+      case LabelType.Place:
+        title = '位置';
+        labels = widget.store.placeSet.itemList;
+        labelKeys = widget.focusEvent.placeKeys;
+        break;
+      case LabelType.Tag:
+        title = '标签';
+        labels = widget.store.tagSet.itemList;
+        labelKeys = widget.focusEvent.tagKeys;
+        break;
+    }
     bool offstageAddButton = true;
     List<ReferencesBoxItem> resultList = [];
     resultList.addAll(labels);
@@ -791,7 +821,7 @@ class RichNoteState extends State<RichNote> {
         barrierDismissible: true,
         builder: (context) {
           double width = MediaQuery.of(context).size.width * 0.85;
-          double height = MediaQuery.of(context).size.height * 0.7;
+          double height = MediaQuery.of(context).size.height * 0.6;
           return AlertDialog(
             contentPadding: EdgeInsets.all(0),
             content: StatefulBuilder(
@@ -869,15 +899,31 @@ class RichNoteState extends State<RichNote> {
                           itemCount: resultList.length,
                           itemBuilder: (context, index) {
                             var item = resultList[index];
-                            //bool isSelected = widget..findId(item.boxId);
+                            bool isSelected = labelKeys.findKey(item.boxId);
+                            String labelText = resultList[index].getLabel();
                             return ListTile(
-                              title: Text(resultList[index].getLabel()),
-                              //selected: isSelected,
+                              title: Text(labelText),
+                              selected: isSelected,
+                              onTap: (){
+                                if (titleMap.containsKey(index)) {
+                                  titleMap.remove(index);
+                                } else {
+                                  titleMap[index] = labelText;
+                                }
+                                setState((){
+                                  clipText = StringExt.listStringToString(titleMap.values.toList());
+                                });
+                              },
                             );
                           },
                         ),
                       ),
                     ),
+                    Divider(height: 1,),
+                    Padding(
+                      padding: EdgeInsets.all(6),
+                      child: Text(clipText),
+                    )
                   ],
                 );
               }
@@ -899,19 +945,19 @@ class RichNoteState extends State<RichNote> {
         IconButton(
           icon: Icon(Icons.people),
           onPressed: (){
-            editPersonLabel('人物', widget.store.personSet.itemList);
+            editLabels(LabelType.Person);
           },
         ),
         IconButton(
           icon: Icon(Icons.place),
           onPressed: (){
-            editPersonLabel('位置', widget.store.placeSet.itemList);
+            editLabels(LabelType.Place);
           },
         ),
         IconButton(
           icon: Icon(Icons.label),
           onPressed: (){
-            editPersonLabel('标签', widget.store.tagSet.itemList);
+            editLabels(LabelType.Tag);
           },
         ),
       ],

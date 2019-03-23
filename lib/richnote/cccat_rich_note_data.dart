@@ -121,7 +121,7 @@ class RichItem extends RichLine {
     type: type,
   ) {
     if (type == RichType.Task) {
-      expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemBoxId);
+      expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemId);
     }
     textkey = GlobalKey();
     controller = TextEditingController();
@@ -232,7 +232,7 @@ class RichItem extends RichLine {
     if (newType == RichType.Task) {
       assert(source.richNote.store.selectedDateIndex != null);
       if (expandData is! TaskItem) {
-        expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemBoxId);
+        expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemId);
         debugPrint('新建了一个TaskItem记录, dayIndex：${source.dayIndex}');
       }
     }
@@ -242,12 +242,17 @@ class RichItem extends RichLine {
 
 class RichSource {
   RichSource(
-    lineList, {
-    this.focusItemBoxId,
-    this.dayIndex,
-  }) : assert(lineList != null) {
+    lineList
+  ) : assert(lineList != null) {
     this.richLineList = lineList ?? [];
   }
+
+  RichSource.fromFocusEvent(
+    this.focusEvent,
+  ): assert(focusEvent != null),
+     this.richLineList = focusEvent.noteLines;
+     //this.focusItemBoxId = focusEvent.focusItemBoxId,
+     //this.dayIndex = focusEvent.dayIndex;
 
   RichSource.fromJson(
     String jsonString,
@@ -270,8 +275,9 @@ class RichSource {
   List<RichLine> richLineList;
   List<TaskItem> mergeRemoveTask = [];
   RichNote richNote;
-  int focusItemBoxId;
-  int dayIndex;
+  FocusEvent focusEvent;
+  int get focusItemId => focusEvent.focusItemBoxId;
+  int get dayIndex => focusEvent.dayIndex;
 
   void dispose() {
     if (!richNote.isEditable) return;
@@ -347,13 +353,14 @@ class RichSource {
     return richLines;
   }
 
-  String getJsonFromParagraphList() {
+  String getJsonFromLineList() {
     if (richNote.isEditable) {
       return json.encode(_getRichLines());
     }
     return json.encode(richLineList);
   }
 
+  // TODO: 判断一行是否有数据应该用isEmpty，待优化
   bool hasNote() {
     int words = 0;
     for (var line in richLineList) {

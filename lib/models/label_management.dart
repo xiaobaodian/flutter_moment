@@ -185,25 +185,33 @@ class LabelKeys {
   void removeAt(int index) => _keys.removeAt(index);
   bool contains(int key) => _keys.contains(key);
 
-  bool hasKeys() => _keys.length > 0;
+  void addOrRemove(int key) {
+    if (_keys.contains(key)) {
+      _keys.remove(key);
+    } else {
+      _keys.add(key);
+    }
+  }
+
+  bool hasKeys() => _keys.isNotEmpty;
 
   /// 将[_keys]转换成字符串：'1|2|3|4|5'
-  String toString() {
+  String toString({String pattern = '|'}) {
     String str;
     for (int i = 0; i < _keys.length; i++) {
       if (i == 0) {
         str = _keys[i].toString();
       } else {
-        str = str + "|${_keys[i].toString()}";
+        str = str + "$pattern${_keys[i].toString()}";
       }
     }
     return str;
   }
 
   /// 将字符串'1|2|3|4|5'，转换成[_keys]
-  void fromString(String labelString) {
+  void fromString(String labelString, [String pattern = '|']) {
     if (labelString != null) {
-      _keys = labelString.split('|').map((key) => int.parse(key)).toList();
+      _keys = labelString.split(pattern).map((key) => int.parse(key)).toList();
     }
   }
 
@@ -236,5 +244,9 @@ class LabelKeys {
 
   void copyWith(LabelKeys other){
     _keys = other._keys.sublist(0);
+  }
+
+  bool findKey(int key) {
+    return _keys.contains(key);
   }
 }

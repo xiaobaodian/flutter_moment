@@ -38,10 +38,11 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     var store = GlobalStore.of(context);
     routeTitle = store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
     dateTitle = store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
-    richSource = RichSource(widget._focusEvent.noteLines,
-      focusItemBoxId: widget._focusEvent.focusItemBoxId,
-      dayIndex: widget._focusEvent.dayIndex,
-    );
+//    richSource = RichSource(widget._focusEvent.noteLines,
+//      focusItemBoxId: widget._focusEvent.focusItemBoxId,
+//      dayIndex: widget._focusEvent.dayIndex,
+//    );
+    richSource = RichSource.fromFocusEvent(widget._focusEvent);
     richNote = RichNote.editable(
       focusEvent: widget._focusEvent,
       richSource: richSource,
@@ -136,7 +137,6 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
                 FocusEvent focus = FocusEvent();
                 focus.copyWith(widget._focusEvent);
                 focus.noteLines = richSource.exportingRichLists();
-                //focus.note = richSource.getJsonFromParagraphList();
                 PassingObject<FocusEvent> focusEventPassingObject = PassingObject(
                   oldObject: widget._focusEvent,
                   newObject: focus,
