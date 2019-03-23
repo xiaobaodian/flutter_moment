@@ -920,10 +920,15 @@ class RichNoteState extends State<RichNote> {
                       ),
                     ),
                     Divider(height: 1,),
-                    Padding(
-                      padding: EdgeInsets.all(6),
-                      child: Text(clipText),
-                    )
+                    InkWell(
+                      child: Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Text(clipText),
+                      ),
+                      onTap: (){
+                        Clipboard.setData(new ClipboardData(text: clipText));
+                      },
+                    ),
                   ],
                 );
               }
