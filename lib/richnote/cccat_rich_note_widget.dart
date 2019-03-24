@@ -404,6 +404,27 @@ class RichNoteState extends State<RichNote> {
     return index;
   }
 
+  FocusNode _getCurrentFocusNode() {
+    FocusNode node;
+    for (int i = 0; i < widget.richSource.richLineList.length; i++) {
+      RichItem item = (widget.richSource.richLineList[i]);
+      if (item.focusNode.hasFocus) {
+        node = item.focusNode;
+        break;
+      }
+    }
+    return node;
+  }
+
+  RichItem _getCurrentRichItem() {
+    RichItem item;
+    for (int i = 0; i < widget.richSource.richLineList.length; i++) {
+      item = (widget.richSource.richLineList[i]);
+      if (item.focusNode.hasFocus) break;
+    }
+    return item;
+  }
+
   void _requestFocus(FocusNode node) {
     var focusScopeNode = FocusScope.of(context);
     focusScopeNode.requestFocus(node);
@@ -795,6 +816,12 @@ class RichNoteState extends State<RichNote> {
     LabelKeys labelKeys;
     Map<int, String> titleMap = Map<int, String>();
     String clipText = '';
+
+    RichItem item = _getCurrentRichItem();
+    var currentFocusNode = item.focusNode;
+    var currentController = item.controller;
+    int p = item.controller.selection.start;
+
     switch (type) {
       case LabelType.Person:
         title = '人物';
@@ -816,128 +843,157 @@ class RichNoteState extends State<RichNote> {
     List<ReferencesBoxItem> resultList = [];
     resultList.addAll(labels);
     TextEditingController controller = TextEditingController();
+    String newLabel;
+
     showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) {
-          double width = MediaQuery.of(context).size.width * 0.85;
-          double height = MediaQuery.of(context).size.height * 0.6;
-          return AlertDialog(
-            contentPadding: EdgeInsets.all(0),
-            content: StatefulBuilder(
-              builder: (context, setState) {
-                return Column(
-                  children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: TextField(
-                                controller: controller,
-                                autofocus: true,
-                                decoration: InputDecoration(
-                                  hintText: '输入或选择$title',
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.fromLTRB(0, 3, 0, 3)
-                                ),
-                                onChanged: (text){
-                                  debugPrint(text);
-                                  if (text.isEmpty) {
-                                    setState((){
-                                      resultList.addAll(labels);
-                                      offstageAddButton = true;
-                                    });
-                                  } else {
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        double width = MediaQuery.of(context).size.width * 0.85;
+        double height = MediaQuery.of(context).size.height * 0.6;
+        return AlertDialog(
+          contentPadding: EdgeInsets.all(0),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                children: <Widget>[
+                  Container(
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: TextField(
+                              controller: controller,
+                              //autofocus: true,
+                              decoration: InputDecoration(
+                                icon: Icon(Icons.search),
+                                hintText: '点击搜索$title',
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.fromLTRB(0, 3, 0, 3)
+                              ),
+                              onChanged: (text){
+                                debugPrint(text);
+                                if (text.isEmpty) {
+                                  setState((){
                                     resultList.clear();
-                                    labels.forEach((label){
-                                      if (label.getLabel().contains(controller.text)) {
-                                        resultList.add(label);
-                                      }
-                                    });
-                                    if (resultList.isEmpty) {
-                                      offstageAddButton = false;
-                                    } else {
-                                      offstageAddButton = true;
-                                    }
-                                    setState((){});
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                          Offstage(
-                            offstage: offstageAddButton,
-                            child: FlatButton(
-                              child: Text('加入',
-                                style: TextStyle(color: Theme.of(context).accentColor),
-                              ),
-                              onPressed: (){
-                                debugPrint('可以执行加入数据');
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: <BoxShadow>[
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 5.0
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        width: width,
-                        height: height,
-                        child: ListView.builder(
-                          itemCount: resultList.length,
-                          itemBuilder: (context, index) {
-                            var item = resultList[index];
-                            bool isSelected = labelKeys.findKey(item.boxId);
-                            String labelText = resultList[index].getLabel();
-                            return ListTile(
-                              title: Text(labelText),
-                              selected: isSelected,
-                              onTap: (){
-                                if (titleMap.containsKey(index)) {
-                                  titleMap.remove(index);
+                                    resultList.addAll(labels);
+                                    offstageAddButton = true;
+                                  });
                                 } else {
-                                  titleMap[index] = labelText;
+                                  resultList.clear();
+                                  labels.forEach((label){
+                                    if (label.getLabel().contains(controller.text)) {
+                                      resultList.add(label);
+                                    }
+                                  });
+                                  if (resultList.isEmpty) {
+                                    offstageAddButton = false;
+                                    newLabel = text;
+                                  } else {
+                                    offstageAddButton = true;
+                                  }
+                                  setState((){});
                                 }
-                                setState((){
-                                  clipText = StringExt.listStringToString(titleMap.values.toList());
-                                });
                               },
-                            );
-                          },
+                            ),
+                          ),
                         ),
+                        Offstage(
+                          offstage: offstageAddButton,
+                          child: FlatButton(
+                            child: Text('加入',
+                              style: TextStyle(color: Theme.of(context).accentColor),
+                            ),
+                            onPressed: (){
+                              debugPrint('可以执行加入数据');
+                              PersonItem person = PersonItem(name: newLabel);
+                              widget.store.personSet.addItem(person);
+                              setState((){
+                                resultList.add(person);
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 5.0
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: width,
+                      height: height,
+                      child: ListView.builder(
+                        itemCount: resultList.length,
+                        itemBuilder: (context, index) {
+                          var item = resultList[index];
+                          bool isSelected = labelKeys.findKey(item.boxId);
+                          String labelText = resultList[index].getLabel();
+                          return ListTile(
+                            title: Text(labelText),
+                            selected: isSelected,
+                            onTap: (){
+                              if (titleMap.containsKey(index)) {
+                                titleMap.remove(index);
+                              } else {
+                                titleMap[index] = labelText;
+                              }
+                              setState((){
+                                clipText = StringExt.listStringToString(titleMap.values.toList());
+                              });
+                            },
+                          );
+                        },
                       ),
                     ),
-                    Divider(height: 1,),
-                    InkWell(
-                      child: Padding(
-                        padding: EdgeInsets.all(6),
-                        child: Text(clipText),
-                      ),
-                      onTap: (){
-                        Clipboard.setData(new ClipboardData(text: clipText));
-                      },
-                    ),
-                  ],
-                );
-              }
+                  ),
+                  Divider(height: 1,),
+                  Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Text(clipText),
+                  ),
+                  Divider(height: 1,),
+                ],
+              );
+            }
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('插入'),
+              onPressed: () {
+                Navigator.of(context).pop(clipText);
+              },
             ),
-          );
-        }
+          ],
+        );
+      }
     ).then((result) {
       if (result != null) {
-        Navigator.of(context).pop();
+        if (currentFocusNode != null) {
+          String clipText = result;
+          String clearText = item.controller.text.replaceAll('\u0000', '');
+          String before = clearText.substring(0, p - 1);
+          String after = clearText.substring(p - 1);
+          String newText = '\u0000' + before + clipText + after;
+          item.canChanged = false;
+          item.controller.text = newText;
+          FocusScope.of(context).requestFocus(currentFocusNode);
+          item.controller.selection = TextSelection.fromPosition(TextPosition(
+            affinity: TextAffinity.downstream,
+            offset: p + clipText.length,
+          ));
+        } else {
+          Clipboard.setData(new ClipboardData(text: result));
+        }
       }
     });
   }
