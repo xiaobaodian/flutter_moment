@@ -21,5 +21,5 @@ data class DailyRecord(
     var boxId: Long = 0
     // 这是一个虚属性，只为了方便向flutter端返回数据，从flutter端不传数据过来，因此存在数据库
     // 中的就是一个空字段，不能用@Transient标注排除，那样就不能生成json了
-    var focusEvents: List<FocusEvent> = listOf()
+    lateinit var focusEvents: List<FocusEvent>// = listOf()
 }

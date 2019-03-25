@@ -1,39 +1,41 @@
 package com.threecats.fluttermoment.models
 
-import android.content.Context
 import com.google.gson.Gson
+import com.threecats.flutter_moment.BuildConfig
 import com.threecats.fluttermoment.MomentApplication
 import io.objectbox.Box
+import io.objectbox.BoxStore
+import io.objectbox.android.AndroidObjectBrowser
 import io.objectbox.kotlin.boxFor
 
 /**
  * 由 zhang 于 2019/1/25 创建
  */
 object DataSource {
+    lateinit var boxStore: BoxStore
+        private set
 
-    lateinit var app: MomentApplication
+    private lateinit var taskItemBox: Box<TaskItem>
+    private lateinit var focusItemBox:  Box<FocusItem>
+    private lateinit var personItemBox: Box<PersonItem>
+    private lateinit var placeItemBox:  Box<PlaceItem>
+    private lateinit var tagItemBox:  Box<TagItem>
+    private lateinit var dailyRecordBox: Box<DailyRecord>
+    private lateinit var focusEventBox: Box<FocusEvent>
 
-    val context: Context
-        get() = app.applicationContext
+    fun init(context: MomentApplication) {
+        boxStore = MyObjectBox.builder().androidContext(context).build()
+        if (BuildConfig.DEBUG) {
+            AndroidObjectBrowser(boxStore).start(context)
+        }
 
-    lateinit var taskItemBox: Box<TaskItem>
-    lateinit var focusItemBox:  Box<FocusItem>
-    lateinit var personItemBox: Box<PersonItem>
-    lateinit var placeItemBox:  Box<PlaceItem>
-    lateinit var tagItemBox:  Box<TagItem>
-    lateinit var dailyRecordBox: Box<DailyRecord>
-    lateinit var focusEventBox: Box<FocusEvent>
-
-    fun init(application: MomentApplication) {
-        this.app = application
-
-        taskItemBox = app.boxStore.boxFor()
-        focusItemBox = app.boxStore.boxFor()
-        personItemBox = app.boxStore.boxFor()
-        placeItemBox = app.boxStore.boxFor()
-        tagItemBox = app.boxStore.boxFor()
-        dailyRecordBox = app.boxStore.boxFor()
-        focusEventBox = app.boxStore.boxFor()
+        taskItemBox = boxStore.boxFor()
+        focusItemBox = boxStore.boxFor()
+        personItemBox = boxStore.boxFor()
+        placeItemBox = boxStore.boxFor()
+        tagItemBox = boxStore.boxFor()
+        dailyRecordBox = boxStore.boxFor()
+        focusEventBox = boxStore.boxFor()
     }
 
     // TaskItem
@@ -107,10 +109,11 @@ object DataSource {
         focusItemBox.put(FocusItem("朋友圈", "朋友间的趣闻和聚会也是有很多值得品味的，记下来，分享给大家。"))
         focusItemBox.put(FocusItem("购物", "血拼的战报，提醒自己要多挣钱。"))
         focusItemBox.put(FocusItem("读书与知识", "提升自己的知识和见识，需要大量的阅读，多花些时间看看书, 多花些时间思考。"))
-        focusItemBox.put(FocusItem("健身项目", "身体是革命的本钱，锻炼身体，保卫祖国。好身体也是快乐的源泉..."))
+        focusItemBox.put(FocusItem("健身", "身体是革命的本钱，锻炼身体，保卫祖国。好身体也是快乐的源泉..."))
         focusItemBox.put(FocusItem("宠物星球", "小宠物们的日常点滴。"))
-        focusItemBox.put(FocusItem("熊孩子成长记", "家里熊孩子的日常点滴。"))
-        focusItemBox.put(FocusItem("饮食及身体反应", "每天的饮食状况与身体的反应。"))
+        focusItemBox.put(FocusItem("流浪喵星", "帮助流浪的小动物。"))
+        focusItemBox.put(FocusItem("饮食", "每天的饮食状况。"))
+        focusItemBox.put(FocusItem("健康", "身体的健康状况。"))
     }
 
 }

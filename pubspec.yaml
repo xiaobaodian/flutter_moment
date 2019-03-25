@@ -1,5 +1,5 @@
 name: flutter_moment
-description: 时光记忆
+description: 时光
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -75,29 +75,9 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
   assets:
+    - assets/image/SplashPage.png
     - assets/image/defaultPersonPhoto1.png
     - assets/image/defaultPersonPhoto2.png
     - assets/image/iconBoy.png
     - assets/image/iconGirl.png
-    - assets/image/SplashPage.png
-    - assets/image/miwa01.jpg
-    - assets/image/miwa02.jpg
     - assets/image/xuelei01.jpg
-    - assets/image/xuelei02.jpg
-    - assets/image/diandian01.jpg
-    - assets/image/heihei01.jpg
-    - assets/image/huhu01.jpg
-    - assets/image/11577-106.jpg
-    - assets/image/41438-106.jpg
-    - assets/image/57165-106.jpg
-    - assets/image/106379-106.jpg
-    - assets/image/113160-106.jpg
-    - assets/image/225005-106.jpg
-    - assets/image/274399-106.jpg
-    - assets/image/277013-106.jpg
-    - assets/image/293711-106.jpg
-    - assets/image/293711-106.jpg
-    - assets/image/315983-106.jpg
-    - assets/image/331731-106.jpg
-    - assets/image/332697-106.jpg
-    - assets/image/353884-106.jpg

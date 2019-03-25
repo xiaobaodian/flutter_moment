@@ -10,6 +10,7 @@ import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 import 'package:flutter_moment/task/task_item.dart';
+import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/gender_label_choice_dialog.dart';
 
 class RichNoteTapObject {
@@ -316,9 +317,9 @@ class RichNoteState extends State<RichNote> {
         if (item.indent == 0) {
           iconData = Icons.people;
         } else if (item.indent == 1) {
-          iconData = Icons.place;
+          iconData = Icons.map;
         } else if (item.indent == 2) {
-          iconData = Icons.bookmark;
+          iconData = Icons.label;
         } else {
           iconData = Icons.favorite_border;
         }
@@ -385,8 +386,15 @@ class RichNoteState extends State<RichNote> {
       return Column(
         children: <Widget>[
           SizedBox(height: 12),
-          Divider(),
+          //Divider(),
+          DividerExt(thickness: 6, color: Color.fromARGB(127, 235, 235, 235),),
         ],
+      );
+    } else if (current.type != RichType.Related && next.type == RichType.Related) {
+      double right = MediaQuery.of(context).size.width * 0.8;
+      return Padding(
+        padding: EdgeInsets.fromLTRB(16, 12, right, 12),
+        child: Divider(height: 1,),
       );
     }
     return SizedBox(height: layout.segmentSpacing);
@@ -653,8 +661,6 @@ class RichNoteState extends State<RichNote> {
           contentPadding: EdgeInsets.fromLTRB(0, 3, 0 ,3)
       ),
       onChanged: (text) {
-        /// 当item不具有焦点的时候退出，这回调只处理当前具有焦点的item
-        //if (!item.node.hasFocus) return;
 
         debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
         debugPrint('内容长度: ${text.length}');
@@ -819,7 +825,6 @@ class RichNoteState extends State<RichNote> {
 
     RichItem item = _getCurrentRichItem();
     var currentFocusNode = item.focusNode;
-    var currentController = item.controller;
     int p = item.controller.selection.start;
 
     switch (type) {
@@ -850,7 +855,7 @@ class RichNoteState extends State<RichNote> {
       barrierDismissible: true,
       builder: (context) {
         double width = MediaQuery.of(context).size.width * 0.85;
-        double height = MediaQuery.of(context).size.height * 0.6;
+        double height = MediaQuery.of(context).size.height * 0.5;
         return AlertDialog(
           contentPadding: EdgeInsets.all(0),
           content: StatefulBuilder(
@@ -906,12 +911,19 @@ class RichNoteState extends State<RichNote> {
                               style: TextStyle(color: Theme.of(context).accentColor),
                             ),
                             onPressed: (){
-                              debugPrint('可以执行加入数据');
-                              PersonItem person = PersonItem(name: newLabel);
-                              widget.store.personSet.addItem(person);
-                              setState((){
-                                resultList.add(person);
-                              });
+                              if (type == LabelType.Person) {
+                                PersonItem person = PersonItem(name: newLabel);
+                                widget.store.personSet.addItem(person);
+                                setState((){
+                                  resultList.add(person);
+                                });
+                              } else if (type == LabelType.Place) {
+                                PlaceItem place = PlaceItem(title: newLabel);
+                                widget.store.placeSet.addItem(place);
+                                setState((){
+                                  resultList.add(place);
+                                });
+                              }
                             },
                           ),
                         ),
@@ -942,10 +954,10 @@ class RichNoteState extends State<RichNote> {
                             title: Text(labelText),
                             selected: isSelected,
                             onTap: (){
-                              if (titleMap.containsKey(index)) {
-                                titleMap.remove(index);
+                              if (titleMap.containsKey(item.boxId)) {
+                                titleMap.remove(item.boxId);
                               } else {
-                                titleMap[index] = labelText;
+                                titleMap[item.boxId] = labelText;
                               }
                               setState((){
                                 clipText = StringExt.listStringToString(titleMap.values.toList());
@@ -967,6 +979,12 @@ class RichNoteState extends State<RichNote> {
             }
           ),
           actions: <Widget>[
+            FlatButton(
+              child: Text('退出'),
+              onPressed: () {
+                Navigator.of(context).pop(null);
+              },
+            ),
             FlatButton(
               child: Text('插入'),
               onPressed: () {
@@ -1093,22 +1111,25 @@ class RichNoteState extends State<RichNote> {
     List<Widget> bodyItems = [];
     bodyItems.add(Expanded(
       child: ListView.separated(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
         itemBuilder: (context, index) {
-          return InkWell(
-            child: buildLineLayoutWidget(index),
-            onTap: () {
-              if (widget.onTap != null) {
-                widget.onTap(RichNoteTapObject(
-                    index, widget.richSource.richLineList[index]));
-              }
-            },
-            onLongPress: () {
-              if (widget.onLongTap != null) {
-                widget.onLongTap(RichNoteTapObject(
-                    index, widget.richSource.richLineList[index]));
-              }
-            },
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: InkWell(
+              child: buildLineLayoutWidget(index),
+              onTap: () {
+                if (widget.onTap != null) {
+                  widget.onTap(RichNoteTapObject(
+                      index, widget.richSource.richLineList[index]));
+                }
+              },
+              onLongPress: () {
+                if (widget.onLongTap != null) {
+                  widget.onLongTap(RichNoteTapObject(
+                      index, widget.richSource.richLineList[index]));
+                }
+              },
+            ),
           );
         },
         separatorBuilder: (context, index) {

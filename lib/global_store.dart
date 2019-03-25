@@ -66,13 +66,10 @@ class GlobalStoreState extends State<GlobalStore> {
   void initState() {
     super.initState();
     debugPrint('GlobalStore 初始化...');
-
-    getLocalPath().then((path) {
-      localDir = path;
-    });
-
-    //loadTaskItems();
-    //loadPersonItems();
+//
+//    getLocalPath().then((path) {
+//      localDir = path;
+//    });
 
     Future.wait([
       taskSet.loadItemsFromDataSource(),
