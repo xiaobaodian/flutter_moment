@@ -40,7 +40,8 @@ class BoxSet<T extends BoxItem> {
     }
     assert(dataSource.database != null);
     return await dataSource.database
-        .rawQuery('SELECT * FROM ${dataSource.tables[BoxItem.typeName(T)].name}')
+        .rawQuery(
+            'SELECT * FROM ${dataSource.tables[BoxItem.typeName(T)].name}')
         .then((resultJson) {
       itemList = resultJson.map((jsonString) {
         T item = BoxItem.itemFromJson(T, jsonString);
@@ -71,8 +72,12 @@ class BoxSet<T extends BoxItem> {
     itemList.add(item);
 
     if (dataSource != null) {
-      dataSource.database.insert(
-          dataSource.tables[BoxItem.typeName(T)].name, item.toJson());
+      dataSource.database
+          .insert(dataSource.tables[BoxItem.typeName(T)].name, item.toJson())
+          .then((id) {
+        item.boxId = id;
+        _itemMap[id] = item;
+      });
     } else {
       dataChannel.invokeMethod(_putCommand, json.encode(item)).then((id) {
         item.boxId = id;
@@ -144,7 +149,8 @@ class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
     @required dataChannel,
     @required command,
     DataSource dataSource,
-  }) : super(dataChannel: dataChannel, command: command, dataSource: dataSource);
+  }) : super(
+            dataChannel: dataChannel, command: command, dataSource: dataSource);
 
   int addReferences(T item) {
     item.addReferences();
