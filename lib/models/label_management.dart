@@ -2,20 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_moment/models/data_services.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/task/task_item.dart';
 
-
 class BoxSet<T extends BoxItem> {
   BoxSet({
-    @required this.dataSource,
+    @required this.dataChannel,
     @required command,
+    this.dataSource,
   })  : _loadCommand = 'Load${command}Items',
         _putCommand = 'Put${command}Item',
         _removeCommand = 'Remove${command}Item';
 
-  final MethodChannel dataSource;
+  final MethodChannel dataChannel;
+  final DataSource dataSource;
   final String _loadCommand;
   final String _putCommand;
   final String _removeCommand;
@@ -25,9 +27,22 @@ class BoxSet<T extends BoxItem> {
 
   T getItemFromId(int id) => _itemMap[id];
 
-  Future<T> loadItemsFromDataSource() {
-    return dataSource.invokeMethod(_loadCommand).then((result) {
-      List<dynamic> resultJson = json.decode(result) as List;
+  Future<T> loadItemsFromDataChannel() async {
+    if (dataSource == null) {
+      return dataChannel.invokeMethod(_loadCommand).then((result) {
+        List<dynamic> resultJson = json.decode(result) as List;
+        itemList = resultJson.map((jsonString) {
+          T item = BoxItem.itemFromJson(T, jsonString);
+          _itemMap[item.boxId] = item;
+          return item;
+        }).toList();
+      });
+    }
+    print('T.runtimeType: (${T.runtimeType})');
+    return await dataSource.database
+        .rawQuery(
+        'SELECT * FROM ${dataSource.tables[T.runtimeType.toString()].name}')
+        .then((resultJson) {
       itemList = resultJson.map((jsonString) {
         T item = BoxItem.itemFromJson(T, jsonString);
         _itemMap[item.boxId] = item;
@@ -35,6 +50,10 @@ class BoxSet<T extends BoxItem> {
       }).toList();
     });
   }
+
+//  Future<T> loadItemsFromDataSource() async {
+//
+//  }
 
   void addItemsFromList(List<T> items) {
     for (T item in items) {
@@ -51,10 +70,16 @@ class BoxSet<T extends BoxItem> {
 
   void addItem(T item) {
     itemList.add(item);
-    dataSource.invokeMethod(_putCommand, json.encode(item)).then((id) {
-      item.boxId = id;
-      _itemMap[id] = item;
-    });
+
+    if (dataSource != null) {
+      dataSource.database.insert(
+          dataSource.tables[T.runtimeType.toString()].name, item.toJson());
+    } else {
+      dataChannel.invokeMethod(_putCommand, json.encode(item)).then((id) {
+        item.boxId = id;
+        _itemMap[id] = item;
+      });
+    }
   }
 
   /// 修改[item]的时候传进来的可能是一个副本，只有[boxId]是可靠的，所以先
@@ -82,7 +107,7 @@ class BoxSet<T extends BoxItem> {
 //        _itemMap[item.boxId] = item;
 //      }
     }
-    dataSource.invokeMethod(_putCommand, json.encode(item));
+    dataChannel.invokeMethod(_putCommand, json.encode(item));
   }
 
   /// 删除item的时候，传进来的可能是一个全新的副本，直接删除是有可能出错的。
@@ -95,7 +120,7 @@ class BoxSet<T extends BoxItem> {
     T item = _itemMap[id];
     assert(item != null);
     if (item != null) {
-      dataSource.invokeMethod(_putCommand, item.boxId.toString());
+      dataChannel.invokeMethod(_putCommand, item.boxId.toString());
     }
   }
 
@@ -105,7 +130,7 @@ class BoxSet<T extends BoxItem> {
     if (item != null) {
       itemList.remove(item);
       _itemMap.remove(item.boxId);
-      dataSource.invokeMethod(_removeCommand, item.boxId.toString());
+      dataChannel.invokeMethod(_removeCommand, item.boxId.toString());
     }
   }
 
@@ -117,9 +142,10 @@ class BoxSet<T extends BoxItem> {
 /// 标签管理类
 class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
   LabelSet({
-    @required dataSource,
+    @required dataChannel,
     @required command,
-  }): super(dataSource: dataSource, command: command);
+    DataSource dataSource,
+  }) : super(dataChannel: dataChannel, command: command, dataSource: dataSource);
 
   int addReferences(T item) {
     item.addReferences();
@@ -230,7 +256,8 @@ class LabelKeys {
         newKeys: newList, oldKeys: oldList, unusedKeys: unusedList);
   }
 
-  void fromExtracting(List<RichLine> lines, List<ReferencesBoxItem> objectList) {
+  void fromExtracting(
+      List<RichLine> lines, List<ReferencesBoxItem> objectList) {
     _keys.clear();
     for (var line in lines) {
       for (var obj in objectList) {
@@ -242,7 +269,7 @@ class LabelKeys {
     }
   }
 
-  void copyWith(LabelKeys other){
+  void copyWith(LabelKeys other) {
     _keys = other._keys.sublist(0);
   }
 

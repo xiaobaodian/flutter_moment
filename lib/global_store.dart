@@ -30,34 +30,16 @@ class GlobalStore extends StatefulWidget {
 }
 
 class GlobalStoreState extends State<GlobalStore> {
+  DataSource dataSource = DataSource(version: 1);
   static const _platformDataSource = const MethodChannel('DataSource');
   String localDir;
   CalendarMap calendarMap = CalendarMap();
 
-  LabelSet<FocusItem> focusItemSet = LabelSet(
-    dataSource: _platformDataSource,
-    command: 'Focus',
-  );
-
-  LabelSet<PersonItem> personSet = LabelSet(
-    dataSource: _platformDataSource,
-    command: 'Person',
-  );
-
-  LabelSet<PlaceItem> placeSet = LabelSet(
-    dataSource: _platformDataSource,
-    command: 'Place',
-  );
-
-  LabelSet<TagItem> tagSet = LabelSet(
-    dataSource: _platformDataSource,
-    command: 'Tag',
-  );
-
-  BoxSet<TaskItem> taskSet = BoxSet(
-    dataSource: _platformDataSource,
-    command: 'Task',
-  );
+  LabelSet<FocusItem> focusItemSet;
+  LabelSet<PersonItem> personSet;
+  LabelSet<PlaceItem> placeSet;
+  LabelSet<TagItem> tagSet;
+  BoxSet<TaskItem> taskSet;
 
   //Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
   //List<TaskItem> taskItemList;
@@ -66,17 +48,43 @@ class GlobalStoreState extends State<GlobalStore> {
   void initState() {
     super.initState();
     debugPrint('GlobalStore 初始化...');
-//
+
 //    getLocalPath().then((path) {
 //      localDir = path;
 //    });
 
+    focusItemSet = LabelSet(
+      dataChannel: _platformDataSource,
+      command: 'Focus',
+    );
+
+    personSet = LabelSet(
+      dataChannel: _platformDataSource,
+      dataSource: dataSource,
+      command: 'Person',
+    );
+
+    placeSet = LabelSet(
+      dataChannel: _platformDataSource,
+      command: 'Place',
+    );
+
+    tagSet = LabelSet(
+      dataChannel: _platformDataSource,
+      command: 'Tag',
+    );
+
+    taskSet = BoxSet(
+      dataChannel: _platformDataSource,
+      command: 'Task',
+    );
+
     Future.wait([
-      taskSet.loadItemsFromDataSource(),
-      focusItemSet.loadItemsFromDataSource(),
-      personSet.loadItemsFromDataSource(),
-      placeSet.loadItemsFromDataSource(),
-      tagSet.loadItemsFromDataSource()
+      taskSet.loadItemsFromDataChannel(),
+      focusItemSet.loadItemsFromDataChannel(),
+      personSet.loadItemsFromDataChannel(),
+      placeSet.loadItemsFromDataChannel(),
+      tagSet.loadItemsFromDataChannel()
     ]).then((_){
       loadDailyRecords();
     });

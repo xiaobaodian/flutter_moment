@@ -39,6 +39,8 @@ abstract class BoxItem {
     }
     return null;
   }
+
+  Map<String, dynamic> toJson();
 }
 
 abstract class ReferencesBoxItem extends BoxItem{
