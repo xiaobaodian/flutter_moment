@@ -40,6 +40,23 @@ abstract class BoxItem {
     return null;
   }
 
+  static String typeName(Type type){
+    if (type == FocusItem) {
+      return 'FocusItem';
+    } else if (type == PersonItem) {
+      return 'PersonItem';
+    } else if (type == PlaceItem) {
+      return 'PlaceItem';
+    } else if (type == FocusEvent) {
+      return 'FocusEvent';
+    } else if (type == TagItem) {
+      return 'TagItem';
+    } else if (type == TaskItem) {
+      return 'TaskItem';
+    }
+    return null;
+  }
+
   Map<String, dynamic> toJson();
 }
 
@@ -311,7 +328,7 @@ class PersonItem extends ReferencesBoxItem
         gender: json['gender'],
         birthday: _birthday == '' ? null : DateTime.parse(_birthday),
         boxId: json['boxId'],
-        references: json['references']);
+        references: json['ref']);
   }
 
   //
@@ -321,7 +338,7 @@ class PersonItem extends ReferencesBoxItem
         'gender': gender,
         'birthday': hasBirthday() ? birthday.toIso8601String() : '',
         'boxId': boxId,
-        'references': references,
+        'ref': references,
       };
 }
 

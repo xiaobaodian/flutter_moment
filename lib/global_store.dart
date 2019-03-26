@@ -30,7 +30,7 @@ class GlobalStore extends StatefulWidget {
 }
 
 class GlobalStoreState extends State<GlobalStore> {
-  DataSource dataSource = DataSource(version: 1);
+  DataSource dataSource;
   static const _platformDataSource = const MethodChannel('DataSource');
   String localDir;
   CalendarMap calendarMap = CalendarMap();
@@ -53,16 +53,13 @@ class GlobalStoreState extends State<GlobalStore> {
 //      localDir = path;
 //    });
 
+    dataSource = DataSource(version: 1);
+
     focusItemSet = LabelSet(
       dataChannel: _platformDataSource,
       command: 'Focus',
     );
 
-    personSet = LabelSet(
-      dataChannel: _platformDataSource,
-      dataSource: dataSource,
-      command: 'Person',
-    );
 
     placeSet = LabelSet(
       dataChannel: _platformDataSource,
@@ -79,13 +76,24 @@ class GlobalStoreState extends State<GlobalStore> {
       command: 'Task',
     );
 
+
+
     Future.wait([
-      taskSet.loadItemsFromDataChannel(),
-      focusItemSet.loadItemsFromDataChannel(),
-      personSet.loadItemsFromDataChannel(),
-      placeSet.loadItemsFromDataChannel(),
-      tagSet.loadItemsFromDataChannel()
+      dataSource.openDataBase().then((_){
+        print('openDataBase end');
+      })
     ]).then((_){
+      personSet = LabelSet(
+        dataChannel: _platformDataSource,
+        dataSource: dataSource,
+        command: 'Person',
+      );
+      taskSet.loadItemsFromDataChannel();
+      focusItemSet.loadItemsFromDataChannel();
+      personSet.loadItemsFromDataChannel();
+      placeSet.loadItemsFromDataChannel();
+      tagSet.loadItemsFromDataChannel();
+    }).then((_){
       loadDailyRecords();
     });
   }

@@ -38,10 +38,9 @@ class BoxSet<T extends BoxItem> {
         }).toList();
       });
     }
-    print('T.runtimeType: (${T.runtimeType})');
+    assert(dataSource.database != null);
     return await dataSource.database
-        .rawQuery(
-        'SELECT * FROM ${dataSource.tables[T.runtimeType.toString()].name}')
+        .rawQuery('SELECT * FROM ${dataSource.tables[BoxItem.typeName(T)].name}')
         .then((resultJson) {
       itemList = resultJson.map((jsonString) {
         T item = BoxItem.itemFromJson(T, jsonString);
@@ -73,7 +72,7 @@ class BoxSet<T extends BoxItem> {
 
     if (dataSource != null) {
       dataSource.database.insert(
-          dataSource.tables[T.runtimeType.toString()].name, item.toJson());
+          dataSource.tables[BoxItem.typeName(T)].name, item.toJson());
     } else {
       dataChannel.invokeMethod(_putCommand, json.encode(item)).then((id) {
         item.boxId = id;

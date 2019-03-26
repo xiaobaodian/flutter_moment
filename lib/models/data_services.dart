@@ -20,10 +20,11 @@ class DataSource {
     this.version = 1,
   }){
     initTable();
-    _getPath().then((databasesPath){
-      _path = join(databasesPath, "TimeMoment.db");
-      openDataBase();
-    });
+//    setPath().then((databasesPath){
+//      _path = join(databasesPath, "TimeMoment.db");
+//      print('database path : $_path');
+//      //openDataBase();
+//    });
   }
 
   String _path;
@@ -34,12 +35,15 @@ class DataSource {
   String get path => _path;
   Database get database => _database;
 
-  Future _getPath() async {
+  Future setPath() async {
     assert(tables.isNotEmpty);
     return await getDatabasesPath();
   }
 
   Future openDataBase() async {
+    var p = await getDatabasesPath();
+    _path = join(p, "TimeMoment.db");
+    print('database path : $_path');
     _database = await openDatabase(_path, version: version,
       onCreate: (Database db, int version) async {
         await db.execute(
@@ -53,9 +57,9 @@ class DataSource {
   }
 
   void initTable() {
-    tables['PersonItem'] = TableDefinition(
+    tables['PersonItem'] = TableDefinition(  //INTEGER PRIMARY KEY,
       name: 'PersonTable',
-      structure: '''boxId INTEGER PRIMARY KEY,
+      structure: '''boxId integer primary key autoincrement,
        name TEXT, 
        photo TEXT,
        gender INTEGER, 
@@ -70,7 +74,7 @@ class DataSource {
         title text not null,
         address text,
         picture text,
-        references integer,
+        ref integer,
       ''',
     );
   }
