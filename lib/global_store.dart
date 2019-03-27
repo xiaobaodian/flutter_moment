@@ -40,6 +40,9 @@ class GlobalStoreState extends State<GlobalStore> {
   LabelSet<PlaceItem> placeSet;
   LabelSet<TagItem> tagSet;
   BoxSet<TaskItem> taskSet;
+  BoxSet<FocusEvent> focusEventSet;
+  BoxSet<DailyRecord> dailyRecordSet;
+
 
   //Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
   //List<TaskItem> taskItemList;
@@ -59,39 +62,30 @@ class GlobalStoreState extends State<GlobalStore> {
         print('openDataBase loading');
       })
     ]).then((_){
-      focusItemSet = LabelSet(
-        dataChannel: _platformDataSource,
-        command: 'Focus',
-      );
+      focusItemSet = LabelSet(dataSource: dataSource);
+      personSet = LabelSet(dataSource: dataSource);
+      placeSet = LabelSet(dataSource: dataSource);
+      tagSet = LabelSet(dataSource: dataSource);
+      taskSet = BoxSet(dataSource: dataSource);
+      dailyRecordSet = BoxSet(dataSource: dataSource);
+      focusEventSet = BoxSet(dataSource: dataSource);
 
-      personSet = LabelSet(
-        dataChannel: _platformDataSource,
-        dataSource: dataSource,
-        command: 'Person',
-      );
-
-      placeSet = LabelSet(
-        dataChannel: _platformDataSource,
-        command: 'Place',
-      );
-
-      tagSet = LabelSet(
-        dataChannel: _platformDataSource,
-        command: 'Tag',
-      );
-
-      taskSet = BoxSet(
-        dataChannel: _platformDataSource,
-        command: 'Task',
-      );
-
-      taskSet.loadItemsFromDataChannel();
-      focusItemSet.loadItemsFromDataChannel();
-      personSet.loadItemsFromDataChannel();
-      placeSet.loadItemsFromDataChannel();
-      tagSet.loadItemsFromDataChannel();
-    }).then((_){
-      loadDailyRecords();
+      focusItemSet.loadItemsFromDataSource().then((_){
+        if (focusItemSet.itemList.isEmpty) {
+          dataSource.initData(this);
+        }
+      });
+      personSet.loadItemsFromDataSource();
+      placeSet.loadItemsFromDataSource();
+      tagSet.loadItemsFromDataSource();
+      taskSet.loadItemsFromDataSource();
+      focusEventSet.loadItemsFromDataSource();
+      dailyRecordSet.loadItemsFromDataSource().then((_){
+        dailyRecordSet.itemList.forEach((record){
+          int dayIndex = record.dayIndex;
+          calendarMap.everyDayIndex[dayIndex].dailyRecord = record;
+        });
+      });
     });
   }
 
@@ -194,25 +188,25 @@ class GlobalStoreState extends State<GlobalStore> {
   void clearDailyRecordOfDayIndex(int dayIndex) =>
       calendarMap.clearDailyRecordOfDayIndex(dayIndex);
 
-  void putDailyRecord(DailyRecord dailyRecord) {
-    _platformDataSource
-        .invokeMethod("PutDailyRecord", json.encode(dailyRecord))
-        .then((id) {
-      dailyRecord.boxId = id;
-    });
-  }
-
-  void changeDailyRecord(DailyRecord dailyRecord) {
-    _platformDataSource.invokeMethod(
-        "PutDailyRecord", json.encode(dailyRecord));
-  }
-
-  void removeDailyRecord(DailyRecord dailyEvens) {
-    // 删除DailyEvents数据
-    _platformDataSource.invokeMethod(
-        "RemoveDailyRecord", dailyEvens.boxId.toString());
-    //dailyEventsMap
-  }
+//  void putDailyRecord(DailyRecord dailyRecord) {
+//    _platformDataSource
+//        .invokeMethod("PutDailyRecord", json.encode(dailyRecord))
+//        .then((id) {
+//      dailyRecord.boxId = id;
+//    });
+//  }
+//
+//  void changeDailyRecord(DailyRecord dailyRecord) {
+//    _platformDataSource.invokeMethod(
+//        "PutDailyRecord", json.encode(dailyRecord));
+//  }
+//
+//  void removeDailyRecord(DailyRecord dailyEvens) {
+//    // 删除DailyEvents数据
+//    _platformDataSource.invokeMethod(
+//        "RemoveDailyRecord", dailyEvens.boxId.toString());
+//    //dailyEventsMap
+//  }
 
   // FocusEvent
 
@@ -240,7 +234,8 @@ class GlobalStoreState extends State<GlobalStore> {
 
     /// 如果还没有保存过就加入到数据库
     if (selectedDailyRecord.boxId == 0) {
-      putDailyRecord(selectedDailyRecord);
+      //putDailyRecord(selectedDailyRecord);
+      dailyRecordSet.addItem(selectedDailyRecord);
     }
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
 
@@ -255,7 +250,8 @@ class GlobalStoreState extends State<GlobalStore> {
     focusEvent.tagKeys.list.forEach((id) => tagSet.addReferencesByBoxId(id));
 
     Future.delayed(Duration(milliseconds: r), () {
-      putFocusEvent(focusEvent);
+      //putFocusEvent(focusEvent);
+      focusEventSet.addItem(focusEvent);
     });
   }
 
@@ -269,7 +265,8 @@ class GlobalStoreState extends State<GlobalStore> {
     dayEvents[focusEventsIndex] = focusEvent;
     int i = changeTaskItemFromFocusEvent(focusEvent);
     Future.delayed(Duration(milliseconds: 100 * i), () {
-      changeFocusEvent(focusEvent);
+      //changeFocusEvent(focusEvent);
+      focusEventSet.changeItem(focusEvent);
     });
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
   }
@@ -326,7 +323,8 @@ class GlobalStoreState extends State<GlobalStore> {
     }
 
     Future.delayed(Duration(milliseconds: r), () {
-      changeFocusEvent(newFocus);
+      //changeFocusEvent(newFocus);
+      focusEventSet.changeItem(newFocus);
     });
   }
 
@@ -346,42 +344,44 @@ class GlobalStoreState extends State<GlobalStore> {
       }
     });
     focusEvent.personKeys.list.forEach((id) => personSet.minusReferencesByBoxId(id));
-    removeFocusEvent(focusEvent);
+    //removeFocusEvent(focusEvent);
+    focusEventSet.removeItem(focusEvent);
     DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
     dailyRecord.richLines.clear();
     dailyRecord.focusEvents.remove(focusEvent);
 
     if (dailyRecord.isNull) {
-      removeDailyRecord(dailyRecord);
+      //removeDailyRecord(dailyRecord);
+      dailyRecordSet.removeItem(dailyRecord);
       clearDailyRecordOfDayIndex(focusEvent.dayIndex);
     }
     //debugPrint('remove SelectedDay Events: ${json.encode(selectedDailyRecord.focusEvents)}');
   }
 
-  void putFocusEvent(FocusEvent focusEvent) {
-    assert(focusEvent.boxId == 0);
-    _platformDataSource
-        .invokeMethod("PutFocusEvent", json.encode(focusEvent))
-        .then((id) {
-      focusEvent.boxId = id;
-    });
-    var test = json.encode(focusEvent);
-    debugPrint('Put Focus Event: $test');
-  }
-
-  void changeFocusEvent(FocusEvent focusEvent) {
-    assert(focusEvent.boxId > 0);
-    _platformDataSource.invokeMethod("PutFocusEvent", json.encode(focusEvent));
-    var test = json.encode(focusEvent);
-    debugPrint('change Focus Event: $test');
-  }
-
-  void removeFocusEvent(FocusEvent focusEvent) {
-    _platformDataSource.invokeMethod(
-        "RemoveFocusEvent", focusEvent.boxId.toString());
-    var test = json.encode(focusEvent);
-    debugPrint('remove Focus Event: $test');
-  }
+//  void putFocusEvent(FocusEvent focusEvent) {
+//    assert(focusEvent.boxId == 0);
+//    _platformDataSource
+//        .invokeMethod("PutFocusEvent", json.encode(focusEvent))
+//        .then((id) {
+//      focusEvent.boxId = id;
+//    });
+//    var test = json.encode(focusEvent);
+//    debugPrint('Put Focus Event: $test');
+//  }
+//
+//  void changeFocusEvent(FocusEvent focusEvent) {
+//    assert(focusEvent.boxId > 0);
+//    _platformDataSource.invokeMethod("PutFocusEvent", json.encode(focusEvent));
+//    var test = json.encode(focusEvent);
+//    debugPrint('change Focus Event: $test');
+//  }
+//
+//  void removeFocusEvent(FocusEvent focusEvent) {
+//    _platformDataSource.invokeMethod(
+//        "RemoveFocusEvent", focusEvent.boxId.toString());
+//    var test = json.encode(focusEvent);
+//    debugPrint('remove Focus Event: $test');
+//  }
 
   List<FocusEvent> getFocusEventsFromFocusItemId(int id) {
     List<FocusEvent> focusEvents = [];
@@ -432,6 +432,21 @@ class GlobalStoreState extends State<GlobalStore> {
       }
     }
     return focusEvents;
+  }
+
+  void setFocusEventsToDailyRecord(DailyRecord dailyRecord) {
+    if (dailyRecord.isNull) {
+      dailyRecord.focusEvents = [];
+      focusEventSet.itemList.forEach((focusEvent){
+        if (focusEvent.dayIndex == dailyRecord.dayIndex) dailyRecord.focusEvents.add(focusEvent);
+      });
+    }
+  }
+
+  List<FocusEvent> getFocusEventsFromSelectedDay() {
+    var record = calendarMap.getDailyRecordFromSelectedDay();
+    setFocusEventsToDailyRecord(record);
+    return record.focusEvents;
   }
 
   FocusEvent getFocusEventFormDailyRecord(

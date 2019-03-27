@@ -23,7 +23,6 @@ if (flutterVersionName == null) {
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 def keystorePropertiesFile = rootProject.file("key.properties")
@@ -81,13 +80,4 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
-    debugImplementation "io.objectbox:objectbox-android-objectbrowser:$objectboxVersion"
-    releaseImplementation "io.objectbox:objectbox-android:$objectboxVersion"
-
-    //implementation "io.objectbox:objectbox-kotlin:$objectboxVersion"
-    //kapt "io.objectbox:objectbox-processor:$objectboxVersion"
-    implementation 'com.google.code.gson:gson:2.8.5'
 }
-apply plugin: 'io.objectbox'
-

@@ -1,10 +1,6 @@
 package com.threecats.fluttermoment
 
 import android.content.Context
-import android.util.Log
-import com.google.gson.Gson
-import com.threecats.fluttermoment.models.*
-//import com.threecats.fluttermoment.models.DataSource.getDailyEvent
 import io.flutter.plugin.common.*
 
 /**
@@ -20,109 +16,7 @@ object DataSourcePlugin {
         val channel = MethodChannel(registrar.messenger(), ChannelName)
         channel.setMethodCallHandler { methodCall, result ->
             when (methodCall.method) {
-                "LoadTaskItems" -> {
-                    result.success(DataSource.getTaskItemsFromJson())
-                }
-                "PutTaskItem" -> {
-                    val json = methodCall.arguments as String
-                    val taskItem = Gson().fromJson(json, TaskItem::class.java)
-                    result.success(DataSource.putTaskItem(taskItem)) // put到数据库，并返回boxId
-                }
-                "RemoveTaskItem" -> {
-                    val id = (methodCall.arguments as String).toLong()
-                    DataSource.removeTaskItemBy(id)
-                    result.success(null)
-                }
-                "LoadFocusItems" -> {
-                    result.success(DataSource.getFocusItemsFromJson())
-                }
-                "PutFocusItem" -> {
-                    val json = methodCall.arguments as String
-                    val focusItem = Gson().fromJson(json, FocusItem::class.java)
-                    // put到数据库，并返回boxId
-                    result.success(DataSource.putFocusItem(focusItem))
-                }
-                "RemoveFocusItem" -> {
-                    val id = (methodCall.arguments as String).toLong()
-                    DataSource.removeFocusItemBy(id)
-                    result.success(null)
-                }
-                "PutPersonItem" -> {
-                    val json = methodCall.arguments as String
-                    val personItem = Gson().fromJson(json, PersonItem::class.java)
-                    result.success(DataSource.putPersonItem(personItem))
-                }
 
-                "LoadPersonItems" -> {
-                    result.success(DataSource.getPersonItemsOfJson())
-                }
-                "RemovePersonItem" -> {
-                    val id = (methodCall.arguments as String).toLong()
-                    DataSource.removePersonItemBy(id)
-                    result.success(null)
-                }
-
-                "LoadPlaceItems" -> {
-                    result.success(DataSource.getPlaceItemsOfJson())
-                }
-                "PutPlaceItem" -> {
-                    val json = methodCall.arguments as String
-                    val placeItem = Gson().fromJson(json, PlaceItem::class.java)
-                    result.success(DataSource.putPlaceItem(placeItem))
-                }
-                "RemovePlaceItem" -> {
-                    val id = (methodCall.arguments as String).toLong()
-                    DataSource.removePlaceItemBy(id)
-                    result.success(null)
-                }
-
-                "LoadTagItems" -> {
-                    result.success(DataSource.getTagItemsOfJson())
-                }
-                "PutTagItem" -> {
-                    val json = methodCall.arguments as String
-                    val tagItem = Gson().fromJson(json, TagItem::class.java)
-                    result.success(DataSource.putTagItem(tagItem))
-                }
-                "RemoveTagItem" -> {
-                    val id = (methodCall.arguments as String).toLong()
-                    DataSource.removePlaceItemBy(id)
-                    result.success(null)
-                }
-
-                "LoadDailyRecords" -> {
-                    result.success(DataSource.getDailyRecordsOfJson())
-                }
-
-                "PutDailyRecord" -> {
-                    // 获取参数
-                    val json = methodCall.arguments as String
-                    val dailyRecord = Gson().fromJson(json, DailyRecord::class.java)
-                    Log.d("android", "daily reocrd: $dailyRecord")
-                    result.success(DataSource.putDailyRecord(dailyRecord))
-                }
-                "GetDailyRecord" -> {
-                    // 获取参数
-                    val dayIndex = methodCall.arguments as Int
-                    val dailyRecord = DataSource.getDailyRecordBy(dayIndex)
-                    //Log.d("android", p.name)
-                    result.success(dailyRecord)
-                }
-                "RemoveDailyRecord" -> {
-                    val id = (methodCall.arguments as String).toLong()
-                    DataSource.removeDailyRecordBy(id)
-                }
-                "PutFocusEvent" -> {
-                    val json = methodCall.arguments as String
-                    val focusEvent = Gson().fromJson(json, FocusEvent::class.java)
-                    result.success(DataSource.putFocusEvent(focusEvent))
-                }
-                "RemoveFocusEvent" -> {
-                    val id = (methodCall.arguments as String).toLong()
-                    DataSource.removeFocusEventBy(id)
-                    result.success(null)
-                }
-                else -> result.notImplemented()
             }
         }
     }

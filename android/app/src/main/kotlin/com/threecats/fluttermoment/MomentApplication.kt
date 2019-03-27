@@ -1,6 +1,5 @@
 package com.threecats.fluttermoment
 
-import com.threecats.fluttermoment.models.DataSource
 import io.flutter.app.FlutterApplication
 
 
@@ -10,6 +9,5 @@ import io.flutter.app.FlutterApplication
 class MomentApplication: FlutterApplication() {
     override fun onCreate() {
         super.onCreate()
-        DataSource.init(this)
     }
 }

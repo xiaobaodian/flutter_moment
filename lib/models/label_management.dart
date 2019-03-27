@@ -9,35 +9,17 @@ import 'package:flutter_moment/task/task_item.dart';
 
 class BoxSet<T extends BoxItem> {
   BoxSet({
-    @required this.dataChannel,
-    @required command,
     this.dataSource,
-  })  : _loadCommand = 'Load${command}Items',
-        _putCommand = 'Put${command}Item',
-        _removeCommand = 'Remove${command}Item';
+  });
 
-  final MethodChannel dataChannel;
   final DataSource dataSource;
-  final String _loadCommand;
-  final String _putCommand;
-  final String _removeCommand;
 
   Map<int, T> _itemMap = Map();
   List<T> itemList = [];
 
   T getItemFromId(int id) => _itemMap[id];
 
-  Future<T> loadItemsFromDataChannel() async {
-    if (dataSource == null) {
-      return dataChannel.invokeMethod(_loadCommand).then((result) {
-        List<dynamic> resultJson = json.decode(result) as List;
-        itemList = resultJson.map((jsonString) {
-          T item = BoxItem.itemFromJson(T, jsonString);
-          _itemMap[item.boxId] = item;
-          return item;
-        }).toList();
-      });
-    }
+  Future<List<T>> loadItemsFromDataSource() async {
     assert(dataSource.database != null);
     return await dataSource.database
         .rawQuery(
@@ -50,10 +32,6 @@ class BoxSet<T extends BoxItem> {
       }).toList();
     });
   }
-
-//  Future<T> loadItemsFromDataSource() async {
-//
-//  }
 
   void addItemsFromList(List<T> items) {
     for (T item in items) {
@@ -70,22 +48,14 @@ class BoxSet<T extends BoxItem> {
 
   void addItem(T item) {
     itemList.add(item);
-
-    if (dataSource != null) {
-      Map<String, dynamic> data = item.toJson();
-      data.remove('boxId');
-      dataSource.database
-          .insert(dataSource.tables[BoxItem.typeName(T)].name, data)
-          .then((id) {
+    Map<String, dynamic> data = item.toJson();
+    data.remove('boxId');
+    dataSource.database
+        .insert(dataSource.tables[BoxItem.typeName(T)].name, data)
+        .then((id) {
         item.boxId = id;
         _itemMap[id] = item;
       });
-    } else {
-      dataChannel.invokeMethod(_putCommand, json.encode(item)).then((id) {
-        item.boxId = id;
-        _itemMap[id] = item;
-      });
-    }
   }
 
   /// 修改[item]的时候传进来的可能是一个副本，只有[boxId]是可靠的，所以先
@@ -93,29 +63,26 @@ class BoxSet<T extends BoxItem> {
   /// 处理。否则，通过indexOf方法定位到index，然后进行替换，并把[_itemMap]也进行
   /// 替换。
   void changeItem(T item) {
+
+    print('changeItem id: ${item.boxId}');
+
     T temp = _itemMap[item.boxId];
     assert(temp != null);
-//    if (item.runtimeType == TaskItem) {
-//      var oo = temp as TaskItem;
-//      var nn = item as TaskItem;
-//      debugPrint('old task(${oo.boxId}) -> (${oo.title})');
-//      debugPrint('new task(${nn.boxId}) -> (${nn.title})');
-//    }
+
     if (temp != item) {
       int position = itemList.indexOf(temp);
+
+      print('itemList.indexOf(temp) = $position');
+
       assert(position != -1);
       itemList[position] = item;
       _itemMap[item.boxId] = item;
     }
-    if (dataSource == null) {
-      dataChannel.invokeMethod(_putCommand, json.encode(item));
-    } else {
-      Map<String, dynamic> data = item.toJson();
-      data.remove('boxId');
-      dataSource.database.update(
-          dataSource.tables[BoxItem.typeName(T)].name, data,
-          where: 'boxId = ?', whereArgs: [item.boxId]);
-    }
+    Map<String, dynamic> data = item.toJson();
+    data.remove('boxId');
+    dataSource.database.update(
+        dataSource.tables[BoxItem.typeName(T)].name, data,
+        where: 'boxId = ?', whereArgs: [item.boxId]);
   }
 
   /// 删除item的时候，传进来的可能是一个全新的副本，直接删除是有可能出错的。
@@ -130,8 +97,8 @@ class BoxSet<T extends BoxItem> {
     if (item != null) {
       Map<String, dynamic> data = item.toJson();
       data.remove('boxId');
-      dataSource.database
-          .update(dataSource.tables[BoxItem.typeName(T)].name, data,
+      dataSource.database.update(
+          dataSource.tables[BoxItem.typeName(T)].name, data,
           where: 'boxId = ?', whereArgs: [item.boxId]);
     }
   }
@@ -143,12 +110,38 @@ class BoxSet<T extends BoxItem> {
       itemList.remove(item);
       _itemMap.remove(item.boxId);
       if (dataSource == null) {
-        dataChannel.invokeMethod(_removeCommand, item.boxId.toString());
+//        dataChannel.invokeMethod(_removeCommand, item.boxId.toString());
       } else {
         dataSource.database.delete(dataSource.tables[BoxItem.typeName(T)].name,
             where: 'boxId = ?', whereArgs: [item.boxId]);
       }
     }
+  }
+
+  // 'dayIndex = ?' 'boxId = ?'
+  Future<List<T>> findByWhere(String where, List<dynamic> whereArgs) async {
+    List<T> list = [];
+    List<Map<String, dynamic>> rawList = await dataSource.database
+        .query(dataSource.tables[BoxItem.typeName(T)].name,
+            where: where, whereArgs: whereArgs);
+
+    print('findByWhere 返回了(${rawList.length})条数据');
+
+    list = rawList.map((jsonString) {
+      T item = BoxItem.itemFromJson(T, jsonString);
+      _itemMap[item.boxId] = item;
+      return item;
+    }).toList();
+
+
+    if (T == FocusEvent) {
+      list.forEach((r){
+        FocusEvent e = r as FocusEvent;
+        print('item : ${e.focusItemBoxId}');
+      });
+    }
+    print('转换了(${list.length})条数据');
+    return list;
   }
 
   bool findId(int id) {
@@ -159,11 +152,12 @@ class BoxSet<T extends BoxItem> {
 /// 标签管理类
 class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
   LabelSet({
-    @required dataChannel,
-    @required command,
+//    @required dataChannel,
+//    @required command,
     DataSource dataSource,
   }) : super(
-            dataChannel: dataChannel, command: command, dataSource: dataSource);
+            dataSource:
+                dataSource); //dataChannel: dataChannel, command: command,
 
   int addReferences(T item) {
     item.addReferences();

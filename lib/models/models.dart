@@ -36,6 +36,10 @@ abstract class BoxItem {
       return TagItem.fromJson(json);
     } else if (type == TaskItem) {
       return TaskItem.fromJson(json);
+    } else if (type == DailyRecord) {
+      return DailyRecord.fromJson(json);
+    } else if (type == FocusEvent) {
+      return FocusEvent.fromJson(json);
     }
     return null;
   }
@@ -53,6 +57,10 @@ abstract class BoxItem {
       return 'TagItem';
     } else if (type == TaskItem) {
       return 'TaskItem';
+    } else if (type == DailyRecord) {
+      return 'DailyRecord';
+    } else if (type == FocusEvent) {
+      return 'FocusEvent';
     }
     return null;
   }
@@ -104,9 +112,6 @@ abstract class SystemBaseItem extends ReferencesBoxItem {
 //@JsonSerializable()
 
 class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
-  String title;
-  String comment;
-
   FocusItem({
     this.title = "",
     this.comment = "",
@@ -128,6 +133,8 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     //id = DateTime.now().millisecondsSinceEpoch.toString();
   }
 
+  String title;
+  String comment;
   String getLabel() => title;
 
   factory FocusItem.fromJson(Map<String, dynamic> json) {
@@ -136,18 +143,18 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
       title: json['title'],
       comment: json['comment'],
       count: json['count'], // 引用次数
-      presets: json['presets'], // 系统预设
-      internal: json['internal'], // 内部使用
+      presets: json['presets'] == 1, // 系统预设
+      internal: json['internal'] == 1, // 内部使用
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'boxId': boxId,
+//        'boxId': boxId,
         'title': title,
         'comment': comment,
         'count': count,
-        'presets': presets,
-        'internal': internal,
+        'presets': presets ? 1 : 0,
+        'internal': internal ? 1 : 0,
       };
 }
 
@@ -346,29 +353,22 @@ class PersonItem extends ReferencesBoxItem
 /// DailyEvents 每天的事件句柄
 ///
 
-class DailyRecord {
+class DailyRecord extends BoxItem {
   DailyRecord(this.dayIndex);
 
   DailyRecord.build({
-    this.boxId,
+    int boxId,
     this.dayIndex,
     this.weather = '',
-    var focusEventsOfJson,
-  }) {
-    var list = focusEventsOfJson as List;
-    focusEvents = list.map((item) => FocusEvent.fromJson(item)).toList();
-  }
+  }): super(boxId: boxId) ;
 
-  int boxId = 0;
   int dayIndex = -1;
-  //DateTime date;
   String weather = '';
-  List<FocusEvent> focusEvents = [];
+  List<FocusEvent> focusEvents;
   List<RichLine> richLines = [];
 
   bool get isNull {
-    if (focusEvents == null) focusEvents = [];
-    return weather.isEmpty && focusEvents.length == 0;
+    return focusEvents == null;
   }
 
   void initRichList(GlobalStoreState store, bool hasRelated) {
@@ -466,7 +466,6 @@ class DailyRecord {
       boxId: json['boxId'],
       dayIndex: json['dayIndex'],
       weather: json['weather'],
-      focusEventsOfJson: json['focusEvents'],
     );
   }
 
@@ -477,28 +476,22 @@ class DailyRecord {
   };
 }
 
-class FocusEvent {
+class FocusEvent  extends BoxItem {
   FocusEvent({
-    this.boxId = 0,
+    int boxId = 0,
     this.dayIndex = -1,
     this.focusItemBoxId = -1,
     String note = '',
     String personBoxIds,
     String placeBoxIds,
     String tagBoxIds,
-  }) {
-    //personIds = StringExt.stringToListInt(personBoxIds);
-    //placeIds = StringExt.stringToListInt(placeBoxIds);
-    //tagIds = StringExt.stringToListInt(tagBoxIds);
+  }): super(boxId: boxId) {
     noteLines = RichSource.getRichLinesFromJson(note);
-
     personKeys.fromString(personBoxIds);
     placeKeys.fromString(placeBoxIds);
     tagKeys.fromString(tagBoxIds);
-
   }
 
-  int boxId;
   int dayIndex;
   int focusItemBoxId;
   List<RichLine> noteLines;
@@ -557,7 +550,6 @@ class FocusEvent {
     'dayIndex': dayIndex,
     'focusItemBoxId': focusItemBoxId,
     'note': RichSource.getJsonFromRichLine(noteLines),
-    //'personBoxIds': StringExt.listIntToString(personIds),
     'personBoxIds': personKeys.toString(),
     'placeBoxIds': placeKeys.toString(),
     'tagBoxIds': tagKeys.toString(),

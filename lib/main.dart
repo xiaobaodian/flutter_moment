@@ -81,6 +81,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void deactivate() {
     super.deactivate();
+    debugPrint('退出了主页 ！！！');
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    debugPrint('退出了这个App ！！！');
+    _store.dataSource.closeDataBase();
   }
 
   void test(String text) {
@@ -286,17 +295,14 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             var dailyRecord = _store.getDailyRecord(index);
             if (dailyRecord != null) {
-              if (dailyRecord.richLines == null ||
-                  dailyRecord.richLines.length == 0) {
+              if (dailyRecord.isNull) {
+                _store.setFocusEventsToDailyRecord(dailyRecord);
                 buildDailyEventNote(dailyRecord);
-                //延后调用会形成界面闪烁，暂时不用。
-//                Future(() => buildDailyEventNote(dailyRecord)).then((length) {
-//                  if (length > 0) {
-//                    setState(() {
-//                      debugPrint('延迟生成daily record rich list 完成...');
-//                    });
-//                  }
-//                });
+              } else {
+                if (dailyRecord.richLines == null ||
+                    dailyRecord.richLines.length == 0) {
+                  buildDailyEventNote(dailyRecord);
+                }
               }
             }
             return getDayNote(context, index);
@@ -320,15 +326,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          var selectedDayEvents =
-              _store.calendarMap.getFocusEventsFromSelectedDay();
+          var events = _store.getFocusEventsFromSelectedDay();
           var list = List<FocusItem>();
-          if (selectedDayEvents.length == 0) {
-            //list.addAll(_store.focusItemList);
+          if (events.length == 0) {
             list.addAll(_store.focusItemSet.itemList);
           } else {
             _store.focusItemSet.itemList.forEach((focus) {
-              if (!selectedDayEvents
+              if (!events
                   .any((event) => event.focusItemBoxId == focus.boxId)) {
                 list.add(focus);
               }
@@ -396,8 +400,7 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
   );
 }
 
-Widget _buildFocusModelSheet(
-    GlobalStoreState store, List<FocusItem> usableList) {
+Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList) {
   final dailyRecord = store.calendarMap.getDailyRecordFromSelectedDay();
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
