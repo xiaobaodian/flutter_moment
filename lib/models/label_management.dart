@@ -72,8 +72,10 @@ class BoxSet<T extends BoxItem> {
     itemList.add(item);
 
     if (dataSource != null) {
+      Map<String, dynamic> data = item.toJson();
+      data.remove('boxId');
       dataSource.database
-          .insert(dataSource.tables[BoxItem.typeName(T)].name, item.toJson())
+          .insert(dataSource.tables[BoxItem.typeName(T)].name, data)
           .then((id) {
         item.boxId = id;
         _itemMap[id] = item;
@@ -104,14 +106,16 @@ class BoxSet<T extends BoxItem> {
       assert(position != -1);
       itemList[position] = item;
       _itemMap[item.boxId] = item;
-//      if (position == -1) {
-//        debugPrint('index error ! -> ${item.boxId} (${item.runtimeType})');
-//      } else {
-//        itemList[position] = item;
-//        _itemMap[item.boxId] = item;
-//      }
     }
-    dataChannel.invokeMethod(_putCommand, json.encode(item));
+    if (dataSource == null) {
+      dataChannel.invokeMethod(_putCommand, json.encode(item));
+    } else {
+      Map<String, dynamic> data = item.toJson();
+      data.remove('boxId');
+      dataSource.database.update(
+          dataSource.tables[BoxItem.typeName(T)].name, data,
+          where: 'boxId = ?', whereArgs: [item.boxId]);
+    }
   }
 
   /// 删除item的时候，传进来的可能是一个全新的副本，直接删除是有可能出错的。
@@ -124,7 +128,11 @@ class BoxSet<T extends BoxItem> {
     T item = _itemMap[id];
     assert(item != null);
     if (item != null) {
-      dataChannel.invokeMethod(_putCommand, item.boxId.toString());
+      Map<String, dynamic> data = item.toJson();
+      data.remove('boxId');
+      dataSource.database
+          .update(dataSource.tables[BoxItem.typeName(T)].name, data,
+          where: 'boxId = ?', whereArgs: [item.boxId]);
     }
   }
 
@@ -134,7 +142,12 @@ class BoxSet<T extends BoxItem> {
     if (item != null) {
       itemList.remove(item);
       _itemMap.remove(item.boxId);
-      dataChannel.invokeMethod(_removeCommand, item.boxId.toString());
+      if (dataSource == null) {
+        dataChannel.invokeMethod(_removeCommand, item.boxId.toString());
+      } else {
+        dataSource.database.delete(dataSource.tables[BoxItem.typeName(T)].name,
+            where: 'boxId = ?', whereArgs: [item.boxId]);
+      }
     }
   }
 
@@ -155,13 +168,13 @@ class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
   int addReferences(T item) {
     item.addReferences();
     changeItem(item);
-    return item.references;
+    return item.count;
   }
 
   int minusReferences(T item) {
     item.minusReferences();
     changeItem(item);
-    return item.references;
+    return item.count;
   }
 
   int addReferencesByBoxId(int id) {

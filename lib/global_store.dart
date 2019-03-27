@@ -54,40 +54,37 @@ class GlobalStoreState extends State<GlobalStore> {
 //    });
 
     dataSource = DataSource(version: 1);
-
-    focusItemSet = LabelSet(
-      dataChannel: _platformDataSource,
-      command: 'Focus',
-    );
-
-
-    placeSet = LabelSet(
-      dataChannel: _platformDataSource,
-      command: 'Place',
-    );
-
-    tagSet = LabelSet(
-      dataChannel: _platformDataSource,
-      command: 'Tag',
-    );
-
-    taskSet = BoxSet(
-      dataChannel: _platformDataSource,
-      command: 'Task',
-    );
-
-
-
     Future.wait([
       dataSource.openDataBase().then((_){
-        print('openDataBase end');
+        print('openDataBase loading');
       })
     ]).then((_){
+      focusItemSet = LabelSet(
+        dataChannel: _platformDataSource,
+        command: 'Focus',
+      );
+
       personSet = LabelSet(
         dataChannel: _platformDataSource,
         dataSource: dataSource,
         command: 'Person',
       );
+
+      placeSet = LabelSet(
+        dataChannel: _platformDataSource,
+        command: 'Place',
+      );
+
+      tagSet = LabelSet(
+        dataChannel: _platformDataSource,
+        command: 'Tag',
+      );
+
+      taskSet = BoxSet(
+        dataChannel: _platformDataSource,
+        command: 'Task',
+      );
+
       taskSet.loadItemsFromDataChannel();
       focusItemSet.loadItemsFromDataChannel();
       personSet.loadItemsFromDataChannel();

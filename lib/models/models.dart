@@ -63,39 +63,39 @@ abstract class BoxItem {
 abstract class ReferencesBoxItem extends BoxItem{
   ReferencesBoxItem({
     boxId = 0,
-    this.references = 0,
+    this.count = 0,
   }): super(boxId: boxId);
 
-  int references = 0;
-  bool get isReferences => references == 0;
-  bool get isNotReferences => references > 0;
+  int count;
+  bool get isReferences => count == 0;
+  bool get isNotReferences => count > 0;
 
   String getLabel();
 
   void addReferences() {
-    references++;
+    count++;
   }
 
   void minusReferences() {
-    references--;
-    if (references < 0) references = 0;
+    count--;
+    if (count < 0) count = 0;
   }
 
 }
 
 abstract class SystemBaseItem extends ReferencesBoxItem {
-  bool systemPresets = false;
-  bool internal = false;
-
   SystemBaseItem({
     boxId = 0,
-    references = 0,
-    systemPresets = false,
-    internal = false,
+    count = 0,
+    this.presets = false,
+    this.internal = false,
   }) : super(
     boxId: boxId,
-    references: references,
+    count: count,
   );
+
+  bool presets;
+  bool internal;
 }
 
 // user.g.dart 将在我们运行生成命令后自动生成
@@ -117,13 +117,13 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     this.title,
     this.comment,
     int boxId = 0,
-    int references = 0,
-    bool systemPresets = false,
+    int count = 0,
+    bool presets = false,
     bool internal = false,
   }) : super(
     boxId: boxId,
-    references: references,
-    systemPresets: systemPresets,
+    count: count,
+    presets: presets,
     internal: internal) {
     //id = DateTime.now().millisecondsSinceEpoch.toString();
   }
@@ -135,8 +135,8 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
       boxId: json['boxId'],
       title: json['title'],
       comment: json['comment'],
-      references: json['references'], // 引用次数
-      systemPresets: json['systemPresets'], // 系统预设
+      count: json['count'], // 引用次数
+      presets: json['presets'], // 系统预设
       internal: json['internal'], // 内部使用
     );
   }
@@ -145,8 +145,8 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
         'boxId': boxId,
         'title': title,
         'comment': comment,
-        'references': references,
-        'systemPresets': systemPresets,
+        'count': count,
+        'presets': presets,
         'internal': internal,
       };
 }
@@ -160,11 +160,11 @@ class PlaceItem extends ReferencesBoxItem with BuildImageMixin, DetailsListMixin
   PlaceItem({
     this.title = '',
     this.address = '',
-    this.picture,
+    this.coverPicture,
     boxId = 0,
-    references = 0,
-  }) : super(boxId: boxId, references: references) {
-    setMixinImageSource(picture);
+    count = 0,
+  }) : super(boxId: boxId, count: count) {
+    setMixinImageSource(coverPicture);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
   }
@@ -172,10 +172,10 @@ class PlaceItem extends ReferencesBoxItem with BuildImageMixin, DetailsListMixin
   String title;
   String address;
   double geography;
-  String picture;
+  String coverPicture;
 
   bool hasTitle() => title.length > 0;
-  bool hasPicture() => picture != null;
+  bool hasPicture() => coverPicture != null;
 
   String getLabel() => title;
 
@@ -184,39 +184,39 @@ class PlaceItem extends ReferencesBoxItem with BuildImageMixin, DetailsListMixin
   }
 
   void updatePicture(String pic) {
-    picture = pic;
-    setMixinImageSource(picture);
+    coverPicture = pic;
+    setMixinImageSource(coverPicture);
   }
 
   void copyWith(PlaceItem other) {
     title = other.title;
     address = other.address;
     geography = other.geography;
-    if (picture != other.picture) {
-      picture = other.picture;
-      setMixinImageSource(picture);
+    if (coverPicture != other.coverPicture) {
+      coverPicture = other.coverPicture;
+      setMixinImageSource(coverPicture);
     }
     boxId = other.boxId;
-    references = other.references;
+    count = other.count;
   }
 
   factory PlaceItem.fromJson(Map<String, dynamic> json) {
     return PlaceItem(
       title: json['title'],
       address: json['address'],
-      picture: json['picture'],
+      coverPicture: json['coverPicture'],
       boxId: json['boxId'],
-      references: json['references'],
+      count: json['count'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'title': title,
-        'address': address,
-        'picture': picture,
-        'boxId': boxId,
-        'references': references,
-      };
+    'boxId': boxId,
+    'title': title,
+    'address': address,
+    'coverPicture': coverPicture,
+    'count': count,
+  };
 }
 
 ///
@@ -228,8 +228,8 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
   TagItem({
     this.title = '',
     boxId = 0,
-    references = 0,
-  }) : super(boxId: boxId, references: references);
+    count = 0,
+  }) : super(boxId: boxId, count: count);
 
   bool hasTitle() => title.isNotEmpty;
   String getLabel() => title;
@@ -237,21 +237,21 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
   void copyWith(TagItem other) {
     title = other.title;
     boxId = other.boxId;
-    references = other.references;
+    count = other.count;
   }
 
   factory TagItem.fromJson(Map<String, dynamic> json) {
     return TagItem(
       title: json['title'],
       boxId: json['boxId'],
-      references: json['references'],
+      count: json['count'],
     );
   }
 
   Map<String, dynamic> toJson() => {
     'title': title,
     'boxId': boxId,
-    'references': references,
+    'count': count,
   };
 }
 
@@ -278,8 +278,8 @@ class PersonItem extends ReferencesBoxItem
     this.birthday,
     photo = '',
     boxId = 0,
-    references = 0,
-  }) : super(boxId: boxId, references: references) {
+    count = 0,
+  }) : super(boxId: boxId, count: count) {
     setMixinImageSource(photo);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
@@ -317,29 +317,29 @@ class PersonItem extends ReferencesBoxItem
       setMixinImageSource(other.mixinImage);
     }
     boxId = other.boxId;
-    references = other.references;
+    count = other.count;
   }
 
   factory PersonItem.fromJson(Map<String, dynamic> json) {
     String _birthday = json['birthday'];
     return PersonItem(
-        name: json['name'],
-        photo: json['photo'],
-        gender: json['gender'],
-        birthday: _birthday == '' ? null : DateTime.parse(_birthday),
-        boxId: json['boxId'],
-        references: json['ref']);
+      name: json['name'],
+      photo: json['photo'],
+      gender: json['gender'],
+      birthday: _birthday == '' ? null : DateTime.parse(_birthday),
+      boxId: json['boxId'],
+      count: json['count']);
   }
 
   //
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'photo': mixinImage,
-        'gender': gender,
-        'birthday': hasBirthday() ? birthday.toIso8601String() : '',
-        'boxId': boxId,
-        'ref': references,
-      };
+    'name': name,
+    'photo': mixinImage,
+    'gender': gender,
+    'birthday': hasBirthday() ? birthday.toIso8601String() : '',
+    'boxId': boxId,
+    'count': count,
+  };
 }
 
 ///
@@ -471,10 +471,10 @@ class DailyRecord {
   }
 
   Map<String, dynamic> toJson() => {
-        'boxId': boxId,
-        'dayIndex': dayIndex,
-        'weather': weather,
-      };
+    'boxId': boxId,
+    'dayIndex': dayIndex,
+    'weather': weather,
+  };
 }
 
 class FocusEvent {

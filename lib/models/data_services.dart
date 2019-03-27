@@ -11,14 +11,14 @@ class TableDefinition {
   });
 
   String name;
-  String structure ;
+  String structure;
   int version;
 }
 
 class DataSource {
   DataSource({
     this.version = 1,
-  }){
+  }) {
     initTable();
 //    setPath().then((databasesPath){
 //      _path = join(databasesPath, "TimeMoment.db");
@@ -45,11 +45,21 @@ class DataSource {
     _path = join(p, "TimeMoment.db");
     print('database path : $_path');
     _database = await openDatabase(_path, version: version,
-      onCreate: (Database db, int version) async {
-        await db.execute(
-            'CREATE TABLE ${tables['PersonItem'].name} (${tables['PersonItem'].structure})');
-      }
-    );
+        onCreate: (Database db, int version) async {
+      await db.execute(
+          'CREATE TABLE ${tables['FocusItem'].name} (${tables['FocusItem'].structure})');
+      await db.execute(
+          'CREATE TABLE ${tables['PersonItem'].name} (${tables['PersonItem'].structure})');
+      await db.execute(
+          'CREATE TABLE ${tables['PlaceItem'].name} (${tables['PlaceItem'].structure})');
+      await db.execute(
+          'CREATE TABLE ${tables['TagItem'].name} (${tables['TagItem'].structure})');
+      await db.execute(
+          'CREATE TABLE ${tables['DailyRecord'].name} (${tables['DailyRecord'].structure})');
+      await db.execute(
+          'CREATE TABLE ${tables['FocusEvent'].name} (${tables['FocusEvent'].structure})');
+    });
+
   }
 
   Future deleteDataBase() async {
@@ -57,15 +67,25 @@ class DataSource {
   }
 
   void initTable() {
-    tables['PersonItem'] = TableDefinition(  //INTEGER PRIMARY KEY,
-      name: 'PersonTable',
-      structure: '''boxId integer primary key autoincrement,
-       name TEXT, 
-       photo TEXT,
-       gender INTEGER, 
-       birthday TEXT, 
-       ref INTEGER'''
-    );
+    tables['FocusItem'] = TableDefinition(name: 'FocusItemTable', structure: '''
+        boxId integer primary key autoincrement,
+        title text,
+        comment text,
+        count integer,
+        presets integer,
+        internal integer
+      ''');
+
+    tables['PersonItem'] = TableDefinition(name: 'PersonTable', structure: '''
+        boxId integer primary key autoincrement,
+        name text, 
+        photo text,
+        gender integer, 
+        birthday text, 
+        height real,
+        weight real,
+        count integer
+      ''');
 
     tables['PlaceItem'] = TableDefinition(
       name: 'PlaceTable',
@@ -73,15 +93,43 @@ class DataSource {
         boxId integer primary key autoincrement, 
         title text not null,
         address text,
-        picture text,
-        ref integer,
+        coverPicture text,
+        count integer
+      ''',
+    );
+
+    tables['TagItem'] = TableDefinition(
+      name: 'TagTable',
+      structure: '''
+        boxId integer primary key autoincrement, 
+        title text not null,
+        count integer
+      ''',
+    );
+
+    tables['DailyRecord'] = TableDefinition(
+      name: 'DailyRecordTable',
+      structure: '''
+        boxId integer primary key autoincrement, 
+        dayIndex integer,
+        weather text,
+        coverPicture text
+      ''',
+    );
+
+    tables['FocusEvent'] = TableDefinition(
+      name: 'FocusEventTable',
+      structure: '''
+        boxId integer primary key autoincrement, 
+        dayIndex integer,
+        focusItemBoxId integer,
+        note text,
+        personBoxIds text,
+        placeBoxIds text,
+        tagBoxIds text
       ''',
     );
   }
-
 }
 
-class DateServices {
-
-
-}
+class DateServices {}

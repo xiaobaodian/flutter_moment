@@ -27,8 +27,8 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
   @override
   void initState() {
     super.initState();
-    _hideEditButton = widget._focusItem.systemPresets ? true : false;
-    _hideDeleteButton = widget._focusItem.systemPresets || widget._focusItem.isNotReferences ? true : false;
+    _hideEditButton = widget._focusItem.presets ? true : false;
+    _hideDeleteButton = widget._focusItem.presets || widget._focusItem.isNotReferences ? true : false;
   }
 
   @override

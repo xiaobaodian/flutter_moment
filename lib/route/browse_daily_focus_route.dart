@@ -193,9 +193,9 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
   Widget buildFocusListViewItem(BuildContext context, int index) {
     FocusItem focusItem = focusList[index];
     var subTitle =
-        focusItem.references == 0 ? '未关注' : '已关注 ${focusItem.references} 次';
+        focusItem.count == 0 ? '未关注' : '已关注 ${focusItem.count} 次';
     var gz =
-        focusItem.references == 0 ? '' : '${focusItem.references} ';
+        focusItem.count == 0 ? '' : '${focusItem.count} ';
     return CatListTile(
       title: Text(
         focusItem.title,
@@ -241,9 +241,9 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
 
     var personItem = personList[index];
     var subTitle =
-        personItem.references == 0 ? '未关注' : '在 ${personItem.references} 个焦点中';
+        personItem.count == 0 ? '未关注' : '在 ${personItem.count} 个焦点中';
     var gz =
-    personItem.references == 0 ? '' : '${personItem.references} ';
+    personItem.count == 0 ? '' : '${personItem.count} ';
     return CatListTile(
       leading: SizedBox(
         height: 36,
@@ -283,7 +283,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
   Widget getPlaceListViewItem(BuildContext context, int index) {
     var placeItem = placeList[index];
     var subTitle =
-        placeItem.references == 0 ? '未关注' : '提到 ${placeItem.references} 次';
+        placeItem.count == 0 ? '未关注' : '提到 ${placeItem.count} 次';
     return ListTile(
       leading: Icon(Icons.ac_unit),
       title: Text(placeItem.title),
@@ -313,7 +313,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
 
   Widget getTagListViewItem(BuildContext context, int index) {
     var tagItem = tagList[index];
-    var gz = tagItem.references == 0 ? '' : '${tagItem.references} ';
+    var gz = tagItem.count == 0 ? '' : '${tagItem.count} ';
     return CatListTile(
       title: Text(tagItem.title),
       trailText: Text(gz),
