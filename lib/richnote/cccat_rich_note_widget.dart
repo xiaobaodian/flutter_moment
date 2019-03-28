@@ -873,12 +873,11 @@ class RichNoteState extends State<RichNote> {
                               //autofocus: true,
                               decoration: InputDecoration(
                                 icon: Icon(Icons.search),
-                                hintText: '点击搜索$title',
+                                hintText: '点击此处搜索或加入新的$title',
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.fromLTRB(0, 3, 0, 3)
                               ),
                               onChanged: (text){
-                                debugPrint(text);
                                 if (text.isEmpty) {
                                   setState((){
                                     resultList.clear();
@@ -906,22 +905,42 @@ class RichNoteState extends State<RichNote> {
                         ),
                         Offstage(
                           offstage: offstageAddButton,
-                          child: FlatButton(
-                            child: Text('加入',
-                              style: TextStyle(color: Theme.of(context).accentColor),
-                            ),
+                          child: IconButton(
+                            icon: Icon(Icons.clear),
+                            color: Theme.of(context).accentColor,
+                            onPressed: () {
+                              controller.clear();
+                              setState((){
+                                resultList.clear();
+                                resultList.addAll(labels);
+                                offstageAddButton = true;
+                              });
+                            },
+                          ),
+                        ),
+                        Offstage(
+                          offstage: offstageAddButton,
+                          child: IconButton(
+                            icon: Icon(Icons.add),
+                            color: Theme.of(context).accentColor,
                             onPressed: (){
                               if (type == LabelType.Person) {
                                 PersonItem person = PersonItem(name: newLabel);
-                                widget.store.personSet.addItem(person);
-                                setState((){
-                                  resultList.add(person);
+                                widget.store.personSet.addItem(person).then((id){
+                                  titleMap[id] = person.name;
+                                  setState((){
+                                    resultList.add(person);
+                                    clipText = StringExt.listStringToString(titleMap.values.toList());
+                                  });
                                 });
                               } else if (type == LabelType.Place) {
                                 PlaceItem place = PlaceItem(title: newLabel);
-                                widget.store.placeSet.addItem(place);
-                                setState((){
-                                  resultList.add(place);
+                                widget.store.placeSet.addItem(place).then((id){
+                                  titleMap[id] = place.title;
+                                  setState((){
+                                    resultList.add(place);
+                                    clipText = StringExt.listStringToString(titleMap.values.toList());
+                                  });
                                 });
                               }
                             },

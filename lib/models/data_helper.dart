@@ -46,16 +46,15 @@ class BoxSet<T extends BoxItem> {
     }
   }
 
-  void addItem(T item) {
+  Future<int> addItem(T item) async {
     itemList.add(item);
     Map<String, dynamic> data = item.toJson();
     data.remove('boxId');
-    dataSource.database
-        .insert(dataSource.tables[BoxItem.typeName(T)].name, data)
-        .then((id) {
-        item.boxId = id;
-        _itemMap[id] = item;
-      });
+    int id = await dataSource.database
+        .insert(dataSource.tables[BoxItem.typeName(T)].name, data);
+    item.boxId = id;
+    _itemMap[id] = item;
+    return id;
   }
 
   /// 修改[item]的时候传进来的可能是一个副本，只有[boxId]是可靠的，所以先
