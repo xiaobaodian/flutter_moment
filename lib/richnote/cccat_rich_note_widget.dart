@@ -50,12 +50,13 @@ class RichNote extends StatefulWidget {
   RichNote.editable({
     @required this.store,
     @required this.richSource,
-    @required this.focusEvent,
+    //@required this.focusEvent,
     this.richNoteLayout,
     this.onTap,
     this.onLongTap,
   })  : isEditable = true,
-        isFixed = false {
+        isFixed = false,
+        focusEvent = richSource.focusEvent {
     richSource.richNote = this;
     debugPrint('RichNote.editable 模式初始化');
     richSource.markEditerItem();
@@ -86,9 +87,7 @@ class RichNote extends StatefulWidget {
   bool get isNotEditable => !isEditable;
 
   @override
-  RichNoteState createState() {
-    return RichNoteState();
-  }
+  RichNoteState createState() => RichNoteState();
 }
 
 class RichNoteState extends State<RichNote> {
@@ -942,6 +941,13 @@ class RichNoteState extends State<RichNote> {
                                     clipText = StringExt.listStringToString(titleMap.values.toList());
                                   });
                                 });
+                              } else {
+                                TagItem tag = TagItem(title: newLabel);
+                                setState((){
+                                  // TODO 需要同时设置新加入的tag为选中状态
+                                  widget.store.tagSet.addItem(tag);
+                                  resultList.add(tag);
+                                });
                               }
                             },
                           ),
@@ -969,28 +975,59 @@ class RichNoteState extends State<RichNote> {
                           var item = resultList[index];
                           bool isSelected = labelKeys.findKey(item.boxId);
                           String labelText = resultList[index].getLabel();
-                          return ListTile(
-                            title: Text(labelText),
-                            selected: isSelected,
-                            onTap: (){
-                              if (titleMap.containsKey(item.boxId)) {
-                                titleMap.remove(item.boxId);
-                              } else {
-                                titleMap[item.boxId] = labelText;
-                              }
-                              setState((){
-                                clipText = StringExt.listStringToString(titleMap.values.toList());
-                              });
-                            },
-                          );
+                          ListTile listTile;
+                          if (type != LabelType.Tag) {
+                            listTile = ListTile(
+                              title: Text(labelText),
+                              selected: isSelected,
+                              onTap: (){
+                                if (titleMap.containsKey(item.boxId)) {
+                                  titleMap.remove(item.boxId);
+                                } else {
+                                  titleMap[item.boxId] = labelText;
+                                }
+                                setState((){
+                                  clipText = StringExt.listStringToString(titleMap.values.toList());
+                                });
+                              },
+                            );
+                          } else {
+                            listTile = ListTile(
+                              leading: Checkbox(
+                                value: isSelected,
+                                onChanged: (selected) {
+                                  setState((){
+                                    labelKeys.addOrRemove(item.boxId);
+                                    clipText = StringExt.listIntToString(labelKeys.keyList);
+                                  });
+                                },
+                              ),
+                              title: Text(labelText),
+                              selected: isSelected,
+                              onTap: (){
+                                setState((){
+                                  labelKeys.addOrRemove(item.boxId);
+                                  clipText = StringExt.listIntToString(labelKeys.keyList);
+                                });
+                              },
+                            );
+                          }
+                          return listTile;
                         },
                       ),
                     ),
                   ),
-                  Divider(height: 1,),
-                  Padding(
-                    padding: EdgeInsets.all(6),
-                    child: Text(clipText),
+                  Offstage(
+                    offstage: type == LabelType.Tag,
+                    child: Column(
+                      children: <Widget>[
+                        Divider(height: 1,),
+                        Padding(
+                          padding: EdgeInsets.all(6),
+                          child: Text(clipText),
+                        ),
+                      ],
+                    ),
                   ),
                   Divider(height: 1,),
                 ],
@@ -1005,8 +1042,11 @@ class RichNoteState extends State<RichNote> {
               },
             ),
             FlatButton(
-              child: Text('插入'),
+              child: type == LabelType.Tag ? Text('确认') : Text('插入'),
               onPressed: () {
+
+                debugPrint('选择了（${widget.focusEvent.tagKeys.keyList.length}）个标签');
+
                 Navigator.of(context).pop(clipText);
               },
             ),
@@ -1015,21 +1055,25 @@ class RichNoteState extends State<RichNote> {
       }
     ).then((result) {
       if (result != null) {
-        if (currentFocusNode != null) {
-          String clipText = result;
-          String clearText = item.controller.text.replaceAll('\u0000', '');
-          String before = clearText.substring(0, p - 1);
-          String after = clearText.substring(p - 1);
-          String newText = '\u0000' + before + clipText + after;
-          item.canChanged = false;
-          item.controller.text = newText;
-          FocusScope.of(context).requestFocus(currentFocusNode);
-          item.controller.selection = TextSelection.fromPosition(TextPosition(
-            affinity: TextAffinity.downstream,
-            offset: p + clipText.length,
-          ));
+        if (type == LabelType.Tag) {
+          debugPrint('确认了（${widget.focusEvent.tagKeys.keyList.length}）个标签');
         } else {
-          Clipboard.setData(new ClipboardData(text: result));
+          if (currentFocusNode != null) {
+            String clipText = result;
+            String clearText = item.controller.text.replaceAll('\u0000', '');
+            String before = clearText.substring(0, p - 1);
+            String after = clearText.substring(p - 1);
+            String newText = '\u0000' + before + clipText + after;
+            item.canChanged = false;
+            item.controller.text = newText;
+            FocusScope.of(context).requestFocus(currentFocusNode);
+            item.controller.selection = TextSelection.fromPosition(TextPosition(
+              affinity: TextAffinity.downstream,
+              offset: p + clipText.length,
+            ));
+          } else {
+            Clipboard.setData(new ClipboardData(text: result));
+          }
         }
       }
     });

@@ -92,13 +92,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _store.dataSource.closeDataBase();
   }
 
-  void test(String text) {
-    var snackBar = SnackBar(
-      content: Text('返回了：$text'),
-      backgroundColor: Colors.yellow,
-    );
-    Builder(builder: (BuildContext context) {
-      Scaffold.of(context).showSnackBar(snackBar);
+  void test() {
+    setState(() {
+
     });
   }
 
@@ -300,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 buildDailyEventNote(dailyRecord);
               } else {
                 if (dailyRecord.richLines == null ||
-                    dailyRecord.richLines.length == 0) {
+                    dailyRecord.richLines.isEmpty) {
                   buildDailyEventNote(dailyRecord);
                 }
               }
@@ -486,19 +482,16 @@ Widget _getListView(BuildContext context, int dayIndex) {
     store: store,
     onTap: (tapObject) {
       var richLine = tapObject.richLine;
-      FocusEvent event = richLine.note;
+      FocusEvent focusEvent = richLine.note;
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (BuildContext context) {
-        return EditerFocusEventRoute(event);
+        return EditerFocusEventRoute(focusEvent);
       })).then((resultItem) {
         if (resultItem is PassingObject<FocusEvent>) {
-          Future(() {
-            store.changeFocusEventAndTasks(resultItem);
-          }).then((_) {
-            event.copyWith(resultItem.newObject);
-          });
+          store.changeFocusEventAndTasks(resultItem);
+          focusEvent.copyWith(resultItem.newObject);
         } else if (resultItem is int) {
-          store.removeFocusEventAndTasks(event);
+          store.removeFocusEventAndTasks(focusEvent);
         }
       });
     },

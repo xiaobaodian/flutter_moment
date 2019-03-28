@@ -203,14 +203,14 @@ class GlobalStoreState extends State<GlobalStore> {
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
 
     focusEvent.extractingPersonList(personSet.itemList);
-    //focusEvent.personIds.forEach((key) => personSet.addReferencesByBoxId(key));
-    focusEvent.personKeys.list.forEach((key) => personSet.addReferencesByBoxId(key));
+    focusEvent.personKeys.keyList.forEach((key) => personSet.addReferencesByBoxId(key));
 
     focusEvent.extractingPlaceList(placeSet.itemList);
-    focusEvent.placeKeys.list.forEach((id) => placeSet.addReferencesByBoxId(id));
+    focusEvent.placeKeys.keyList.forEach((id) => placeSet.addReferencesByBoxId(id));
 
-    focusEvent.extractingTagList(tagSet.itemList);
-    focusEvent.tagKeys.list.forEach((id) => tagSet.addReferencesByBoxId(id));
+    debugPrint('新增 标签的个数: ${focusEvent.tagKeys.keyList.length}');
+
+    focusEvent.tagKeys.keyList.forEach((id) => tagSet.addReferencesByBoxId(id));
 
     Future.delayed(Duration(milliseconds: r), () {
       //putFocusEvent(focusEvent);
@@ -234,22 +234,23 @@ class GlobalStoreState extends State<GlobalStore> {
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
   }
 
-  void changeFocusEventAndTasks(PassingObject<FocusEvent> passingObject) {
+  Future changeFocusEventAndTasks(PassingObject<FocusEvent> passingObject) async {
     FocusEvent newFocus = passingObject.newObject;
     FocusEvent oldFocus = passingObject.oldObject;
 
     DailyRecord dailyRecord = getDailyRecord(newFocus.dayIndex);
     dailyRecord.richLines.clear();
+
     int r = changeTaskItemFromFocusEvent(newFocus) * 100;
 
     if (oldFocus != null) {
       newFocus.extractingPersonList(personSet.itemList);
       newFocus.extractingPlaceList(placeSet.itemList);
-      newFocus.extractingTagList(tagSet.itemList);
 
-      // 比较位置的引用
-      DiffKeysResult result = LabelKeys.diffKeys(oldFocus.personKeys.list, newFocus.personKeys.list);
+      debugPrint('当前标签的个数: ${newFocus.tagKeys.keyList.length}');
 
+      // 比较人物的引用
+      DiffKeysResult result = LabelKeys.diffKeys(oldFocus.personKeys.keyList, newFocus.personKeys.keyList);
 
       // 测试用
       result.newKeys
@@ -261,7 +262,7 @@ class GlobalStoreState extends State<GlobalStore> {
       result.unusedKeys.forEach((id) => personSet.minusReferencesByBoxId(id));
 
       // 比较位置的引用
-      result = LabelKeys.diffKeys(oldFocus.placeKeys.list, newFocus.placeKeys.list);
+      result = LabelKeys.diffKeys(oldFocus.placeKeys.keyList, newFocus.placeKeys.keyList);
 
       // 测试用
       result.newKeys
@@ -273,7 +274,7 @@ class GlobalStoreState extends State<GlobalStore> {
       result.unusedKeys.forEach((id) => placeSet.minusReferencesByBoxId(id));
 
       // 比较标签的引用
-      result = LabelKeys.diffKeys(oldFocus.tagKeys.list, newFocus.tagKeys.list);
+      result = LabelKeys.diffKeys(oldFocus.tagKeys.keyList, newFocus.tagKeys.keyList);
 
       // 测试用
       result.newKeys
@@ -285,7 +286,7 @@ class GlobalStoreState extends State<GlobalStore> {
       result.unusedKeys.forEach((id) => tagSet.minusReferencesByBoxId(id));
     }
 
-    Future.delayed(Duration(milliseconds: r), () {
+    await Future.delayed(Duration(milliseconds: r), () {
       //changeFocusEvent(newFocus);
       focusEventSet.changeItem(newFocus);
     });
@@ -306,7 +307,11 @@ class GlobalStoreState extends State<GlobalStore> {
         taskSet.removeItem(task);
       }
     });
-    focusEvent.personKeys.list.forEach((id) => personSet.minusReferencesByBoxId(id));
+
+    focusEvent.personKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
+    focusEvent.placeKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
+    focusEvent.tagKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
+
     //removeFocusEvent(focusEvent);
     focusEventSet.removeItem(focusEvent);
     DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
@@ -321,6 +326,7 @@ class GlobalStoreState extends State<GlobalStore> {
     //debugPrint('remove SelectedDay Events: ${json.encode(selectedDailyRecord.focusEvents)}');
   }
 
+  /// 获取指定FocusItem相关的全部FocusEvent
   List<FocusEvent> getFocusEventsFromFocusItemId(int id) {
     List<FocusEvent> focusEvents = [];
     var everyDay = calendarMap.everyDayIndex;
@@ -346,7 +352,7 @@ class GlobalStoreState extends State<GlobalStore> {
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
         day.dailyRecord.focusEvents.forEach((event) {
-          if (event.personKeys.list.indexOf(id) > -1) {
+          if (event.personKeys.keyList.indexOf(id) > -1) {
             focusEvents.add(event);
           }
         });
@@ -363,7 +369,7 @@ class GlobalStoreState extends State<GlobalStore> {
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
         day.dailyRecord.focusEvents.forEach((event) {
-          if (event.placeKeys.list.indexOf(id) > -1) {
+          if (event.placeKeys.keyList.indexOf(id) > -1) {
             focusEvents.add(event);
           }
         });

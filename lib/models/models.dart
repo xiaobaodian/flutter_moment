@@ -517,12 +517,12 @@ class DailyRecord extends BoxItem {
         if (event.personKeys.hasKeys()) {
           debugPrint('加入人物引用');
           String text;
-          for (int i = 0; i < event.personKeys.list.length; i++) {
+          for (int i = 0; i < event.personKeys.keyList.length; i++) {
             if (i == 0) {
-              text = store.getPersonItemFromId(event.personKeys.list[i]).name;
+              text = store.getPersonItemFromId(event.personKeys.keyList[i]).name;
             } else {
               text = text +
-                  "、${store.getPersonItemFromId(event.personKeys.list[i]).name}";
+                  "、${store.getPersonItemFromId(event.personKeys.keyList[i]).name}";
             }
           }
           richLines.add(RichLine(
@@ -534,17 +534,17 @@ class DailyRecord extends BoxItem {
         }
 
         if (event.placeKeys.hasKeys()) {
-          print('加入地点引用');
+          debugPrint('加入地点引用');
           String text;
-          for (int i = 0; i < event.placeKeys.list.length; i++) {
+          for (int i = 0; i < event.placeKeys.keyList.length; i++) {
             if (i == 0) {
               //text = store.getPlaceItemFromId(event.placeKeys[i]).title;
               text =
-                  store.placeSet.getItemFromId(event.placeKeys.list[i]).title;
+                  store.placeSet.getItemFromId(event.placeKeys.keyList[i]).title;
             } else {
               //text = text + "、${store.getPlaceItemFromId(event.placeKeys[i]).title}";
               text = text +
-                  "、${store.placeSet.getItemFromId(event.placeKeys.list[i]).title}";
+                  "、${store.placeSet.getItemFromId(event.placeKeys.keyList[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -555,19 +555,19 @@ class DailyRecord extends BoxItem {
           ));
         }
         if (event.tagKeys.hasKeys()) {
-          print('加入标签引用');
+          debugPrint('加入标签引用');
           String text;
-          for (int i = 0; i < event.tagKeys.list.length; i++) {
+          for (int i = 0; i < event.tagKeys.keyList.length; i++) {
             if (i == 0) {
-              text = store.tagSet.getItemFromId(event.tagKeys.list[i]).title;
+              text = store.tagSet.getItemFromId(event.tagKeys.keyList[i]).title;
             } else {
               text = text +
-                  "、${store.tagSet.getItemFromId(event.tagKeys.list[i]).title}";
+                  "、${store.tagSet.getItemFromId(event.tagKeys.keyList[i]).title}";
             }
           }
           richLines.add(RichLine(
             type: RichType.Related,
-            indent: 1,
+            indent: 2,
             content: text,
             note: event,
           ));
@@ -654,9 +654,9 @@ class FocusEvent extends BoxItem {
     placeKeys.fromExtracting(noteLines, placeList);
   }
 
-  void extractingTagList(List<TagItem> tagList) {
-    tagKeys.fromExtracting(noteLines, tagList);
-  }
+//  void extractingTagList(List<TagItem> tagList) {
+//    tagKeys.fromExtracting(noteLines, tagList);
+//  }
 
   void copyWith(FocusEvent other) {
     dayIndex = other.dayIndex;
@@ -665,7 +665,6 @@ class FocusEvent extends BoxItem {
     personKeys.copyWith(other.personKeys);
     placeKeys.copyWith(other.placeKeys);
     tagKeys.copyWith(other.tagKeys);
-    //note = other.note;
     boxId = other.boxId;
     bmobObjectId = other.bmobObjectId;
     bmobCreatedAt = other.bmobCreatedAt;

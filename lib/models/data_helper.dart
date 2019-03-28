@@ -212,7 +212,7 @@ class DiffKeysResult {
 class LabelKeys {
   List<int> _keys = [];
 
-  List<int> get list => _keys;
+  List<int> get keyList => _keys;
   void add(int key) {
     if (_keys.contains(key)) return;
     _keys.add(key);
@@ -267,8 +267,7 @@ class LabelKeys {
         newKeys: newList, oldKeys: oldList, unusedKeys: unusedList);
   }
 
-  void fromExtracting(
-      List<RichLine> lines, List<ReferencesBoxItem> objectList) {
+  void fromExtracting(List<RichLine> lines, List<ReferencesBoxItem> objectList) {
     _keys.clear();
     for (var line in lines) {
       for (var obj in objectList) {

@@ -311,7 +311,7 @@ class RichSource {
     /// [mergeRemoveTask]保存的是进入编辑器以后生成的复制数据，只有boxId是唯一的标识
     /// 所以删除合并后废弃的line数据附带的task，只能通过boxId来操作。
     mergeRemoveTask.forEach((task){
-      print('清理合并行遗弃的数据：ID = ${task.boxId}');
+      debugPrint('清理合并行后遗弃的数据：ID = ${task.boxId}');
       //richNote.store.removeTaskItemFromId(task.boxId);
       richNote.store.taskSet.removeItemByBoxId(task.boxId);
     });

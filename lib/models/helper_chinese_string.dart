@@ -16,7 +16,7 @@ mixin GetPersonChineseStringMixin {
 
 class StringExt {
   static String listIntToString(List<int> list, {String split = '|'}) {
-    String text;
+    String text = '';
     for (int i = 0; i < list.length; i++) {
       if (i == 0) {
         text = list[i].toString();

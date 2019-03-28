@@ -9,9 +9,9 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class EditerFocusEventRoute extends StatefulWidget {
-  final FocusEvent _focusEvent;
-
   EditerFocusEventRoute(this._focusEvent);
+
+  final FocusEvent _focusEvent;
 
   @override
   EditerFocusEventRouteState createState() => EditerFocusEventRouteState();
@@ -20,6 +20,7 @@ class EditerFocusEventRoute extends StatefulWidget {
 class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   //final focusEventController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  FocusEvent _editerFocusEvent = FocusEvent();
   String routeTitle;
   RichSource richSource;
   RichNote richNote;
@@ -38,13 +39,9 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     var store = GlobalStore.of(context);
     routeTitle = store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
     dateTitle = store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
-//    richSource = RichSource(widget._focusEvent.noteLines,
-//      focusItemBoxId: widget._focusEvent.focusItemBoxId,
-//      dayIndex: widget._focusEvent.dayIndex,
-//    );
-    richSource = RichSource.fromFocusEvent(widget._focusEvent);
+    _editerFocusEvent.copyWith(widget._focusEvent);
+    richSource = RichSource.fromFocusEvent(_editerFocusEvent);
     richNote = RichNote.editable(
-      focusEvent: widget._focusEvent,
       richSource: richSource,
       store: store,
     );
@@ -134,12 +131,17 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
             icon: Icon(Icons.save),
             onPressed: () {
               if (richSource.hasNote()) {
-                FocusEvent focus = FocusEvent();
-                focus.copyWith(widget._focusEvent);
-                focus.noteLines = richSource.exportingRichLists();
+                //FocusEvent newFocusEvent = richSource.focusEvent;
+                // 原来是下面的方法，但是当新建一个focusEvent进来编辑时，执行到这里
+                // richNote.focusEvent != richNote.focusEvent，但是如果是编辑一个
+                // focusEvent时，这里的richNote.focusEvent == richNote.focusEvent
+                // 具体原因以后排查。
+                // newFocusEvent.copyWith(widget._focusEvent);
+                //newFocusEvent.copyWith(richNote.focusEvent);
+                _editerFocusEvent.noteLines = richSource.exportingRichLists();
                 PassingObject<FocusEvent> focusEventPassingObject = PassingObject(
                   oldObject: widget._focusEvent,
-                  newObject: focus,
+                  newObject: _editerFocusEvent,
                 );
                 Navigator.of(context).pop(focusEventPassingObject);
               } else {
