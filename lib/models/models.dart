@@ -7,7 +7,7 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/enums.dart';
 import 'package:flutter_moment/models/helper_image.dart';
 import 'package:flutter_moment/models/helper_chinese_string.dart';
-import 'package:flutter_moment/models/label_management.dart';
+import 'package:flutter_moment/models/data_helper.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
@@ -20,10 +20,19 @@ class PassingObject<T> {
 }
 
 abstract class BoxItem {
-  BoxItem({this.boxId = 0});
-  int boxId;
+  BoxItem({
+    this.boxId = 0,
+    this.bmobObjectId,
+    this.bmobCreatedAt,
+    this.bmobUpdatedAt,
+  });
 
-  factory BoxItem.itemFromJson(Type type, Map<String, dynamic> json){
+  int boxId;
+  String bmobObjectId;
+  String bmobCreatedAt;
+  String bmobUpdatedAt;
+
+  factory BoxItem.itemFromJson(Type type, Map<String, dynamic> json) {
     if (type == FocusItem) {
       return FocusItem.fromJson(json);
     } else if (type == PersonItem) {
@@ -44,7 +53,7 @@ abstract class BoxItem {
     return null;
   }
 
-  static String typeName(Type type){
+  static String typeName(Type type) {
     if (type == FocusItem) {
       return 'FocusItem';
     } else if (type == PersonItem) {
@@ -68,11 +77,18 @@ abstract class BoxItem {
   Map<String, dynamic> toJson();
 }
 
-abstract class ReferencesBoxItem extends BoxItem{
+abstract class ReferencesBoxItem extends BoxItem {
   ReferencesBoxItem({
     boxId = 0,
     this.count = 0,
-  }): super(boxId: boxId);
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
+  }) : super(
+            boxId: boxId,
+            bmobObjectId: bmobObjectId,
+            bmobCreatedAt: bmobCreatedAt,
+            bmobUpdatedAt: bmobUpdatedAt);
 
   int count;
   bool get isReferences => count == 0;
@@ -88,7 +104,6 @@ abstract class ReferencesBoxItem extends BoxItem{
     count--;
     if (count < 0) count = 0;
   }
-
 }
 
 abstract class SystemBaseItem extends ReferencesBoxItem {
@@ -97,10 +112,15 @@ abstract class SystemBaseItem extends ReferencesBoxItem {
     count = 0,
     this.presets = false,
     this.internal = false,
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
   }) : super(
-    boxId: boxId,
-    count: count,
-  );
+            boxId: boxId,
+            count: count,
+            bmobObjectId: bmobObjectId,
+            bmobCreatedAt: bmobCreatedAt,
+            bmobUpdatedAt: bmobUpdatedAt);
 
   bool presets;
   bool internal;
@@ -115,7 +135,13 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
   FocusItem({
     this.title = "",
     this.comment = "",
-  }) : super();
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
+  }) : super(
+            bmobObjectId: bmobObjectId,
+            bmobCreatedAt: bmobCreatedAt,
+            bmobUpdatedAt: bmobUpdatedAt);
 
   // 新建实例时的构建函数
   FocusItem.build({
@@ -125,11 +151,18 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     int count = 0,
     bool presets = false,
     bool internal = false,
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
   }) : super(
-    boxId: boxId,
-    count: count,
-    presets: presets,
-    internal: internal) {
+          boxId: boxId,
+          count: count,
+          presets: presets,
+          internal: internal,
+          bmobObjectId: bmobObjectId,
+          bmobCreatedAt: bmobCreatedAt,
+          bmobUpdatedAt: bmobUpdatedAt,
+        ) {
     //id = DateTime.now().millisecondsSinceEpoch.toString();
   }
 
@@ -137,24 +170,43 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
   String comment;
   String getLabel() => title;
 
+  void copyWith(FocusItem other) {
+    title = other.title;
+    comment = other.comment;
+
+    presets = other.presets;
+    internal = other.internal;
+
+    boxId = other.boxId;
+    count = other.count;
+    bmobObjectId = other.bmobObjectId;
+    bmobCreatedAt = other.bmobCreatedAt;
+    bmobUpdatedAt = other.bmobUpdatedAt;
+  }
+
   factory FocusItem.fromJson(Map<String, dynamic> json) {
     return FocusItem.build(
-      boxId: json['boxId'],
       title: json['title'],
       comment: json['comment'],
       count: json['count'], // 引用次数
       presets: json['presets'] == 1, // 系统预设
       internal: json['internal'] == 1, // 内部使用
+      boxId: json['boxId'],
+      bmobObjectId: json['bmobObjectId'],
+      bmobCreatedAt: json['bmobCreatedAt'],
+      bmobUpdatedAt: json['bmobUpdatedAt'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-//        'boxId': boxId,
         'title': title,
         'comment': comment,
         'count': count,
         'presets': presets ? 1 : 0,
         'internal': internal ? 1 : 0,
+        'bmobObjectId': bmobObjectId,
+        'bmobCreatedAt': bmobCreatedAt,
+        'bmobUpdatedAt': bmobUpdatedAt,
       };
 }
 
@@ -163,14 +215,24 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
 ///
 /// “位置”有图片数据处理，所以混入了[BuildImageMixin]
 ///
-class PlaceItem extends ReferencesBoxItem with BuildImageMixin, DetailsListMixin<FocusEvent> {
+class PlaceItem extends ReferencesBoxItem
+    with BuildImageMixin, DetailsListMixin<FocusEvent> {
   PlaceItem({
     this.title = '',
     this.address = '',
     this.coverPicture,
     boxId = 0,
     count = 0,
-  }) : super(boxId: boxId, count: count) {
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
+  }) : super(
+          boxId: boxId,
+          count: count,
+          bmobObjectId: bmobObjectId,
+          bmobCreatedAt: bmobCreatedAt,
+          bmobUpdatedAt: bmobUpdatedAt,
+        ) {
     setMixinImageSource(coverPicture);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
@@ -205,6 +267,9 @@ class PlaceItem extends ReferencesBoxItem with BuildImageMixin, DetailsListMixin
     }
     boxId = other.boxId;
     count = other.count;
+    bmobObjectId = other.bmobObjectId;
+    bmobCreatedAt = other.bmobCreatedAt;
+    bmobUpdatedAt = other.bmobUpdatedAt;
   }
 
   factory PlaceItem.fromJson(Map<String, dynamic> json) {
@@ -214,16 +279,21 @@ class PlaceItem extends ReferencesBoxItem with BuildImageMixin, DetailsListMixin
       coverPicture: json['coverPicture'],
       boxId: json['boxId'],
       count: json['count'],
+      bmobObjectId: json['bmobObjectId'],
+      bmobCreatedAt: json['bmobCreatedAt'],
+      bmobUpdatedAt: json['bmobUpdatedAt'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'title': title,
-    'address': address,
-    'coverPicture': coverPicture,
-    'count': count,
-  };
+        'title': title,
+        'address': address,
+        'coverPicture': coverPicture,
+        'count': count,
+        'bmobObjectId': bmobObjectId,
+        'bmobCreatedAt': bmobCreatedAt,
+        'bmobUpdatedAt': bmobUpdatedAt,
+      };
 }
 
 ///
@@ -236,7 +306,16 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
     this.title = '',
     boxId = 0,
     count = 0,
-  }) : super(boxId: boxId, count: count);
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
+  }) : super(
+          boxId: boxId,
+          count: count,
+          bmobObjectId: bmobObjectId,
+          bmobCreatedAt: bmobCreatedAt,
+          bmobUpdatedAt: bmobUpdatedAt,
+        );
 
   bool hasTitle() => title.isNotEmpty;
   String getLabel() => title;
@@ -245,6 +324,9 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
     title = other.title;
     boxId = other.boxId;
     count = other.count;
+    bmobObjectId = other.bmobObjectId;
+    bmobCreatedAt = other.bmobCreatedAt;
+    bmobUpdatedAt = other.bmobUpdatedAt;
   }
 
   factory TagItem.fromJson(Map<String, dynamic> json) {
@@ -252,14 +334,19 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
       title: json['title'],
       boxId: json['boxId'],
       count: json['count'],
+      bmobObjectId: json['bmobObjectId'],
+      bmobCreatedAt: json['bmobCreatedAt'],
+      bmobUpdatedAt: json['bmobUpdatedAt'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'title': title,
-    'boxId': boxId,
-    'count': count,
-  };
+        'title': title,
+        'count': count,
+        'bmobObjectId': bmobObjectId,
+        'bmobCreatedAt': bmobCreatedAt,
+        'bmobUpdatedAt': bmobUpdatedAt,
+      };
 }
 
 ///
@@ -272,13 +359,6 @@ class PersonItem extends ReferencesBoxItem
         BuildImageMixin,
         DetailsListMixin<FocusEvent>,
         GetPersonChineseStringMixin {
-  String name;
-  //String photo;
-  int gender;
-  DateTime birthday;
-  double height;
-  double weight;
-
   PersonItem({
     this.name = '',
     this.gender = 2,
@@ -286,7 +366,16 @@ class PersonItem extends ReferencesBoxItem
     photo = '',
     boxId = 0,
     count = 0,
-  }) : super(boxId: boxId, count: count) {
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
+  }) : super(
+          boxId: boxId,
+          count: count,
+          bmobObjectId: bmobObjectId,
+          bmobCreatedAt: bmobCreatedAt,
+          bmobUpdatedAt: bmobUpdatedAt,
+        ) {
     setMixinImageSource(photo);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
@@ -296,6 +385,12 @@ class PersonItem extends ReferencesBoxItem
   String get photo => mixinImage;
   bool hasPhoto() => hasImage();
   bool hasBirthday() => birthday != null;
+
+  String name;
+  int gender;
+  DateTime birthday;
+  double height;
+  double weight;
 
   Image getImage({EImageMode mode = EImageMode.Dark}) {
     return buildMixinImage(mode);
@@ -325,6 +420,9 @@ class PersonItem extends ReferencesBoxItem
     }
     boxId = other.boxId;
     count = other.count;
+    bmobObjectId = other.bmobObjectId;
+    bmobCreatedAt = other.bmobCreatedAt;
+    bmobUpdatedAt = other.bmobUpdatedAt;
   }
 
   factory PersonItem.fromJson(Map<String, dynamic> json) {
@@ -335,18 +433,24 @@ class PersonItem extends ReferencesBoxItem
       gender: json['gender'],
       birthday: _birthday == '' ? null : DateTime.parse(_birthday),
       boxId: json['boxId'],
-      count: json['count']);
+      count: json['count'],
+      bmobObjectId: json['bmobObjectId'],
+      bmobCreatedAt: json['bmobCreatedAt'],
+      bmobUpdatedAt: json['bmobUpdatedAt'],
+    );
   }
 
   //
   Map<String, dynamic> toJson() => {
-    'name': name,
-    'photo': mixinImage,
-    'gender': gender,
-    'birthday': hasBirthday() ? birthday.toIso8601String() : '',
-    'boxId': boxId,
-    'count': count,
-  };
+        'name': name,
+        'photo': mixinImage,
+        'gender': gender,
+        'birthday': hasBirthday() ? birthday.toIso8601String() : '',
+        'count': count,
+        'bmobObjectId': bmobObjectId,
+        'bmobCreatedAt': bmobCreatedAt,
+        'bmobUpdatedAt': bmobUpdatedAt,
+      };
 }
 
 ///
@@ -360,7 +464,15 @@ class DailyRecord extends BoxItem {
     int boxId,
     this.dayIndex,
     this.weather = '',
-  }): super(boxId: boxId) ;
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
+  }) : super(
+          boxId: boxId,
+          bmobObjectId: bmobObjectId,
+          bmobCreatedAt: bmobCreatedAt,
+          bmobUpdatedAt: bmobUpdatedAt,
+        );
 
   int dayIndex = -1;
   String weather = '';
@@ -427,10 +539,12 @@ class DailyRecord extends BoxItem {
           for (int i = 0; i < event.placeKeys.list.length; i++) {
             if (i == 0) {
               //text = store.getPlaceItemFromId(event.placeKeys[i]).title;
-              text = store.placeSet.getItemFromId(event.placeKeys.list[i]).title;
+              text =
+                  store.placeSet.getItemFromId(event.placeKeys.list[i]).title;
             } else {
               //text = text + "、${store.getPlaceItemFromId(event.placeKeys[i]).title}";
-              text = text + "、${store.placeSet.getItemFromId(event.placeKeys.list[i]).title}";
+              text = text +
+                  "、${store.placeSet.getItemFromId(event.placeKeys.list[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -447,7 +561,8 @@ class DailyRecord extends BoxItem {
             if (i == 0) {
               text = store.tagSet.getItemFromId(event.tagKeys.list[i]).title;
             } else {
-              text = text + "、${store.tagSet.getItemFromId(event.tagKeys.list[i]).title}";
+              text = text +
+                  "、${store.tagSet.getItemFromId(event.tagKeys.list[i]).title}";
             }
           }
           richLines.add(RichLine(
@@ -461,22 +576,37 @@ class DailyRecord extends BoxItem {
     });
   }
 
+  void copyWith(DailyRecord other) {
+    dayIndex = other.dayIndex;
+    weather = other.weather;
+    focusEvents = other.focusEvents;
+    boxId = other.boxId;
+    bmobObjectId = other.bmobObjectId;
+    bmobCreatedAt = other.bmobCreatedAt;
+    bmobUpdatedAt = other.bmobUpdatedAt;
+  }
+
   factory DailyRecord.fromJson(Map<String, dynamic> json) {
     return DailyRecord.build(
-      boxId: json['boxId'],
       dayIndex: json['dayIndex'],
       weather: json['weather'],
+      boxId: json['boxId'],
+      bmobObjectId: json['bmobObjectId'],
+      bmobCreatedAt: json['bmobCreatedAt'],
+      bmobUpdatedAt: json['bmobUpdatedAt'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'dayIndex': dayIndex,
-    'weather': weather,
-  };
+        'dayIndex': dayIndex,
+        'weather': weather,
+        'bmobObjectId': bmobObjectId,
+        'bmobCreatedAt': bmobCreatedAt,
+        'bmobUpdatedAt': bmobUpdatedAt,
+      };
 }
 
-class FocusEvent  extends BoxItem {
+class FocusEvent extends BoxItem {
   FocusEvent({
     int boxId = 0,
     this.dayIndex = -1,
@@ -485,7 +615,15 @@ class FocusEvent  extends BoxItem {
     String personBoxIds,
     String placeBoxIds,
     String tagBoxIds,
-  }): super(boxId: boxId) {
+    bmobObjectId,
+    bmobCreatedAt,
+    bmobUpdatedAt,
+  }) : super(
+          boxId: boxId,
+          bmobObjectId: bmobObjectId,
+          bmobCreatedAt: bmobCreatedAt,
+          bmobUpdatedAt: bmobUpdatedAt,
+        ) {
     noteLines = RichSource.getRichLinesFromJson(note);
     personKeys.fromString(personBoxIds);
     placeKeys.fromString(placeBoxIds);
@@ -508,7 +646,6 @@ class FocusEvent  extends BoxItem {
   LabelKeys tagKeys = LabelKeys();
   //List<int> tagIds;
 
-
   void extractingPersonList(List<PersonItem> personList) {
     personKeys.fromExtracting(noteLines, personList);
   }
@@ -522,38 +659,45 @@ class FocusEvent  extends BoxItem {
   }
 
   void copyWith(FocusEvent other) {
-    boxId = other.boxId;
     dayIndex = other.dayIndex;
     focusItemBoxId = other.focusItemBoxId;
     noteLines = other.noteLines;
-    //personIds = other.personIds.sublist(0);
     personKeys.copyWith(other.personKeys);
     placeKeys.copyWith(other.placeKeys);
     tagKeys.copyWith(other.tagKeys);
     //note = other.note;
+    boxId = other.boxId;
+    bmobObjectId = other.bmobObjectId;
+    bmobCreatedAt = other.bmobCreatedAt;
+    bmobUpdatedAt = other.bmobUpdatedAt;
   }
 
   factory FocusEvent.fromJson(Map<String, dynamic> json) {
     return FocusEvent(
-      boxId: json['boxId'],
       dayIndex: json['dayIndex'],
       focusItemBoxId: json['focusItemBoxId'],
       note: json['note'],
       personBoxIds: json['personBoxIds'],
       placeBoxIds: json['placeBoxIds'],
       tagBoxIds: json['tagBoxIds'],
+      boxId: json['boxId'],
+      bmobObjectId: json['bmobObjectId'],
+      bmobCreatedAt: json['bmobCreatedAt'],
+      bmobUpdatedAt: json['bmobUpdatedAt'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
-    'dayIndex': dayIndex,
-    'focusItemBoxId': focusItemBoxId,
-    'note': RichSource.getJsonFromRichLine(noteLines),
-    'personBoxIds': personKeys.toString(),
-    'placeBoxIds': placeKeys.toString(),
-    'tagBoxIds': tagKeys.toString(),
-  };
+        'dayIndex': dayIndex,
+        'focusItemBoxId': focusItemBoxId,
+        'note': RichSource.getJsonFromRichLine(noteLines),
+        'personBoxIds': personKeys.toString(),
+        'placeBoxIds': placeKeys.toString(),
+        'tagBoxIds': tagKeys.toString(),
+        'bmobObjectId': bmobObjectId,
+        'bmobCreatedAt': bmobCreatedAt,
+        'bmobUpdatedAt': bmobUpdatedAt,
+      };
 }
 
 mixin DetailsListMixin<T> {

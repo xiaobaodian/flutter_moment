@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/helper_chinese_string.dart';
-import 'package:flutter_moment/models/label_management.dart';
+import 'package:flutter_moment/models/data_helper.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';

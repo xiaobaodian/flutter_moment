@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_moment/calendar_map.dart';
 import 'package:flutter_moment/models/data_services.dart';
 import 'package:flutter_moment/models/helper_file.dart';
-import 'package:flutter_moment/models/label_management.dart';
+import 'package:flutter_moment/models/data_helper.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/task/task_item.dart';
@@ -79,32 +79,15 @@ class GlobalStoreState extends State<GlobalStore> {
       placeSet.loadItemsFromDataSource();
       tagSet.loadItemsFromDataSource();
       taskSet.loadItemsFromDataSource();
-      focusEventSet.loadItemsFromDataSource();
+      focusEventSet.loadItemsFromDataSource().then((_){
+        focusEventSet.itemList.forEach((focusEvent){
+          replaceExpandDataWithTasks(focusEvent);
+        });
+      });
       dailyRecordSet.loadItemsFromDataSource().then((_){
         dailyRecordSet.itemList.forEach((record){
           int dayIndex = record.dayIndex;
           calendarMap.everyDayIndex[dayIndex].dailyRecord = record;
-        });
-      });
-    });
-  }
-
-
-  void loadDailyRecords() {
-    _platformDataSource.invokeMethod('LoadDailyRecords').then((result) {
-      List<dynamic> resultJson = json.decode(result) as List;
-      resultJson.forEach((item) {
-        DailyRecord dailyRecord = DailyRecord.fromJson(item);
-        int dayIndex = dailyRecord.dayIndex;
-        calendarMap.everyDayIndex[dayIndex].dailyRecord = dailyRecord;
-        dailyRecord.focusEvents.forEach((event) {
-          event.noteLines.forEach((line) {
-            if (line.type == RichType.Task) {
-              int id = line.expandData;
-              //line.expandData = _taskItemMap[id];
-              line.expandData = taskSet.getItemFromId(id);
-            }
-          });
         });
       });
     });
@@ -188,29 +171,9 @@ class GlobalStoreState extends State<GlobalStore> {
   void clearDailyRecordOfDayIndex(int dayIndex) =>
       calendarMap.clearDailyRecordOfDayIndex(dayIndex);
 
-//  void putDailyRecord(DailyRecord dailyRecord) {
-//    _platformDataSource
-//        .invokeMethod("PutDailyRecord", json.encode(dailyRecord))
-//        .then((id) {
-//      dailyRecord.boxId = id;
-//    });
-//  }
-//
-//  void changeDailyRecord(DailyRecord dailyRecord) {
-//    _platformDataSource.invokeMethod(
-//        "PutDailyRecord", json.encode(dailyRecord));
-//  }
-//
-//  void removeDailyRecord(DailyRecord dailyEvens) {
-//    // 删除DailyEvents数据
-//    _platformDataSource.invokeMethod(
-//        "RemoveDailyRecord", dailyEvens.boxId.toString());
-//    //dailyEventsMap
-//  }
+  // FocusEvent  replaceExpandDataWithTasks
 
-  // FocusEvent
-
-  void loadTasksForFocusEvent(FocusEvent event) {
+  void replaceExpandDataWithTasks(FocusEvent event) {
     for (var line in event.noteLines) {
       if (line.type == RichType.Task && line.expandData is int) {
         int id = line.expandData;
@@ -357,31 +320,6 @@ class GlobalStoreState extends State<GlobalStore> {
     }
     //debugPrint('remove SelectedDay Events: ${json.encode(selectedDailyRecord.focusEvents)}');
   }
-
-//  void putFocusEvent(FocusEvent focusEvent) {
-//    assert(focusEvent.boxId == 0);
-//    _platformDataSource
-//        .invokeMethod("PutFocusEvent", json.encode(focusEvent))
-//        .then((id) {
-//      focusEvent.boxId = id;
-//    });
-//    var test = json.encode(focusEvent);
-//    debugPrint('Put Focus Event: $test');
-//  }
-//
-//  void changeFocusEvent(FocusEvent focusEvent) {
-//    assert(focusEvent.boxId > 0);
-//    _platformDataSource.invokeMethod("PutFocusEvent", json.encode(focusEvent));
-//    var test = json.encode(focusEvent);
-//    debugPrint('change Focus Event: $test');
-//  }
-//
-//  void removeFocusEvent(FocusEvent focusEvent) {
-//    _platformDataSource.invokeMethod(
-//        "RemoveFocusEvent", focusEvent.boxId.toString());
-//    var test = json.encode(focusEvent);
-//    debugPrint('remove Focus Event: $test');
-//  }
 
   List<FocusEvent> getFocusEventsFromFocusItemId(int id) {
     List<FocusEvent> focusEvents = [];

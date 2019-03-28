@@ -79,7 +79,10 @@ class DataSource {
         comment text,
         count integer,
         presets integer,
-        internal integer
+        internal integer,
+        bmobObjectId text,
+        bmobCreatedAt text,
+        bmobUpdatedAt text
       ''');
 
     tables['PersonItem'] = TableDefinition(name: 'PersonTable', structure: '''
@@ -90,7 +93,12 @@ class DataSource {
         birthday text, 
         height real,
         weight real,
-        count integer
+        count integer,
+        bmobUserName text,
+        bmobEmail text,
+        bmobObjectId text,
+        bmobCreatedAt text,
+        bmobUpdatedAt text
       ''');
 
     tables['PlaceItem'] = TableDefinition(
@@ -100,7 +108,10 @@ class DataSource {
         title text not null,
         address text,
         coverPicture text,
-        count integer
+        count integer,
+        bmobObjectId text,
+        bmobCreatedAt text,
+        bmobUpdatedAt text
       ''',
     );
 
@@ -109,7 +120,10 @@ class DataSource {
       structure: '''
         boxId integer primary key autoincrement, 
         title text not null,
-        count integer
+        count integer,
+        bmobObjectId text,
+        bmobCreatedAt text,
+        bmobUpdatedAt text
       ''',
     );
 
@@ -119,7 +133,10 @@ class DataSource {
         boxId integer primary key autoincrement, 
         dayIndex integer,
         weather text,
-        coverPicture text
+        coverPicture text,
+        bmobObjectId text,
+        bmobCreatedAt text,
+        bmobUpdatedAt text
       ''',
     );
 
@@ -132,7 +149,10 @@ class DataSource {
         note text,
         personBoxIds text,
         placeBoxIds text,
-        tagBoxIds text
+        tagBoxIds text,
+        bmobObjectId text,
+        bmobCreatedAt text,
+        bmobUpdatedAt text
       ''',
     );
 
@@ -157,7 +177,10 @@ class DataSource {
         remindPlan integer,
         shareTo text,
         author integer,
-        delegate integer
+        delegate integer,
+        bmobObjectId text,
+        bmobCreatedAt text,
+        bmobUpdatedAt text
       ''',
     );
   }
