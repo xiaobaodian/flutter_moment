@@ -873,7 +873,7 @@ class RichNoteState extends State<RichNote> {
         return AlertDialog(
           contentPadding: EdgeInsets.all(0),
           content: StatefulBuilder(
-            builder: (context, setState) {
+            builder: (context, setDialogState) {
               return Column(
                 children: <Widget>[
                   Container(
@@ -893,7 +893,7 @@ class RichNoteState extends State<RichNote> {
                               ),
                               onChanged: (text){
                                 if (text.isEmpty) {
-                                  setState((){
+                                  setDialogState((){
                                     resultList.clear();
                                     resultList.addAll(labels);
                                     offstageAddButton = true;
@@ -905,13 +905,14 @@ class RichNoteState extends State<RichNote> {
                                       resultList.add(label);
                                     }
                                   });
-                                  if (resultList.isEmpty) {
-                                    offstageAddButton = false;
-                                    newLabel = text;
-                                  } else {
-                                    offstageAddButton = true;
-                                  }
-                                  setState((){});
+                                  setDialogState((){
+                                    if (resultList.isEmpty) {
+                                      offstageAddButton = false;
+                                      newLabel = text;
+                                    } else {
+                                      offstageAddButton = true;
+                                    }
+                                  });
                                 }
                               },
                             ),
@@ -924,7 +925,7 @@ class RichNoteState extends State<RichNote> {
                             color: Theme.of(context).accentColor,
                             onPressed: () {
                               controller.clear();
-                              setState((){
+                              setDialogState((){
                                 resultList.clear();
                                 resultList.addAll(labels);
                                 offstageAddButton = true;
@@ -942,7 +943,7 @@ class RichNoteState extends State<RichNote> {
                                 PersonItem person = PersonItem(name: newLabel);
                                 widget.store.personSet.addItem(person).then((id){
                                   titleMap[id] = person.name;
-                                  setState((){
+                                  setDialogState((){
                                     resultList.add(person);
                                     clipText = StringExt.listStringToString(titleMap.values.toList());
                                   });
@@ -951,17 +952,17 @@ class RichNoteState extends State<RichNote> {
                                 PlaceItem place = PlaceItem(title: newLabel);
                                 widget.store.placeSet.addItem(place).then((id){
                                   titleMap[id] = place.title;
-                                  setState((){
+                                  setDialogState((){
                                     resultList.add(place);
                                     clipText = StringExt.listStringToString(titleMap.values.toList());
                                   });
                                 });
                               } else {
                                 TagItem tag = TagItem(title: newLabel);
-                                setState((){
-                                  // TODO 需要同时设置新加入的tag为选中状态
+                                setDialogState((){
                                   widget.store.tagSet.addItem(tag);
                                   resultList.add(tag);
+                                  labelKeys.addOrRemove(tag.boxId);
                                 });
                               }
                             },
@@ -1001,7 +1002,7 @@ class RichNoteState extends State<RichNote> {
                                 } else {
                                   titleMap[item.boxId] = labelText;
                                 }
-                                setState((){
+                                setDialogState((){
                                   clipText = StringExt.listStringToString(titleMap.values.toList());
                                 });
                               },
@@ -1011,18 +1012,18 @@ class RichNoteState extends State<RichNote> {
                               leading: Checkbox(
                                 value: isSelected,
                                 onChanged: (selected) {
-                                  setState((){
+                                  setDialogState((){
                                     labelKeys.addOrRemove(item.boxId);
-                                    clipText = StringExt.listIntToString(labelKeys.keyList);
+                                    //clipText = StringExt.listIntToString(labelKeys.keyList);
                                   });
                                 },
                               ),
                               title: Text(labelText),
                               selected: isSelected,
                               onTap: (){
-                                setState((){
+                                setDialogState((){
                                   labelKeys.addOrRemove(item.boxId);
-                                  clipText = StringExt.listIntToString(labelKeys.keyList);
+                                  //clipText = StringExt.listIntToString(labelKeys.keyList);
                                 });
                               },
                             );
@@ -1050,18 +1051,18 @@ class RichNoteState extends State<RichNote> {
             }
           ),
           actions: <Widget>[
-            FlatButton(
-              child: Text('退出'),
-              onPressed: () {
-                Navigator.of(context).pop(null);
-              },
+            Offstage(
+              offstage: type == LabelType.Tag,
+              child: FlatButton(
+                child: Text('返回'),
+                onPressed: () {
+                  Navigator.of(context).pop(null);
+                },
+              ),
             ),
             FlatButton(
-              child: type == LabelType.Tag ? Text('确认') : Text('插入'),
-              onPressed: () {
-
-                debugPrint('选择了（${widget.focusEvent.tagKeys.keyList.length}）个标签');
-
+              child: type == LabelType.Tag ? Text('返回') : Text('插入'),
+              onPressed: type != LabelType.Tag && clipText.isEmpty ? null : () {
                 Navigator.of(context).pop(clipText);
               },
             ),
