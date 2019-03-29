@@ -184,12 +184,14 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
               return EditerFocusEventRoute(event);
             })).then((resultItem) {
               if (resultItem is PassingObject<FocusEvent>) {
-                dailyRecord.richLines.clear();
-                Future(() {
-                  store.changeFocusEventAndTasks(resultItem);
-                }).then((_) {
-                  event.copyWith(resultItem.newObject);
-                });
+//                dailyRecord.richLines.clear();
+//                Future(() {
+//                  store.changeFocusEventAndTasks(resultItem);
+//                }).then((_) {
+//                  event.copyWith(resultItem.newObject);
+//                });
+                store.changeFocusEventAndTasks(resultItem);
+                event.copyWith(resultItem.newObject);
               } else if (resultItem is int) {
                 dailyRecord.richLines.clear();
                 store.removeFocusEventAndTasks(event);

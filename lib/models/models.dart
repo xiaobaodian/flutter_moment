@@ -479,7 +479,7 @@ class DailyRecord extends BoxItem {
   List<FocusEvent> focusEvents;
   List<RichLine> richLines = [];
 
-  bool get isNull {
+  bool get focusEventIsNull {
     return focusEvents == null;
   }
 

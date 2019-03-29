@@ -126,22 +126,7 @@ class RichItem extends RichLine {
     textkey = GlobalKey();
     controller = TextEditingController();
     controller.addListener((){
-      var a = controller.selection.start;
-      var b = controller.selection.end;
-      debugPrint('controller selection.start = $a  $b');
-      if (a == 0) {
-        if (a == b) {
-          controller.selection = TextSelection.fromPosition(TextPosition(
-            affinity: TextAffinity.downstream,
-            offset: controller.text.length,
-          ));
-        } else {
-          controller.selection = TextSelection(
-              baseOffset: 1,
-              extentOffset: controller.selection.extentOffset
-          );
-        }
-      }
+      correctCursorPosition();
     });
 
     controller.text = buildEditerText(content);
@@ -164,25 +149,12 @@ class RichItem extends RichLine {
         canChanged = true;
       }
     });
+
     controller = TextEditingController();
     controller.addListener((){
-      var a = controller.selection.start;
-      var b = controller.selection.end;
-      debugPrint('controller selection.start = $a  $b');
-      if (a == 0) {
-        if (a == b) {
-          controller.selection = TextSelection.fromPosition(TextPosition(
-            affinity: TextAffinity.downstream,
-            offset: 1,
-          ));
-        } else {
-          controller.selection = TextSelection(
-              baseOffset: 1,
-              extentOffset: controller.selection.extentOffset
-          );
-        }
-      }
+      correctCursorPosition();
     });
+
     type = richLine.type;
     style = richLine.style;
     indent = richLine.indent;
@@ -194,11 +166,11 @@ class RichItem extends RichLine {
       newTask.title = buildEditerText(oldTask.title);
       this.expandData = newTask;
       controller.text = newTask.title;
-      print('复制了richLine的task数据：${newTask.title} / ${newTask.createDate}');
+      //print('复制了richLine的task数据：${newTask.title} / ${newTask.createDate}');
     } else {
       content = buildEditerText(richLine.content);
       controller.text = content;
-      print('复制了richLine的基本数据');
+      //print('复制了richLine的基本数据');
     }
   }
 
@@ -215,6 +187,28 @@ class RichItem extends RichLine {
   void dispose() {
     controller?.dispose();
     focusNode?.dispose();
+  }
+
+  void correctCursorPosition() {
+    if (!canChanged || controller.text.isEmpty) return;
+    var start = controller.selection.start;
+    var end = controller.selection.end;
+
+    debugPrint('controller selection.start = $start  $end , controller.text.lenght = ${controller.text.length}');
+
+    if (start == 0) {
+      if (start == end) { // && controller.text.length >= 1
+        controller.selection = TextSelection.fromPosition(TextPosition(
+          affinity: TextAffinity.downstream,
+          offset: 1,
+        ));
+      } else {
+        controller.selection = TextSelection(
+            baseOffset: 1,
+            extentOffset: controller.selection.extentOffset
+        );
+      }
+    }
   }
 
   String buildEditerText(String text) {

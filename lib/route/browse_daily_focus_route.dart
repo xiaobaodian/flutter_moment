@@ -142,46 +142,23 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
         controller: _controller,
         children: <Widget>[
           ListView.separated(
-            itemBuilder: (context, index) {
-              return buildFocusListViewItem(context, index);
-            },
-            separatorBuilder: (context, index) {
-              return Divider(
-                indent: 16,
-              );
-            },
+            itemBuilder: (context, index) => buildFocusListViewItem(context, index),
+            separatorBuilder: (context, index) => Divider(indent: 16, height: 8,),
             itemCount: focusList.length,
           ),
           ListView.separated(
-            itemBuilder: (context, index) {
-              debugPrint('personList length: ${personList.length}');
-              return getPersonListViewItem(context, index);
-            },
-            separatorBuilder: (context, index) => Divider(indent: 70,),
+            itemBuilder: (context, index) => getPersonListViewItem(context, index),
+            separatorBuilder: (context, index) => Divider(indent: 70, height: 8,),
             itemCount: personList.length,
           ),
           ListView.separated(
-            itemBuilder: (context, index) {
-              return getPlaceListViewItem(
-                  context, index); //buildPlaceListViewItem(context, index);
-            },
-            separatorBuilder: (context, index) {
-              return Divider(
-                indent: 60,
-              );
-            },
+            itemBuilder: (context, index) => getPlaceListViewItem(context, index),
+            separatorBuilder: (context, index) => Divider(indent: 60, height: 8,),
             itemCount: placeList.length,
           ),
           ListView.separated(
-            itemBuilder: (context, index) {
-              return getTagListViewItem(
-                  context, index); //buildPlaceListViewItem(context, index);
-            },
-            separatorBuilder: (context, index) {
-              return Divider(
-                indent: 18,
-              );
-            },
+            itemBuilder: (context, index) => getTagListViewItem(context, index),
+            separatorBuilder: (context, index) => Divider(indent: 18, height: 8,),
             itemCount: tagList.length,
           ),
           Text('图片, 待扩充'),
@@ -192,25 +169,13 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
 
   Widget buildFocusListViewItem(BuildContext context, int index) {
     FocusItem focusItem = focusList[index];
-    var subTitle =
-        focusItem.count == 0 ? '未关注' : '已关注 ${focusItem.count} 次';
-    var gz =
-        focusItem.count == 0 ? '' : '${focusItem.count} ';
+    var gz = focusItem.count == 0 ? '' : '${focusItem.count} ';
     return CatListTile(
       title: Text(
         focusItem.title,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
       ),
-//      subtitle: Text(
-//        subTitle,
-//        softWrap: false,
-//        overflow: TextOverflow.ellipsis,
-//        style: TextStyle(
-//          color: Colors.black45,
-//          fontSize: 14,
-//        ),
-//      ),
       trailText: Text(gz),
       trailing: Icon(Icons.arrow_right),
       onTap: () {
@@ -227,7 +192,6 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
           if (resultItem is FocusItem) {
             focusItem.title = resultItem.title;
             focusItem.comment = resultItem.comment;
-//            _store.changeFocusItem(focusItem);
             _store.focusItemSet.changeItem(focusItem);
           }
         });
@@ -236,30 +200,19 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
   }
 
   Widget getPersonListViewItem(BuildContext context, int index) {
-
-    debugPrint('person item: $index');
-
     var personItem = personList[index];
-    var subTitle =
-        personItem.count == 0 ? '未关注' : '在 ${personItem.count} 个焦点中';
-    var gz =
-    personItem.count == 0 ? '' : '${personItem.count} ';
+    var gz = personItem.count == 0 ? '' : '${personItem.count} ';
     return CatListTile(
+      //contentPadding: EdgeInsets.fromLTRB(0, 12, 0, 12),
       leading: SizedBox(
         height: 36,
         width: 36,
         child: ClipOval(child: personItem.getImage()),
       ),
       title: Text(personItem.name),
-//      subtitle: Text(
-//        subTitle,
-//        softWrap: false,
-//        overflow: TextOverflow.ellipsis,
-//      ),
       trailText: Text(gz),
       trailing: Icon(Icons.arrow_right),
       onTap: () {
-        //PersonDetailsRoute
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
           return PersonItemDetailsRoute(personItem);
@@ -282,14 +235,12 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
 
   Widget getPlaceListViewItem(BuildContext context, int index) {
     var placeItem = placeList[index];
-    var subTitle =
-        placeItem.count == 0 ? '未关注' : '提到 ${placeItem.count} 次';
-    return ListTile(
+    var gz = placeItem.count == 0 ? '' : '${placeItem.count} ';
+    return CatListTile(
       leading: Icon(Icons.ac_unit),
       title: Text(placeItem.title),
-      subtitle: Text(subTitle),
+      trailText: Text(gz),
       trailing: Icon(Icons.arrow_right),
-      isThreeLine: true,
       onTap: () {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
@@ -303,7 +254,6 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
         })).then((resultItem) {
           if (resultItem is PlaceItem) {
             placeItem.copyWith(resultItem);
-            //_store.changePlaceItem(placeItem);
             _store.placeSet.changeItem(placeItem);
           }
         });

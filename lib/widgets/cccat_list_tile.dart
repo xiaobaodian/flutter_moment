@@ -186,7 +186,7 @@ class CatListTile extends StatelessWidget {
       ),
     );
 
-    EdgeInsets _contentPadding = contentPadding == null ? const EdgeInsets.fromLTRB(16, 6, 8, 6) : contentPadding;
+    EdgeInsets _contentPadding = contentPadding == null ? const EdgeInsets.fromLTRB(16, 12, 8, 12) : contentPadding;
 
     return InkWell(
       onTap: enabled ? onTap : null,

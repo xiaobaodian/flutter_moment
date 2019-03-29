@@ -291,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             var dailyRecord = _store.getDailyRecord(index);
             if (dailyRecord != null) {
-              if (dailyRecord.isNull) {
+              if (dailyRecord.focusEventIsNull) {
                 _store.setFocusEventsToDailyRecord(dailyRecord);
                 buildDailyEventNote(dailyRecord);
               } else {

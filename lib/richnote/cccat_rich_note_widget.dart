@@ -661,10 +661,25 @@ class RichNoteState extends State<RichNote> {
       ),
       onChanged: (text) {
 
-        debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
-        debugPrint('内容长度: ${text.length}');
+        //debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
+        //debugPrint('内容长度: ${text.length}');
 
-        if (text.length == 0 || (text.substring(0, 1) != '\u0000')) {
+        if (index == 0 && text.isEmpty) {
+          item.canChanged = false;
+          item.controller.text = '\u0000';
+          item.controller.selection = TextSelection.fromPosition(TextPosition(
+            affinity: TextAffinity.downstream,
+            offset: 1,
+          ));
+        } else if (index == 0 && text.substring(0, 1) != '\u0000') {
+          item.canChanged = false;
+          var temp = item.controller.text.replaceAll('\u0000', '');
+          item.controller.text = '\u0000' + temp;
+          item.controller.selection = TextSelection.fromPosition(TextPosition(
+            affinity: TextAffinity.downstream,
+            offset: 1,
+          ));
+        } else if (text.length == 0 || (text.substring(0, 1) != '\u0000')) {
           mergeUPLine(index, text ?? '');
         } else if (item.canChanged) {
           debugPrint('回车位置: ${text.indexOf('\n')}');

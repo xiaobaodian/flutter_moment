@@ -318,7 +318,7 @@ class GlobalStoreState extends State<GlobalStore> {
     dailyRecord.richLines.clear();
     dailyRecord.focusEvents.remove(focusEvent);
 
-    if (dailyRecord.isNull) {
+    if (dailyRecord.focusEventIsNull) {
       //removeDailyRecord(dailyRecord);
       dailyRecordSet.removeItem(dailyRecord);
       clearDailyRecordOfDayIndex(focusEvent.dayIndex);
@@ -328,58 +328,87 @@ class GlobalStoreState extends State<GlobalStore> {
 
   /// 获取指定FocusItem相关的全部FocusEvent
   List<FocusEvent> getFocusEventsFromFocusItemId(int id) {
-    List<FocusEvent> focusEvents = [];
+    List<FocusEvent> resultFocusEvents = [];
     var everyDay = calendarMap.everyDayIndex;
     for (int i = everyDay.length - 1; i > 0; i--) {
       var day = everyDay[i];
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
-        day.dailyRecord.focusEvents.forEach((event) {
+        if (day.dailyRecord.focusEventIsNull) {
+          setFocusEventsToDailyRecord(day.dailyRecord);
+        }
+        day.dailyRecord.focusEvents?.forEach((event) {
           if (event.focusItemBoxId == id) {
-            focusEvents.add(event);
+            resultFocusEvents.add(event);
           }
         });
       }
     }
-    return focusEvents;
+    return resultFocusEvents;
   }
 
   List<FocusEvent> getFocusEventsFromPersonItemId(int id) {
-    List<FocusEvent> focusEvents = [];
+    List<FocusEvent> resultFocusEvents = [];
     var everyDay = calendarMap.everyDayIndex;
     for (int i = everyDay.length - 1; i > 0; i--) {
       var day = everyDay[i];
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
+        if (day.dailyRecord.focusEventIsNull) {
+          setFocusEventsToDailyRecord(day.dailyRecord);
+        }
         day.dailyRecord.focusEvents.forEach((event) {
           if (event.personKeys.keyList.indexOf(id) > -1) {
-            focusEvents.add(event);
+            resultFocusEvents.add(event);
           }
         });
       }
     }
-    return focusEvents;
+    return resultFocusEvents;
   }
 
   List<FocusEvent> getFocusEventsFromPlaceItemId(int id) {
-    List<FocusEvent> focusEvents = [];
+    List<FocusEvent> resultFocusEvents = [];
     var everyDay = calendarMap.everyDayIndex;
     for (int i = everyDay.length - 1; i > 0; i--) {
       var day = everyDay[i];
       if (day.dailyRecord != null) {
         day.dailyRecord.initRichList(this, true);
+        if (day.dailyRecord.focusEventIsNull) {
+          setFocusEventsToDailyRecord(day.dailyRecord);
+        }
         day.dailyRecord.focusEvents.forEach((event) {
           if (event.placeKeys.keyList.indexOf(id) > -1) {
-            focusEvents.add(event);
+            resultFocusEvents.add(event);
           }
         });
       }
     }
-    return focusEvents;
+    return resultFocusEvents;
+  }
+
+  List<FocusEvent> getFocusEventsFromTagItemId(int id) {
+    List<FocusEvent> resultFocusEvents = [];
+    var everyDay = calendarMap.everyDayIndex;
+    for (int i = everyDay.length - 1; i > 0; i--) {
+      var day = everyDay[i];
+      if (day.dailyRecord != null) {
+        day.dailyRecord.initRichList(this, true);
+        if (day.dailyRecord.focusEventIsNull) {
+          setFocusEventsToDailyRecord(day.dailyRecord);
+        }
+        day.dailyRecord.focusEvents.forEach((event) {
+          if (event.tagKeys.keyList.contains(id)) {
+            resultFocusEvents.add(event);
+          }
+        });
+      }
+    }
+    return resultFocusEvents;
   }
 
   void setFocusEventsToDailyRecord(DailyRecord dailyRecord) {
-    if (dailyRecord.isNull) {
+    if (dailyRecord.focusEventIsNull) {
       dailyRecord.focusEvents = [];
       focusEventSet.itemList.forEach((focusEvent){
         if (focusEvent.dayIndex == dailyRecord.dayIndex) dailyRecord.focusEvents.add(focusEvent);
