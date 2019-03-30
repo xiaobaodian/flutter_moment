@@ -177,7 +177,7 @@ class GlobalStoreState extends State<GlobalStore> {
     for (var line in event.noteLines) {
       if (line.type == RichType.Task && line.expandData is int) {
         int id = line.expandData;
-        //line.expandData = _taskItemMap[id];
+        debugPrint('将ID转换成任务数据，当前ID：$id');
         line.expandData = taskSet.getItemFromId(id);
         assert(line.expandData != null);
       }

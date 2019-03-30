@@ -131,7 +131,6 @@ class TaskItem extends BoxItem {
   }
 
   Map<String, dynamic> toJson() => {
-    'boxId': boxId,
     'focusItemId': focusItemId,
     'title': title,
     'comment': comment,

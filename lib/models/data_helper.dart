@@ -46,14 +46,24 @@ class BoxSet<T extends BoxItem> {
     }
   }
 
+//  Future<int> addItem(T item) async {
+//    itemList.add(item);
+//    Map<String, dynamic> data = item.toJson();
+//    return await dataSource.database.transaction((txn) async {
+//      int id = await txn.insert(dataSource.tables[BoxItem.typeName(T)].name, data);
+//      item.boxId = id;
+//      _itemMap[id] = item;
+//      return id;
+//    });
+//  }
+
   Future<int> addItem(T item) async {
     itemList.add(item);
     Map<String, dynamic> data = item.toJson();
-    data.remove('boxId');
-    int id = await dataSource.database
-        .insert(dataSource.tables[BoxItem.typeName(T)].name, data);
-    item.boxId = id;
-    _itemMap[id] = item;
+    int id = await dataSource.database.insert(dataSource.tables[BoxItem.typeName(T)].name, data).then((id){
+      item.boxId = id;
+      _itemMap[id] = item;
+    });
     return id;
   }
 
@@ -108,12 +118,8 @@ class BoxSet<T extends BoxItem> {
     if (item != null) {
       itemList.remove(item);
       _itemMap.remove(item.boxId);
-      if (dataSource == null) {
-//        dataChannel.invokeMethod(_removeCommand, item.boxId.toString());
-      } else {
-        dataSource.database.delete(dataSource.tables[BoxItem.typeName(T)].name,
-            where: 'boxId = ?', whereArgs: [item.boxId]);
-      }
+      dataSource.database.delete(dataSource.tables[BoxItem.typeName(T)].name,
+          where: 'boxId = ?', whereArgs: [item.boxId]);
     }
   }
 

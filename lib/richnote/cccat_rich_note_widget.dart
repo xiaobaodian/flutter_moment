@@ -11,6 +11,7 @@ import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 import 'package:flutter_moment/task/task_item.dart';
 import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
+import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 import 'package:flutter_moment/widgets/gender_label_choice_dialog.dart';
 
 class RichNoteTapObject {
@@ -187,6 +188,11 @@ class RichNoteState extends State<RichNote> {
         break;
       case RichType.Task:
         TaskItem task = item.expandData;
+        if (task == null) {
+          item.type = RichType.Text;
+          item.content = '这里丢失了任务数据';
+          break;
+        }
         Widget checkBox = Checkbox(
           value: task.state == TaskState.Complete,
           onChanged: (isSelected) {
@@ -939,6 +945,10 @@ class RichNoteState extends State<RichNote> {
                             icon: Icon(Icons.add),
                             color: Theme.of(context).accentColor,
                             onPressed: (){
+                              controller.clear();
+                              resultList.clear();
+                              resultList.addAll(labels);
+                              offstageAddButton = true;
                               if (type == LabelType.Person) {
                                 PersonItem person = PersonItem(name: newLabel);
                                 widget.store.personSet.addItem(person).then((id){
@@ -953,16 +963,19 @@ class RichNoteState extends State<RichNote> {
                                 widget.store.placeSet.addItem(place).then((id){
                                   titleMap[id] = place.title;
                                   setDialogState((){
+                                    //resultList.clear();
+                                    //resultList.addAll(labels);
                                     resultList.add(place);
                                     clipText = StringExt.listStringToString(titleMap.values.toList());
                                   });
                                 });
                               } else {
                                 TagItem tag = TagItem(title: newLabel);
-                                setDialogState((){
-                                  widget.store.tagSet.addItem(tag);
-                                  resultList.add(tag);
-                                  labelKeys.addOrRemove(tag.boxId);
+                                widget.store.tagSet.addItem(tag).then((id){
+                                  setDialogState((){
+                                    resultList.add(tag);
+                                    labelKeys.addOrRemove(tag.boxId);
+                                  });
                                 });
                               }
                             },
@@ -991,9 +1004,9 @@ class RichNoteState extends State<RichNote> {
                           var item = resultList[index];
                           bool isSelected = labelKeys.findKey(item.boxId);
                           String labelText = resultList[index].getLabel();
-                          ListTile listTile;
+                          CatListTile catListTile;
                           if (type != LabelType.Tag) {
-                            listTile = ListTile(
+                            catListTile = CatListTile(
                               title: Text(labelText),
                               selected: isSelected,
                               onTap: (){
@@ -1008,15 +1021,19 @@ class RichNoteState extends State<RichNote> {
                               },
                             );
                           } else {
-                            listTile = ListTile(
-                              leading: Checkbox(
-                                value: isSelected,
-                                onChanged: (selected) {
-                                  setDialogState((){
-                                    labelKeys.addOrRemove(item.boxId);
-                                    //clipText = StringExt.listIntToString(labelKeys.keyList);
-                                  });
-                                },
+                            catListTile = CatListTile(
+                              leading: SizedBox(
+                                height: 32,
+                                width: 32,
+                                child: Checkbox(
+                                  value: isSelected,
+                                  onChanged: (selected) {
+                                    setDialogState((){
+                                      labelKeys.addOrRemove(item.boxId);
+                                      //clipText = StringExt.listIntToString(labelKeys.keyList);
+                                    });
+                                  },
+                                ),
                               ),
                               title: Text(labelText),
                               selected: isSelected,
@@ -1028,21 +1045,37 @@ class RichNoteState extends State<RichNote> {
                               },
                             );
                           }
-                          return listTile;
+                          return catListTile;
                         },
                       ),
                     ),
                   ),
                   Offstage(
                     offstage: type == LabelType.Tag,
-                    child: Column(
-                      children: <Widget>[
-                        Divider(height: 1,),
-                        Padding(
-                          padding: EdgeInsets.all(6),
-                          child: Text(clipText),
-                        ),
-                      ],
+                    child: Container(
+                      height: 48,
+                      width: double.infinity,
+                      color: Color.fromARGB(127, 245, 245, 245),
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(16, 6, 6, 6),
+                              child: Text(clipText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.input),
+                            color: Theme.of(context).accentColor,
+                            onPressed: (){
+                              Navigator.of(context).pop(clipText);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Divider(height: 1,),
@@ -1051,19 +1084,20 @@ class RichNoteState extends State<RichNote> {
             }
           ),
           actions: <Widget>[
-            Offstage(
-              offstage: type == LabelType.Tag,
-              child: FlatButton(
-                child: Text('返回'),
-                onPressed: () {
-                  Navigator.of(context).pop(null);
-                },
-              ),
-            ),
+//            Offstage(
+//              offstage: type == LabelType.Tag,
+//              child: FlatButton(
+//                child: Text('返回'),
+//                onPressed: () {
+//                  Navigator.of(context).pop(null);
+//                },
+//              ),
+//            ),
             FlatButton(
-              child: type == LabelType.Tag ? Text('返回') : Text('插入'),
-              onPressed: type != LabelType.Tag && clipText.isEmpty ? null : () {
-                Navigator.of(context).pop(clipText);
+              child: Text('返回'),//type == LabelType.Tag ? Text('返回') : Text('插入'),
+              onPressed: () {
+                //Navigator.of(context).pop(clipText);
+                Navigator.of(context).pop(null);
               },
             ),
           ],
