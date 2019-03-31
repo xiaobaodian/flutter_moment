@@ -134,6 +134,9 @@ class BrowseTaskRouteState extends State<BrowseTaskRoute> {
               }
             });
           },
+//          onLongPress: (){
+//            store.taskSet.removeItem(task);
+//          },
         );
       },
       separatorBuilder: (context, index){

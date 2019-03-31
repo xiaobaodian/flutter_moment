@@ -60,10 +60,9 @@ class BoxSet<T extends BoxItem> {
   Future<int> addItem(T item) async {
     itemList.add(item);
     Map<String, dynamic> data = item.toJson();
-    int id = await dataSource.database.insert(dataSource.tables[BoxItem.typeName(T)].name, data).then((id){
-      item.boxId = id;
-      _itemMap[id] = item;
-    });
+    int id = await dataSource.database.insert(dataSource.tables[BoxItem.typeName(T)].name, data);
+    item.boxId = id;
+    _itemMap[id] = item;
     return id;
   }
 
@@ -192,6 +191,10 @@ class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
       sum = minusReferences(item);
     }
     return sum;
+  }
+
+  void sort(){
+    itemList.sort((one, two) => one.count.compareTo(two.count));
   }
 }
 

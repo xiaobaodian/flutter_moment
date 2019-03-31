@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info/package_info.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter_moment/calendar_map.dart';
 import 'package:flutter_moment/models/data_services.dart';
 import 'package:flutter_moment/models/helper_file.dart';
@@ -34,6 +36,9 @@ class GlobalStoreState extends State<GlobalStore> {
   static const _platformDataSource = const MethodChannel('DataSource');
   String localDir;
   CalendarMap calendarMap = CalendarMap();
+  PackageInfo packageInfo;
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  AndroidDeviceInfo androidInfo;
 
   LabelSet<FocusItem> focusItemSet;
   LabelSet<PersonItem> personSet;
@@ -52,9 +57,7 @@ class GlobalStoreState extends State<GlobalStore> {
     super.initState();
     debugPrint('GlobalStore 初始化...');
 
-//    getLocalPath().then((path) {
-//      localDir = path;
-//    });
+    initSystem();
 
     dataSource = DataSource(version: 1);
     Future.wait([
@@ -90,11 +93,24 @@ class GlobalStoreState extends State<GlobalStore> {
           calendarMap.everyDayIndex[dayIndex].dailyRecord = record;
         });
       });
+      personSet.sort();
+      placeSet.sort();
+      tagSet.sort();
     });
+
   }
 
   void updateCurrentDate() {
     calendarMap.initCurrentDate();
+  }
+
+  Future initSystem() async {
+    //    getLocalPath().then((path) {
+    //      localDir = path;
+    //    });
+
+    packageInfo = await PackageInfo.fromPlatform();
+    androidInfo = await deviceInfo.androidInfo;
   }
 
   int get selectedDateIndex => calendarMap.selectedDateIndex;

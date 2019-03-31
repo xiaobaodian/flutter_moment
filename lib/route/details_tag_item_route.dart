@@ -40,7 +40,7 @@ class TagItemDetailsRouteState extends State<TagItemDetailsRoute> {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
     widget._tagItem.detailsList =
-        _store.getFocusEventsFromPlaceItemId(widget._tagItem.boxId);
+        _store.getFocusEventsFromTagItemId(widget._tagItem.boxId);
   }
 
   @override

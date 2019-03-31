@@ -78,7 +78,6 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
                       return EditerFocusItemRoute(FocusItem());
                     })).then((resultItem) {
                       if (resultItem is FocusItem) {
-//                        _store.addFocusItem(resultItem);
                         _store.focusItemSet.addItem(resultItem);
                       }
                     });

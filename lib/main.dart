@@ -244,14 +244,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 18),
               ),
               trailing: Icon(Icons.arrow_right),
+            ),
+            ListTile(
+              leading: Icon(Icons.child_care),
+              title: Text(
+                '关于',
+                style: TextStyle(fontSize: 18),
+              ),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 //TrimPicture
                 Navigator.of(context).pop();
                 showDialog(
-                    context: context,
-                    builder: (context) {
-                      return TrimPictureDialog();
-                    });
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AboutDialog(
+                      applicationIcon: Image.asset("assets/image/defaultPersonPhoto1.png"),
+                      applicationName: '时光',
+                      applicationVersion: "${_store.packageInfo.version} (${_store.packageInfo.buildNumber})",
+                      applicationLegalese: '数据框架构成版',
+                      children: <Widget>[
+                        Divider(),
+                        Text('${_store.androidInfo.brand} ${_store.androidInfo.model}'),
+                        //Text("${_store.androidInfo.version}"),
+                        //Text("${_store.androidInfo.device}"),
+                        Text("${_store.androidInfo.display}"),
+                        Text("${_store.androidInfo.board}"),
+                      ],
+                    );
+                  }
+                );
               },
             ),
           ],
