@@ -846,6 +846,9 @@ class RichNoteState extends State<RichNote> {
     RichItem item = _getCurrentRichItem();
     var currentFocusNode = item.focusNode;
     int p = item.controller.selection.start;
+    if (p < 1) {
+      p = item.controller.text.length;
+    }
 
     switch (type) {
       case LabelType.Person:

@@ -22,15 +22,15 @@ class PassingObject<T> {
 abstract class BoxItem {
   BoxItem({
     this.boxId = 0,
-    this.bmobObjectId,
-    this.bmobCreatedAt,
-    this.bmobUpdatedAt,
+    this.objectId,
+    this.createdAt,
+    this.updatedAt,
   });
 
   int boxId;
-  String bmobObjectId;
-  String bmobCreatedAt;
-  String bmobUpdatedAt;
+  String objectId;
+  String createdAt;
+  String updatedAt;
 
   factory BoxItem.itemFromJson(Type type, Map<String, dynamic> json) {
     if (type == FocusItem) {
@@ -81,14 +81,14 @@ abstract class ReferencesBoxItem extends BoxItem {
   ReferencesBoxItem({
     boxId = 0,
     this.count = 0,
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
             boxId: boxId,
-            bmobObjectId: bmobObjectId,
-            bmobCreatedAt: bmobCreatedAt,
-            bmobUpdatedAt: bmobUpdatedAt);
+            objectId: objectId,
+            createdAt: createdAt,
+            updatedAt: updatedAt);
 
   int count;
   bool get isReferences => count == 0;
@@ -112,15 +112,15 @@ abstract class SystemBaseItem extends ReferencesBoxItem {
     count = 0,
     this.presets = false,
     this.internal = false,
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
             boxId: boxId,
             count: count,
-            bmobObjectId: bmobObjectId,
-            bmobCreatedAt: bmobCreatedAt,
-            bmobUpdatedAt: bmobUpdatedAt);
+      objectId: objectId,
+      createdAt: createdAt,
+      updatedAt: updatedAt);
 
   bool presets;
   bool internal;
@@ -135,13 +135,13 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
   FocusItem({
     this.title = "",
     this.comment = "",
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
-            bmobObjectId: bmobObjectId,
-            bmobCreatedAt: bmobCreatedAt,
-            bmobUpdatedAt: bmobUpdatedAt);
+      objectId: objectId,
+      createdAt: createdAt,
+      updatedAt: updatedAt);
 
   // 新建实例时的构建函数
   FocusItem.build({
@@ -151,17 +151,17 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     int count = 0,
     bool presets = false,
     bool internal = false,
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
           boxId: boxId,
           count: count,
           presets: presets,
           internal: internal,
-          bmobObjectId: bmobObjectId,
-          bmobCreatedAt: bmobCreatedAt,
-          bmobUpdatedAt: bmobUpdatedAt,
+    objectId: objectId,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
         ) {
     //id = DateTime.now().millisecondsSinceEpoch.toString();
   }
@@ -179,9 +179,9 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
 
     boxId = other.boxId;
     count = other.count;
-    bmobObjectId = other.bmobObjectId;
-    bmobCreatedAt = other.bmobCreatedAt;
-    bmobUpdatedAt = other.bmobUpdatedAt;
+    objectId = other.objectId;
+    createdAt = other.createdAt;
+    updatedAt = other.updatedAt;
   }
 
   factory FocusItem.fromJson(Map<String, dynamic> json) {
@@ -192,9 +192,9 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
       presets: json['presets'] == 1, // 系统预设
       internal: json['internal'] == 1, // 内部使用
       boxId: json['boxId'],
-      bmobObjectId: json['bmobObjectId'],
-      bmobCreatedAt: json['bmobCreatedAt'],
-      bmobUpdatedAt: json['bmobUpdatedAt'],
+      objectId: json['objectId'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
     );
   }
 
@@ -204,9 +204,9 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
         'count': count,
         'presets': presets ? 1 : 0,
         'internal': internal ? 1 : 0,
-        'bmobObjectId': bmobObjectId,
-        'bmobCreatedAt': bmobCreatedAt,
-        'bmobUpdatedAt': bmobUpdatedAt,
+        'objectId': objectId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
       };
 }
 
@@ -223,15 +223,15 @@ class PlaceItem extends ReferencesBoxItem
     this.coverPicture,
     boxId = 0,
     count = 0,
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
           boxId: boxId,
           count: count,
-          bmobObjectId: bmobObjectId,
-          bmobCreatedAt: bmobCreatedAt,
-          bmobUpdatedAt: bmobUpdatedAt,
+    objectId: objectId,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
         ) {
     setMixinImageSource(coverPicture);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
@@ -267,9 +267,9 @@ class PlaceItem extends ReferencesBoxItem
     }
     boxId = other.boxId;
     count = other.count;
-    bmobObjectId = other.bmobObjectId;
-    bmobCreatedAt = other.bmobCreatedAt;
-    bmobUpdatedAt = other.bmobUpdatedAt;
+    objectId = other.objectId;
+    createdAt = other.createdAt;
+    updatedAt = other.updatedAt;
   }
 
   factory PlaceItem.fromJson(Map<String, dynamic> json) {
@@ -279,9 +279,9 @@ class PlaceItem extends ReferencesBoxItem
       coverPicture: json['coverPicture'],
       boxId: json['boxId'],
       count: json['count'],
-      bmobObjectId: json['bmobObjectId'],
-      bmobCreatedAt: json['bmobCreatedAt'],
-      bmobUpdatedAt: json['bmobUpdatedAt'],
+      objectId: json['objectId'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
     );
   }
 
@@ -290,9 +290,9 @@ class PlaceItem extends ReferencesBoxItem
         'address': address,
         'coverPicture': coverPicture,
         'count': count,
-        'bmobObjectId': bmobObjectId,
-        'bmobCreatedAt': bmobCreatedAt,
-        'bmobUpdatedAt': bmobUpdatedAt,
+        'objectId': objectId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
       };
 }
 
@@ -306,15 +306,15 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
     this.title = '',
     boxId = 0,
     count = 0,
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
           boxId: boxId,
           count: count,
-          bmobObjectId: bmobObjectId,
-          bmobCreatedAt: bmobCreatedAt,
-          bmobUpdatedAt: bmobUpdatedAt,
+    objectId: objectId,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
         );
 
   bool hasTitle() => title.isNotEmpty;
@@ -324,9 +324,9 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
     title = other.title;
     boxId = other.boxId;
     count = other.count;
-    bmobObjectId = other.bmobObjectId;
-    bmobCreatedAt = other.bmobCreatedAt;
-    bmobUpdatedAt = other.bmobUpdatedAt;
+    objectId = other.objectId;
+    createdAt = other.createdAt;
+    updatedAt = other.updatedAt;
   }
 
   factory TagItem.fromJson(Map<String, dynamic> json) {
@@ -334,18 +334,18 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
       title: json['title'],
       boxId: json['boxId'],
       count: json['count'],
-      bmobObjectId: json['bmobObjectId'],
-      bmobCreatedAt: json['bmobCreatedAt'],
-      bmobUpdatedAt: json['bmobUpdatedAt'],
+      objectId: json['objectId'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
     );
   }
 
   Map<String, dynamic> toJson() => {
         'title': title,
         'count': count,
-        'bmobObjectId': bmobObjectId,
-        'bmobCreatedAt': bmobCreatedAt,
-        'bmobUpdatedAt': bmobUpdatedAt,
+        'objectId': objectId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
       };
 }
 
@@ -361,20 +361,27 @@ class PersonItem extends ReferencesBoxItem
         GetPersonChineseStringMixin {
   PersonItem({
     this.name = '',
+    this.nickname = '',
     this.gender = 2,
     this.birthday,
     photo = '',
     boxId = 0,
     count = 0,
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    this.username,
+    this.password,
+    this.email,
+    this.emailVerified,
+    this.mobilePhoneNumber,
+    this.mobilePhoneNumberVerified,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
           boxId: boxId,
           count: count,
-          bmobObjectId: bmobObjectId,
-          bmobCreatedAt: bmobCreatedAt,
-          bmobUpdatedAt: bmobUpdatedAt,
+    objectId: objectId,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
         ) {
     setMixinImageSource(photo);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
@@ -387,10 +394,18 @@ class PersonItem extends ReferencesBoxItem
   bool hasBirthday() => birthday != null;
 
   String name;
+  String nickname;
   int gender;
   DateTime birthday;
   double height;
   double weight;
+
+  String username;
+  String password;
+  String email;
+  bool emailVerified;
+  String mobilePhoneNumber;
+  bool mobilePhoneNumberVerified;
 
   Image getImage({EImageMode mode = EImageMode.Dark}) {
     return buildMixinImage(mode);
@@ -410,8 +425,8 @@ class PersonItem extends ReferencesBoxItem
 
   void copyWith(PersonItem other) {
     name = other.name;
+    nickname = other.nickname;
     gender = other.gender;
-    //birthday = DateTime(other.birthday.year, other.birthday.month, other.birthday.day);
     birthday = other.birthday;
     height = other.height;
     weight = other.weight;
@@ -420,36 +435,56 @@ class PersonItem extends ReferencesBoxItem
     }
     boxId = other.boxId;
     count = other.count;
-    bmobObjectId = other.bmobObjectId;
-    bmobCreatedAt = other.bmobCreatedAt;
-    bmobUpdatedAt = other.bmobUpdatedAt;
+    username = other.username;
+    password = other.password;
+    email = other.email;
+    emailVerified = other.emailVerified;
+    mobilePhoneNumber = other.mobilePhoneNumber;
+    mobilePhoneNumberVerified = other.mobilePhoneNumberVerified;
+    objectId = other.objectId;
+    createdAt = other.createdAt;
+    updatedAt = other.updatedAt;
   }
 
   factory PersonItem.fromJson(Map<String, dynamic> json) {
     String _birthday = json['birthday'];
     return PersonItem(
       name: json['name'],
+      nickname: json['nickname'],
       photo: json['photo'],
       gender: json['gender'],
       birthday: _birthday == '' ? null : DateTime.parse(_birthday),
       boxId: json['boxId'],
       count: json['count'],
-      bmobObjectId: json['bmobObjectId'],
-      bmobCreatedAt: json['bmobCreatedAt'],
-      bmobUpdatedAt: json['bmobUpdatedAt'],
+      username: json['username'],
+      password: json['password'],
+      email: json['email'],
+      emailVerified: json['emailVerified'] == 1,
+      mobilePhoneNumber: json['mobilePhoneNumber'],
+      mobilePhoneNumberVerified: json['mobilePhoneNumberVerified'] == 1,
+      objectId: json['objectId'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
     );
   }
 
   //
   Map<String, dynamic> toJson() => {
         'name': name,
+        'nickname': nickname,
         'photo': mixinImage,
         'gender': gender,
         'birthday': hasBirthday() ? birthday.toIso8601String() : '',
         'count': count,
-        'bmobObjectId': bmobObjectId,
-        'bmobCreatedAt': bmobCreatedAt,
-        'bmobUpdatedAt': bmobUpdatedAt,
+        'username': username,
+        'password': password,
+        'email': email,
+        'emailVerified': emailVerified ? 1 : 0,
+        'mobilePhoneNumber': mobilePhoneNumber,
+        'mobilePhoneNumberVerified': mobilePhoneNumberVerified ? 1 : 0,
+        'objectId': objectId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
       };
 }
 
@@ -464,14 +499,14 @@ class DailyRecord extends BoxItem {
     int boxId,
     this.dayIndex,
     this.weather = '',
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
           boxId: boxId,
-          bmobObjectId: bmobObjectId,
-          bmobCreatedAt: bmobCreatedAt,
-          bmobUpdatedAt: bmobUpdatedAt,
+          objectId: objectId,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
         );
 
   int dayIndex = -1;
@@ -581,9 +616,9 @@ class DailyRecord extends BoxItem {
     weather = other.weather;
     focusEvents = other.focusEvents;
     boxId = other.boxId;
-    bmobObjectId = other.bmobObjectId;
-    bmobCreatedAt = other.bmobCreatedAt;
-    bmobUpdatedAt = other.bmobUpdatedAt;
+    objectId = other.objectId;
+    createdAt = other.createdAt;
+    updatedAt = other.updatedAt;
   }
 
   factory DailyRecord.fromJson(Map<String, dynamic> json) {
@@ -591,18 +626,18 @@ class DailyRecord extends BoxItem {
       dayIndex: json['dayIndex'],
       weather: json['weather'],
       boxId: json['boxId'],
-      bmobObjectId: json['bmobObjectId'],
-      bmobCreatedAt: json['bmobCreatedAt'],
-      bmobUpdatedAt: json['bmobUpdatedAt'],
+      objectId: json['objectId'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
     );
   }
 
   Map<String, dynamic> toJson() => {
         'dayIndex': dayIndex,
         'weather': weather,
-        'bmobObjectId': bmobObjectId,
-        'bmobCreatedAt': bmobCreatedAt,
-        'bmobUpdatedAt': bmobUpdatedAt,
+        'objectId': objectId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
       };
 }
 
@@ -615,14 +650,14 @@ class FocusEvent extends BoxItem {
     String personBoxIds,
     String placeBoxIds,
     String tagBoxIds,
-    bmobObjectId,
-    bmobCreatedAt,
-    bmobUpdatedAt,
+    objectId,
+    createdAt,
+    updatedAt,
   }) : super(
           boxId: boxId,
-          bmobObjectId: bmobObjectId,
-          bmobCreatedAt: bmobCreatedAt,
-          bmobUpdatedAt: bmobUpdatedAt,
+          objectId: objectId,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
         ) {
     noteLines = RichSource.getRichLinesFromJson(note);
     personKeys.fromString(personBoxIds);
@@ -666,9 +701,9 @@ class FocusEvent extends BoxItem {
     placeKeys.copyWith(other.placeKeys);
     tagKeys.copyWith(other.tagKeys);
     boxId = other.boxId;
-    bmobObjectId = other.bmobObjectId;
-    bmobCreatedAt = other.bmobCreatedAt;
-    bmobUpdatedAt = other.bmobUpdatedAt;
+    objectId = other.objectId;
+    createdAt = other.createdAt;
+    updatedAt = other.updatedAt;
   }
 
   factory FocusEvent.fromJson(Map<String, dynamic> json) {
@@ -680,9 +715,9 @@ class FocusEvent extends BoxItem {
       placeBoxIds: json['placeBoxIds'],
       tagBoxIds: json['tagBoxIds'],
       boxId: json['boxId'],
-      bmobObjectId: json['bmobObjectId'],
-      bmobCreatedAt: json['bmobCreatedAt'],
-      bmobUpdatedAt: json['bmobUpdatedAt'],
+      objectId: json['objectId'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
     );
   }
 
@@ -693,9 +728,9 @@ class FocusEvent extends BoxItem {
         'personBoxIds': personKeys.toString(),
         'placeBoxIds': placeKeys.toString(),
         'tagBoxIds': tagKeys.toString(),
-        'bmobObjectId': bmobObjectId,
-        'bmobCreatedAt': bmobCreatedAt,
-        'bmobUpdatedAt': bmobUpdatedAt,
+        'objectId': objectId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
       };
 }
 

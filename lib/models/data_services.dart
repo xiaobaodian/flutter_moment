@@ -80,25 +80,30 @@ class DataSource {
         count integer,
         presets integer,
         internal integer,
-        bmobObjectId text,
-        bmobCreatedAt text,
-        bmobUpdatedAt text
+        objectId text,
+        createdAt text,
+        updatedAt text
       ''');
 
     tables['PersonItem'] = TableDefinition(name: 'PersonTable', structure: '''
         boxId integer primary key autoincrement,
         name text, 
+        nickname text,
         photo text,
         gender integer, 
         birthday text, 
         height real,
         weight real,
         count integer,
-        bmobUserName text,
-        bmobEmail text,
-        bmobObjectId text,
-        bmobCreatedAt text,
-        bmobUpdatedAt text
+        username text,
+        password text,
+        email text,
+        emailVerified integer,
+        mobilePhoneNumber text,
+        mobilePhoneNumberVerified integer,
+        objectId text,
+        createdAt text,
+        updatedAt text
       ''');
 
     tables['PlaceItem'] = TableDefinition(
@@ -109,9 +114,9 @@ class DataSource {
         address text,
         coverPicture text,
         count integer,
-        bmobObjectId text,
-        bmobCreatedAt text,
-        bmobUpdatedAt text
+        objectId text,
+        createdAt text,
+        updatedAt text
       ''',
     );
 
@@ -121,9 +126,9 @@ class DataSource {
         boxId integer primary key autoincrement, 
         title text not null,
         count integer,
-        bmobObjectId text,
-        bmobCreatedAt text,
-        bmobUpdatedAt text
+        objectId text,
+        createdAt text,
+        updatedAt text
       ''',
     );
 
@@ -134,9 +139,9 @@ class DataSource {
         dayIndex integer,
         weather text,
         coverPicture text,
-        bmobObjectId text,
-        bmobCreatedAt text,
-        bmobUpdatedAt text
+        objectId text,
+        createdAt text,
+        updatedAt text
       ''',
     );
 
@@ -150,9 +155,9 @@ class DataSource {
         personBoxIds text,
         placeBoxIds text,
         tagBoxIds text,
-        bmobObjectId text,
-        bmobCreatedAt text,
-        bmobUpdatedAt text
+        objectId text,
+        createdAt text,
+        updatedAt text
       ''',
     );
 
@@ -178,9 +183,9 @@ class DataSource {
         shareTo text,
         author integer,
         delegate integer,
-        bmobObjectId text,
-        bmobCreatedAt text,
-        bmobUpdatedAt text
+        objectId text,
+        createdAt text,
+        updatedAt text
       ''',
     );
   }

@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class TrimPhoto extends StatefulWidget {
-  final File _imageFile;
-
   TrimPhoto(this._imageFile);
+
+  final File _imageFile;
 
   @override
   State<StatefulWidget> createState() => _TrimPhotoState();

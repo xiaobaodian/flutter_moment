@@ -156,22 +156,26 @@ class BoxSet<T extends BoxItem> {
 /// 标签管理类
 class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
   LabelSet({
-//    @required dataChannel,
-//    @required command,
     DataSource dataSource,
-  }) : super(
-            dataSource:
-                dataSource); //dataChannel: dataChannel, command: command,
+  }) : super(dataSource:  dataSource);
+
+  Future<List<T>> loadItemsFromDataSource() async {
+    var list = await super.loadItemsFromDataSource();
+    itemList.sort((one, two) => two.count.compareTo(one.count));
+    return list;
+  }
 
   int addReferences(T item) {
     item.addReferences();
     changeItem(item);
+    itemList.sort((one, two) => two.count.compareTo(one.count));
     return item.count;
   }
 
   int minusReferences(T item) {
     item.minusReferences();
     changeItem(item);
+    itemList.sort((one, two) => two.count.compareTo(one.count));
     return item.count;
   }
 
@@ -194,7 +198,8 @@ class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
   }
 
   void sort(){
-    itemList.sort((one, two) => one.count.compareTo(two.count));
+    //itemList.sort((one, two) => one.count.compareTo(two.count));
+    itemList.sort((one, two) => two.count.compareTo(one.count));
   }
 }
 
