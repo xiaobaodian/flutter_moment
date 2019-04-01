@@ -80,6 +80,7 @@ class DataSource {
         count integer,
         presets integer,
         internal integer,
+        tags text,
         objectId text,
         createdAt text,
         updatedAt text
@@ -95,12 +96,8 @@ class DataSource {
         height real,
         weight real,
         count integer,
+        tags text,
         username text,
-        password text,
-        email text,
-        emailVerified integer,
-        mobilePhoneNumber text,
-        mobilePhoneNumberVerified integer,
         objectId text,
         createdAt text,
         updatedAt text
@@ -114,6 +111,7 @@ class DataSource {
         address text,
         coverPicture text,
         count integer,
+        tags text,
         objectId text,
         createdAt text,
         updatedAt text
@@ -126,6 +124,7 @@ class DataSource {
         boxId integer primary key autoincrement, 
         title text not null,
         count integer,
+        tags text,
         objectId text,
         createdAt text,
         updatedAt text
@@ -139,6 +138,7 @@ class DataSource {
         dayIndex integer,
         weather text,
         coverPicture text,
+        tags text,
         objectId text,
         createdAt text,
         updatedAt text
@@ -152,9 +152,9 @@ class DataSource {
         dayIndex integer,
         focusItemBoxId integer,
         note text,
-        personBoxIds text,
-        placeBoxIds text,
-        tagBoxIds text,
+        personTags text,
+        placeTags text,
+        tags text,
         objectId text,
         createdAt text,
         updatedAt text

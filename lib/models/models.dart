@@ -367,12 +367,7 @@ class PersonItem extends ReferencesBoxItem
     photo = '',
     boxId = 0,
     count = 0,
-    this.username,
-    this.password,
-    this.email,
-    this.emailVerified,
-    this.mobilePhoneNumber,
-    this.mobilePhoneNumberVerified,
+    this.username = '',
     objectId,
     createdAt,
     updatedAt,
@@ -401,11 +396,6 @@ class PersonItem extends ReferencesBoxItem
   double weight;
 
   String username;
-  String password;
-  String email;
-  bool emailVerified;
-  String mobilePhoneNumber;
-  bool mobilePhoneNumberVerified;
 
   Image getImage({EImageMode mode = EImageMode.Dark}) {
     return buildMixinImage(mode);
@@ -436,6 +426,129 @@ class PersonItem extends ReferencesBoxItem
     boxId = other.boxId;
     count = other.count;
     username = other.username;
+    objectId = other.objectId;
+    createdAt = other.createdAt;
+    updatedAt = other.updatedAt;
+  }
+
+  factory PersonItem.fromJson(Map<String, dynamic> json) {
+    String _birthday = json['birthday'];
+    return PersonItem(
+      name: json['name'],
+      nickname: json['nickname'],
+      photo: json['photo'],
+      gender: json['gender'],
+      birthday: _birthday == '' ? null : DateTime.parse(_birthday),
+      boxId: json['boxId'],
+      count: json['count'],
+      username: json['username'],
+      objectId: json['objectId'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+    );
+  }
+
+  //
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'nickname': nickname,
+        'photo': mixinImage,
+        'gender': gender,
+        'birthday': hasBirthday() ? birthday.toIso8601String() : '',
+        'count': count,
+        'username': username,
+        'objectId': objectId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+      };
+}
+
+///
+/// UserAccount
+///
+class UserItem extends ReferencesBoxItem
+    with
+        BuildImageMixin,
+        DetailsListMixin<FocusEvent>,
+        GetPersonChineseStringMixin {
+  UserItem({
+    this.name = '',
+    this.nickname = '',
+    this.gender = 2,
+    this.birthday,
+    photo = '',
+    boxId = 0,
+    count = 0,
+    this.username = '',
+    this.password = '',
+    this.email = '',
+    this.emailVerified = false,
+    this.mobilePhoneNumber = '',
+    this.mobilePhoneNumberVerified = false,
+    objectId,
+    createdAt,
+    updatedAt,
+  }) : super(
+    boxId: boxId,
+    count: count,
+    objectId: objectId,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  ) {
+    setMixinImageSource(photo);
+    setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
+    setMixinLightSource('assets/image/defaultPersonPhoto2.png');
+  }
+
+  String getLabel() => name;
+  String get photo => mixinImage;
+  bool hasPhoto() => hasImage();
+  bool hasBirthday() => birthday != null;
+
+  String name;
+  String nickname;
+  int gender;
+  DateTime birthday;
+  double height;
+  double weight;
+
+  String username;
+  String password;
+  String email;
+  bool emailVerified;
+  String mobilePhoneNumber;
+  bool mobilePhoneNumberVerified;
+  String sessionToken;
+
+  Image getImage({EImageMode mode = EImageMode.Dark}) {
+    return buildMixinImage(mode);
+  }
+
+  void updatePhoto(String photo) {
+    setMixinImageSource(photo);
+  }
+
+  String getGenderChineseTitle() {
+    return getGenderChineseString(gender);
+  }
+
+  String getBirthdayChineseTitle() {
+    return getBirthdayChineseString(birthday);
+  }
+
+  void copyWith(UserItem other) {
+    name = other.name;
+    nickname = other.nickname;
+    gender = other.gender;
+    birthday = other.birthday;
+    height = other.height;
+    weight = other.weight;
+    if (mixinImage != other.mixinImage) {
+      setMixinImageSource(other.mixinImage);
+    }
+    boxId = other.boxId;
+    count = other.count;
+    username = other.username;
     password = other.password;
     email = other.email;
     emailVerified = other.emailVerified;
@@ -446,9 +559,9 @@ class PersonItem extends ReferencesBoxItem
     updatedAt = other.updatedAt;
   }
 
-  factory PersonItem.fromJson(Map<String, dynamic> json) {
+  factory UserItem.fromJson(Map<String, dynamic> json) {
     String _birthday = json['birthday'];
-    return PersonItem(
+    return UserItem(
       name: json['name'],
       nickname: json['nickname'],
       photo: json['photo'],
@@ -470,23 +583,24 @@ class PersonItem extends ReferencesBoxItem
 
   //
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'nickname': nickname,
-        'photo': mixinImage,
-        'gender': gender,
-        'birthday': hasBirthday() ? birthday.toIso8601String() : '',
-        'count': count,
-        'username': username,
-        'password': password,
-        'email': email,
-        'emailVerified': emailVerified ? 1 : 0,
-        'mobilePhoneNumber': mobilePhoneNumber,
-        'mobilePhoneNumberVerified': mobilePhoneNumberVerified ? 1 : 0,
-        'objectId': objectId,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-      };
+    'name': name,
+    'nickname': nickname,
+    'photo': mixinImage,
+    'gender': gender,
+    'birthday': hasBirthday() ? birthday.toIso8601String() : '',
+    'count': count,
+    'username': username,
+    'password': password,
+    'email': email,
+    'emailVerified': emailVerified ? 1 : 0,
+    'mobilePhoneNumber': mobilePhoneNumber,
+    'mobilePhoneNumberVerified': mobilePhoneNumberVerified ? 1 : 0,
+    'objectId': objectId,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+  };
 }
+
 
 ///
 /// DailyEvents 每天的事件句柄
@@ -647,9 +761,9 @@ class FocusEvent extends BoxItem {
     this.dayIndex = -1,
     this.focusItemBoxId = -1,
     String note = '',
-    String personBoxIds,
-    String placeBoxIds,
-    String tagBoxIds,
+    String personTags,
+    String placeTags,
+    String tags,
     objectId,
     createdAt,
     updatedAt,
@@ -660,9 +774,9 @@ class FocusEvent extends BoxItem {
           updatedAt: updatedAt,
         ) {
     noteLines = RichSource.getRichLinesFromJson(note);
-    personKeys.fromString(personBoxIds);
-    placeKeys.fromString(placeBoxIds);
-    tagKeys.fromString(tagBoxIds);
+    personKeys.fromString(personTags);
+    placeKeys.fromString(placeTags);
+    tagKeys.fromString(tags);
   }
 
   int dayIndex;
@@ -711,10 +825,10 @@ class FocusEvent extends BoxItem {
       dayIndex: json['dayIndex'],
       focusItemBoxId: json['focusItemBoxId'],
       note: json['note'],
-      personBoxIds: json['personBoxIds'],
-      placeBoxIds: json['placeBoxIds'],
-      tagBoxIds: json['tagBoxIds'],
-      boxId: json['boxId'],
+      personTags: json['personTags'],
+      placeTags: json['placeTags'],
+      tags: json['tagBoxIds'],
+      boxId: json['tags'],
       objectId: json['objectId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
@@ -725,9 +839,9 @@ class FocusEvent extends BoxItem {
         'dayIndex': dayIndex,
         'focusItemBoxId': focusItemBoxId,
         'note': RichSource.getJsonFromRichLine(noteLines),
-        'personBoxIds': personKeys.toString(),
-        'placeBoxIds': placeKeys.toString(),
-        'tagBoxIds': tagKeys.toString(),
+        'personTags': personKeys.toString(),
+        'placeTags': placeKeys.toString(),
+        'tags': tagKeys.toString(),
         'objectId': objectId,
         'createdAt': createdAt,
         'updatedAt': updatedAt,

@@ -39,14 +39,15 @@ class GlobalStoreState extends State<GlobalStore> {
   PackageInfo packageInfo;
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo;
+  UserItem user = UserItem();
 
-  LabelSet<FocusItem> focusItemSet;
-  LabelSet<PersonItem> personSet;
-  LabelSet<PlaceItem> placeSet;
-  LabelSet<TagItem> tagSet;
-  BoxSet<TaskItem> taskSet;
-  BoxSet<FocusEvent> focusEventSet;
-  BoxSet<DailyRecord> dailyRecordSet;
+  ReferencesData<FocusItem> focusItemSet;
+  ReferencesData<PersonItem> personSet;
+  ReferencesData<PlaceItem> placeSet;
+  ReferencesData<TagItem> tagSet;
+  BasicData<TaskItem> taskSet;
+  BasicData<FocusEvent> focusEventSet;
+  BasicData<DailyRecord> dailyRecordSet;
 
 
   //Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
@@ -65,13 +66,13 @@ class GlobalStoreState extends State<GlobalStore> {
         print('openDataBase loading');
       })
     ]).then((_){
-      focusItemSet = LabelSet(dataSource: dataSource);
-      personSet = LabelSet(dataSource: dataSource);
-      placeSet = LabelSet(dataSource: dataSource);
-      tagSet = LabelSet(dataSource: dataSource);
-      taskSet = BoxSet(dataSource: dataSource);
-      dailyRecordSet = BoxSet(dataSource: dataSource);
-      focusEventSet = BoxSet(dataSource: dataSource);
+      focusItemSet = ReferencesData(dataSource: dataSource);
+      personSet = ReferencesData(dataSource: dataSource);
+      placeSet = ReferencesData(dataSource: dataSource);
+      tagSet = ReferencesData(dataSource: dataSource);
+      taskSet = BasicData(dataSource: dataSource);
+      dailyRecordSet = BasicData(dataSource: dataSource);
+      focusEventSet = BasicData(dataSource: dataSource);
 
       focusItemSet.loadItemsFromDataSource().then((_){
         if (focusItemSet.itemList.isEmpty) {

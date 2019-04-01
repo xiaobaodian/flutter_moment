@@ -7,8 +7,9 @@ import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/task/task_item.dart';
 
-class BoxSet<T extends BoxItem> {
-  BoxSet({
+/// 基本数据管理类
+class BasicData<T extends BoxItem> {
+  BasicData({
     this.dataSource,
   });
 
@@ -153,9 +154,9 @@ class BoxSet<T extends BoxItem> {
   }
 }
 
-/// 标签管理类
-class LabelSet<T extends ReferencesBoxItem> extends BoxSet<T> {
-  LabelSet({
+/// 引用属性数据类
+class ReferencesData<T extends ReferencesBoxItem> extends BasicData<T> {
+  ReferencesData({
     DataSource dataSource,
   }) : super(dataSource:  dataSource);
 
@@ -218,7 +219,7 @@ class DiffKeysResult {
 /// 标签关键字管理
 ///
 /// 用于某个对象的标签属性，基于List<int>包装。
-/// 这里只管理标签的key(Id)值，不负责标签对象本身的管理，要获得标签对象，通过[LabelSet]的
+/// 这里只管理标签的key(Id)值，不负责标签对象本身的管理，要获得标签对象，通过[ReferencesData]的
 /// [getItemFromId]方法获取。
 ///
 /// 保存的key值不能有重值。
