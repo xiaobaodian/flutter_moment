@@ -39,6 +39,7 @@ class RichLine {
     this.note = 0,
     this.content = '',
     this.expandData,
+    this.visibleLevel = 0,
   });
 
   RichType type;
@@ -58,6 +59,9 @@ class RichLine {
 
   /// [expandData]是复杂的扩展数据，task等。存放的是对象的引用。
   Object expandData = Object();
+
+  /// [visibleLevel]是可是级别，当为0时完全可见，当>0时，根据当前用户设置的对应级别可见。
+  int visibleLevel = 0;
 
   /// [getContent]是能够根据line[type]进行内容存储的自定义属性。
   String getContent() {
@@ -85,6 +89,7 @@ class RichLine {
     this.indent = other.indent;
     this.content = other.content;
     this.expandData = other.expandData;
+    this.visibleLevel = other.visibleLevel;
   }
 
   /// RichLine转换成json文本后持久化。对于[RichType.Task]类型的line，将把[TaskItem]的[boxId]
@@ -99,6 +104,7 @@ class RichLine {
       indent: json['ent'],
       content: json['txt'],
       expandData: json['tk'],
+      visibleLevel: json['vl'],
     );
   }
 
@@ -108,6 +114,7 @@ class RichLine {
         'ent': indent,
         'txt': content,
         'tk': type == RichType.Task ? (expandData as TaskItem).boxId : 0,
+        'vl': visibleLevel,
       };
 }
 
@@ -159,6 +166,7 @@ class RichItem extends RichLine {
     style = richLine.style;
     indent = richLine.indent;
     note = richLine.note;
+    visibleLevel = richLine.visibleLevel;
     this.source = source;
     if (type == RichType.Task) {
       TaskItem oldTask = richLine.expandData;

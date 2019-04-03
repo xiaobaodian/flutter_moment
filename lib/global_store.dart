@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_moment/models/shared_preferences.dart';
 import 'package:package_info/package_info.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter_moment/calendar_map.dart';
@@ -39,6 +40,7 @@ class GlobalStoreState extends State<GlobalStore> {
   PackageInfo packageInfo;
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo;
+  AppPreferences prefs;
   UserItem user = UserItem();
 
   ReferencesData<FocusItem> focusItemSet;
