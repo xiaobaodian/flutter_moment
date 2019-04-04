@@ -8,7 +8,6 @@ class AppVersion {
     this.update_log,
     this.version_i,
     this.path,
-    this.store,
   });
 
   String update_log;
@@ -16,8 +15,6 @@ class AppVersion {
   String version_number;
   int version_i;
   String path;
-
-  GlobalStoreState store;
 
   factory AppVersion.fromJson(Map<String, dynamic> json) {
     return AppVersion(
@@ -29,7 +26,7 @@ class AppVersion {
     );
   }
 
-  bool diffVersion() {
+  bool diffVersion(GlobalStoreState store) {
     var currentVersion = store.packageInfo.version;
     int diff = version_number.compareTo(currentVersion);
     String text = (diff > 0) ? '需要升级' : '无需升级';

@@ -42,6 +42,7 @@ class GlobalStoreState extends State<GlobalStore> {
   PackageInfo packageInfo;
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo;
+  AppVersion appVersion;
   AppPreferences prefs;
   UserItem user = UserItem();
 
@@ -102,9 +103,6 @@ class GlobalStoreState extends State<GlobalStore> {
       placeSet.sort();
       tagSet.sort();
     });
-
-    loadUpdatesFile();
-
   }
 
   void updateCurrentDate() {
@@ -118,6 +116,8 @@ class GlobalStoreState extends State<GlobalStore> {
 
     packageInfo = await PackageInfo.fromPlatform();
     androidInfo = await deviceInfo.androidInfo;
+    appVersion = await loadUpdatesFile();
+    appVersion.diffVersion(this);
   }
 
   int get selectedDateIndex => calendarMap.selectedDateIndex;
@@ -466,13 +466,14 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   // updates
-  Future loadUpdatesFile() async {
+  Future<AppVersion> loadUpdatesFile() async {
     Response response;
     Dio dio = Dio();
     response = await dio.get("https://share.heiluo.com/share/download?type=1&shareId=ce2e6c74d2b0428f80ff8203b84b7379&fileId=2609208");
     debugPrint('获取的文件内容：${response.data.toString()}');
-    AppVersion appVersion = AppVersion.fromJson(jsonDecode(response.data.toString()));
-    debugPrint('版本：${appVersion.version_title}');
+    AppVersion appVer = AppVersion.fromJson(jsonDecode(response.data.toString()));
+    debugPrint('版本：${appVer.version_title}');
+    return appVer;
   }
 
   // build & inherited
