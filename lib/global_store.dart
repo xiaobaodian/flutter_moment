@@ -26,8 +26,7 @@ class GlobalStore extends StatefulWidget {
 
   static GlobalStoreState of(BuildContext context) {
     return (context.inheritFromWidgetOfExactType(_StoreInherited)
-            as _StoreInherited)
-        .data;
+            as _StoreInherited).data;
   }
 
   @override
@@ -45,6 +44,7 @@ class GlobalStoreState extends State<GlobalStore> {
   AppVersion appVersion;
   AppPreferences prefs;
   UserItem user = UserItem();
+  bool allowUpgrades = true;
 
   ReferencesData<FocusItem> focusItemSet;
   ReferencesData<PersonItem> personSet;
@@ -110,14 +110,10 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   Future initSystem() async {
-    //    getLocalPath().then((path) {
-    //      localDir = path;
-    //    });
-
+    localDir = await getLocalPath();
     packageInfo = await PackageInfo.fromPlatform();
     androidInfo = await deviceInfo.androidInfo;
-    appVersion = await loadUpdatesFile();
-    appVersion.diffVersion(this);
+    appVersion = await checkUpdatesFile();
   }
 
   int get selectedDateIndex => calendarMap.selectedDateIndex;
@@ -466,10 +462,9 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   // updates
-  Future<AppVersion> loadUpdatesFile() async {
-    Response response;
+  Future<AppVersion> checkUpdatesFile() async {
     Dio dio = Dio();
-    response = await dio.get("https://share.heiluo.com/share/download?type=1&shareId=ce2e6c74d2b0428f80ff8203b84b7379&fileId=2609208");
+    Response response = await dio.get("https://share.heiluo.com/share/download?type=1&shareId=ce2e6c74d2b0428f80ff8203b84b7379&fileId=2609208");
     debugPrint('获取的文件内容：${response.data.toString()}');
     AppVersion appVer = AppVersion.fromJson(jsonDecode(response.data.toString()));
     debugPrint('版本：${appVer.version_title}');

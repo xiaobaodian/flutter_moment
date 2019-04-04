@@ -119,6 +119,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_store.allowUpgrades) {
+      Future.delayed(Duration(seconds: 10),(){
+        _store.appVersion.diffVersion(context, _store);
+      });
+    }
     _store.updateCurrentDate();
     return Scaffold(
       drawer: Drawer(
