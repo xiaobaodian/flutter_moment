@@ -10,6 +10,7 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/task/task_item.dart';
+import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class UserAccountRoute extends StatefulWidget {
@@ -41,10 +42,10 @@ class UserAccountRouteState extends State<UserAccountRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('任务'),
+        title: Text('账户'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.description),
+            icon: Icon(Icons.settings),
             onPressed: (){
             },
           ),
@@ -84,64 +85,68 @@ class UserAccountRouteState extends State<UserAccountRoute> {
   }
 
   Widget buildBody(BuildContext context, GlobalStoreState store) {
-    store.taskSet.itemList.sort((a,b) => b.createDate.compareTo(a.createDate));
-    return ListView.separated(
-        itemCount: store.taskSet.itemList.length,
-        itemBuilder: (context, index){
-          var task = store.taskSet.itemList[index];
-          print('task createDate: ${task.title} - ${task.createDate}');
-          final date = store.calendarMap.getDateFromIndex(task.createDate);
-          final str = DateTimeExt.chineseDateString(date);
-          return ListTile(
-            leading: SizedBox(
-              width: 32,
-              height: 32,
-              child: Checkbox(
-                  value: task.state == TaskState.Complete,
-                  onChanged: (isSelected) {
-                    setState(() {
-                      task.state =
-                      isSelected ? TaskState.Complete : TaskState.StandBy;
-                      //store.changeTaskItem(task);
-                      store.taskSet.changeItem(task);
-                    });
-                  }
-              ),
-            ),
-            title: Text(task.title),
-            subtitle: Text(str),
-            isThreeLine: true,
-            onTap: (){
-              DailyRecord dailyRecord = store.getDailyRecordFormTask(task);
-              FocusEvent focusEvent = store.getFocusEventFormTask(task);
-              print('task focusitem id : ${task.focusItemId}');
-              print('task dayIndex: ${task.createDate}');
-              print('focusEvent dayIndex: ${focusEvent.dayIndex}');
-              assert(dailyRecord != null);
-              assert(focusEvent != null);
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (BuildContext context) {
-                return EditerFocusEventRoute(focusEvent);
-              })).then((resultItem) {
-                if (resultItem is PassingObject<FocusEvent>) {
-                  dailyRecord.richLines.clear();
-                  focusEvent = resultItem.newObject;
-                  store.changeFocusEventAndTasks(resultItem);
-                  //store.changeFocusEvent(event);
-                } else if (resultItem is int) {
-                  dailyRecord.richLines.clear();
-                  store.removeFocusEventAndTasks(focusEvent);
-                }
-              });
-            },
-//          onLongPress: (){
-//            store.taskSet.removeItem(task);
-//          },
-          );
-        },
-        separatorBuilder: (context, index){
-          return Divider();
-        }
+    const dividerHeight = 3.0;
+    const dividerIndent = 48.0;
+    const dividerThickness = 6.0;
+    return ListView(
+      children: <Widget>[
+        ListTile(
+          title: Text('视图'),
+          leading: Icon(Icons.view_agenda),
+          trailing: Icon(Icons.chevron_right),
+        ),
+        DividerExt(height: dividerHeight, thickness: dividerThickness),
+        ListTile(
+          title: Text('提醒'),
+          leading: Icon(Icons.alarm),
+          trailing: Icon(Icons.chevron_right),
+        ),
+        DividerExt(height: dividerHeight, indent: dividerIndent),
+        ListTile(
+          title: Text('照片'),
+          leading: Icon(Icons.photo),
+          trailing: Icon(Icons.chevron_right),
+        ),
+        DividerExt(height: dividerHeight, indent: dividerIndent),
+        ListTile(
+          title: Text('日历'),
+          leading: Icon(Icons.calendar_today),
+          trailing: Icon(Icons.chevron_right),
+        ),
+        DividerExt(height: dividerHeight, indent: dividerIndent),
+        ListTile(
+          title: Text('任务'),
+          leading: Icon(Icons.work),
+          trailing: Icon(Icons.chevron_right),
+        ),
+        DividerExt(height: dividerHeight, indent: dividerIndent),
+        ListTile(
+          title: Text('标签'),
+          leading: Icon(Icons.label_outline),
+          trailing: Icon(Icons.chevron_right),
+        ),
+        DividerExt(height: dividerHeight, thickness: dividerThickness),
+        ListTile(
+          title: Text('语言'),
+          leading: Icon(Icons.language),
+          trailing: Icon(Icons.chevron_right),
+        ),
+        DividerExt(height: dividerHeight, indent: dividerIndent),
+        ListTile(
+          title: Text('帮助'),
+          leading: Icon(Icons.help_outline),
+          trailing: Icon(Icons.chevron_right),
+        ),
+        DividerExt(height: dividerHeight, thickness: dividerThickness),
+        ListTile(
+          title: Text('版本'),
+          subtitle: store.appVersion.needUpgrade ? Text('点击升级到：${_store.appVersion.number}',
+            style: TextStyle(fontSize: 10),
+          ) : null,
+          leading: Icon(Icons.update),
+          trailing: Text('${_store.packageInfo.version} (${_store.packageInfo.buildNumber})'),
+        ),
+      ],
     );
   }
 

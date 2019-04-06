@@ -15,6 +15,7 @@ import 'package:flutter_moment/route/calendar_route.dart';
 import 'package:flutter_moment/route/details_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/browse_daily_focus_route.dart';
+import 'package:flutter_moment/route/user_account_details_route.dart';
 import 'package:flutter_moment/widgets/trim_picture_dialog.dart';
 
 void main() => runApp(GlobalStore(child: MyApp()));
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
       home: LaunchPage(),
       routes: <String, WidgetBuilder>{
         'HomeScreen': (_) => HomeScreen(),
+        'UserAccount': (_) => UserAccountRoute(),
         'CalendarRoute': (_) => CalendarRoute(),
       },
     );
@@ -45,16 +47,18 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
-  final homeStateKey = GlobalKey<_HomeScreenState>();
+  //final homeStateKey = GlobalKey<_HomeScreenState>();
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalStoreState _store;
   CalendarMap _calendarMap;
   bool hideGoTodayButton;
+  bool firstReminderUpgrade;
 
   //ScrollController _scrollController;
   PageController _pageController;
@@ -67,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
     //SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top, SystemUiOverlay.bottom]);
     hideGoTodayButton = true;
+    firstReminderUpgrade = true;
   }
 
   @override
@@ -76,6 +81,15 @@ class _HomeScreenState extends State<HomeScreen> {
     _calendarMap = _store.calendarMap;
     _pageController = PageController(initialPage: _calendarMap.getDateIndex());
     _pageStorageBucket = PageStorageBucket();
+    Future.delayed(Duration(seconds: 8),(){
+      _store.appVersion.diffVersion(_store);
+      if (_store.appVersion.needUpgrade && firstReminderUpgrade) {
+        _scaffoldKey.currentState.showSnackBar(
+            SnackBar(content: Text('有新的版本发布'),)
+        );
+        firstReminderUpgrade = false;
+      }
+    });
   }
 
   @override
@@ -90,12 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
     debugPrint('退出了这个App ！！！');
     _store.dataSource.closeDataBase();
-  }
-
-  void test() {
-    setState(() {
-
-    });
   }
 
   void jumpToCurrentPage() {
@@ -119,13 +127,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_store.allowUpgrades) {
-      Future.delayed(Duration(seconds: 10),(){
-        _store.appVersion.diffVersion(context, _store);
-      });
-    }
     _store.updateCurrentDate();
     return Scaffold(
+      key: _scaffoldKey,
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -134,16 +138,22 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,
               ),
-              child: Center(
-                child: SizedBox(
-                  width: 90,
-                  height: 90,
-                  child: CircleAvatar(
-                    radius: 5,
-                    backgroundImage: AssetImage('assets/image/xuelei01.jpg'),
-                    //child: Text('雪嫘'),
+              child: InkWell(
+                child: Center(
+                  child: SizedBox(
+                    width: 90,
+                    height: 90,
+                    child: CircleAvatar(
+                      radius: 5,
+                      backgroundImage: AssetImage('assets/image/xuelei01.jpg'),
+                      //child: Text('雪嫘'),
+                    ),
                   ),
                 ),
+                onTap: (){
+                  Navigator.pop(context);
+                  Navigator.of(context).pushNamed('UserAccount');
+                },
               ),
             ),
             ListTile(
@@ -152,12 +162,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 '任务',
                 style: TextStyle(fontSize: 18),
               ),
-              trailing: Icon(Icons.arrow_right),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 var navigator = Navigator.of(context);
                 navigator.pop(context);
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
                   return BrowseTaskRoute();
                 }));
               },
@@ -168,12 +177,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 '焦点',
                 style: TextStyle(fontSize: 18),
               ),
-              trailing: Icon(Icons.arrow_right),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 var navigator = Navigator.of(context);
                 navigator.pop(context);
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
                   return BrowseDailyFocusRoute(0);
                 }));
               },
@@ -184,12 +192,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 '人物',
                 style: TextStyle(fontSize: 18),
               ),
-              trailing: Icon(Icons.arrow_right),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 var navigator = Navigator.of(context);
                 navigator.pop(context);
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
                   return BrowseDailyFocusRoute(1);
                 }));
               },
@@ -200,12 +207,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 '相片',
                 style: TextStyle(fontSize: 18),
               ),
-              trailing: Icon(Icons.arrow_right),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 var navigator = Navigator.of(context);
                 navigator.pop(context);
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
                   return BrowseDailyFocusRoute(4);
                 }));
               },
@@ -216,12 +222,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 '位置',
                 style: TextStyle(fontSize: 18),
               ),
-              trailing: Icon(Icons.arrow_right),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 var navigator = Navigator.of(context);
                 navigator.pop(context);
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
                   return BrowseDailyFocusRoute(2);
                 }));
               },
@@ -232,23 +237,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 '标签',
                 style: TextStyle(fontSize: 18),
               ),
-              trailing: Icon(Icons.arrow_right),
+              trailing: Icon(Icons.chevron_right),
               onTap: () {
                 var navigator = Navigator.of(context);
                 navigator.pop(context);
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
                   return BrowseDailyFocusRoute(3);
                 }));
               },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text(
-                '设置',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.arrow_right),
             ),
             ListTile(
               leading: Icon(Icons.child_care),

@@ -467,7 +467,7 @@ class GlobalStoreState extends State<GlobalStore> {
     Response response = await dio.get("https://share.heiluo.com/share/download?type=1&shareId=ce2e6c74d2b0428f80ff8203b84b7379&fileId=2609208");
     debugPrint('获取的文件内容：${response.data.toString()}');
     AppVersion appVer = AppVersion.fromJson(jsonDecode(response.data.toString()));
-    debugPrint('版本：${appVer.version_title}');
+    debugPrint('版本：${appVer.title}');
     return appVer;
   }
 

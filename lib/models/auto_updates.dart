@@ -7,68 +7,34 @@ import 'package:open_file/open_file.dart';
 
 class AppVersion {
   AppVersion({
-    this.version_title,
-    this.version_number,
-    this.update_log,
-    this.version_i,
+    this.title,
+    this.number,
+    this.log,
+    this.version,
     this.path,
   });
 
-  String update_log;
-  String version_title;
-  String version_number;
-  int version_i;
+  String log;
+  String title;
+  String number;
+  int version;
   String path;
+
+  bool needUpgrade = false;
 
   factory AppVersion.fromJson(Map<String, dynamic> json) {
     return AppVersion(
-      version_title: json['version_title'],
-      version_number: json['version_number'],
-      update_log: json['update_log'],
-      version_i: json['version_i'],
+      title: json['version_title'],
+      number: json['version_number'],
+      log: json['update_log'],
+      version: json['version_i'],
       path: json['path'],
     );
   }
 
-  bool diffVersion(BuildContext context, GlobalStoreState store) {
-    var currentVersion = store.packageInfo.version;
-    int diff = version_number.compareTo(currentVersion);
-    String text = (diff > 0) ? '需要升级' : '无需升级';
-    debugPrint('version title: $version_title');
-    debugPrint('currentVersion: $currentVersion, updateVersion: $version_number');
-    debugPrint('can updates: $text');
-    if (diff > 0) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('发现新的版本'),
-            content: Text('找到了$version_title，Version：$version_number。需要升级吗？'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('取消'),
-                onPressed: () {
-                  store.allowUpgrades = false;
-                  Navigator.of(context).pop(null);
-                },
-              ),
-              FlatButton(
-                child: Text('升级'),
-                onPressed: () {
-                  Navigator.of(context).pop(1);
-                },
-              ),
-            ],
-          );
-        }
-      ).then((result){
-        if (result is int) {
-          updates(store);
-        }
-      });
-
-    }
-    return (diff > 0);
+  void diffVersion(GlobalStoreState store) {
+    int diff = number.compareTo(store.packageInfo.version);
+    needUpgrade = diff > 0;
   }
 
   Future updates(GlobalStoreState store) async {
@@ -78,6 +44,7 @@ class AppVersion {
       if (status == DownloadTaskStatus.complete) {
         //FlutterDownloader.open(taskId: id);
         OpenFile.open(_updatesPath + '/app-release.apk');
+        FlutterDownloader.registerCallback(null);
       }
     });
     debugPrint('下载升级文件的目录：$_updatesPath');
