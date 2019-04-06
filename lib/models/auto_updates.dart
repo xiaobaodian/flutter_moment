@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:open_file/open_file.dart';
 
 class AppVersion {
   AppVersion({
@@ -71,18 +72,19 @@ class AppVersion {
   }
 
   Future updates(GlobalStoreState store) async {
+    String _updatesPath = store.localDir + '/Update';
     FlutterDownloader.registerCallback((id, status, progress) {
       debugPrint('Download task ($id) is in status ($status) and process ($progress)');
       if (status == DownloadTaskStatus.complete) {
-        FlutterDownloader.open(taskId: id);
+        //FlutterDownloader.open(taskId: id);
+        OpenFile.open(_updatesPath + '/app-release.apk');
       }
     });
-    String _updatesPath = store.localDir + '/Update';
     debugPrint('下载升级文件的目录：$_updatesPath');
     final savedDir = Directory(_updatesPath);
     bool hasExisted = await savedDir.exists();
     if (!hasExisted) {
-      //savedDir.create();
+      savedDir.create();
     }
     final taskId = await FlutterDownloader.enqueue(
       url: 'https://share.heiluo.com/share/download?type=1&shareId=e6414385ca4a48b98899a7d51ca29af7&fileId=2445569',
