@@ -60,8 +60,11 @@ class RichLine {
   /// [expandData]是复杂的扩展数据，task等。存放的是对象的引用。
   Object expandData = Object();
 
-  /// [visibleLevel]是可是级别，当为0时完全可见，当>0时，根据当前用户设置的对应级别可见。
+  /// [visibleLevel]是可视级别，当为0时完全可见，当>0时，根据当前用户设置的对应级别可见。
   int visibleLevel = 0;
+
+  /// [createTime]创建的时间
+  DateTime createTime;
 
   /// [getContent]是能够根据line[type]进行内容存储的自定义属性。
   String getContent() {
@@ -143,6 +146,8 @@ class RichItem extends RichLine {
         canChanged = true;
       }
     });
+
+    sde
   }
 
   RichItem.from({

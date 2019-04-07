@@ -37,16 +37,8 @@ class AppVersion {
     needUpgrade = diff > 0;
   }
 
-  Future updates(GlobalStoreState store) async {
+  Future updates(BuildContext context, GlobalStoreState store) async {
     String _updatesPath = store.localDir + '/Update';
-    FlutterDownloader.registerCallback((id, status, progress) {
-      debugPrint('Download task ($id) is in status ($status) and process ($progress)');
-      if (status == DownloadTaskStatus.complete) {
-        //FlutterDownloader.open(taskId: id);
-        OpenFile.open(_updatesPath + '/app-release.apk');
-        FlutterDownloader.registerCallback(null);
-      }
-    });
     debugPrint('下载升级文件的目录：$_updatesPath');
     final savedDir = Directory(_updatesPath);
     bool hasExisted = await savedDir.exists();
@@ -61,5 +53,37 @@ class AppVersion {
     );
     //FlutterDownloader.open(taskId: taskId);
     final tasks = await FlutterDownloader.loadTasks();
+
+    showDialog(
+      context: context,
+      //barrierDismissible: true,
+      builder: (context) {
+        double downloadProgress = 0.2;
+        return AlertDialog(
+          title: Text('下载'),
+          contentPadding: EdgeInsets.all(32),
+          content: StatefulBuilder(
+            builder: (context, setDialogState) {
+              FlutterDownloader.registerCallback((id, status, progress) {
+                if (status == DownloadTaskStatus.complete) {
+                  OpenFile.open(_updatesPath + '/app-release.apk');
+                  FlutterDownloader.registerCallback(null);
+                  Navigator.of(context).pop(null);
+                } else {
+                  setDialogState((){
+                    downloadProgress = progress / 100.0;
+                  });
+                }
+              });
+              return Container(
+                child: LinearProgressIndicator(
+                  value: downloadProgress,
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }

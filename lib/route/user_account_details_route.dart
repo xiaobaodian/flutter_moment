@@ -14,7 +14,6 @@ import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class UserAccountRoute extends StatefulWidget {
-
   @override
   UserAccountRouteState createState() => UserAccountRouteState();
 }
@@ -46,14 +45,12 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.settings),
-            onPressed: (){
-            },
+            onPressed: () {},
           ),
           PopupMenuButton(
-            onSelected: (int v){
+            onSelected: (int v) {
               if (v == 1) {
-              } else if (v == 2) {
-              }
+              } else if (v == 2) {}
             },
             itemBuilder: (BuildContext context) {
               return <PopupMenuItem<int>>[
@@ -140,14 +137,23 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         DividerExt(height: dividerHeight, thickness: dividerThickness),
         ListTile(
           title: Text('版本'),
-          subtitle: store.appVersion.needUpgrade ? Text('点击升级到：${_store.appVersion.number}',
-            style: TextStyle(fontSize: 10),
-          ) : null,
           leading: Icon(Icons.update),
-          trailing: Text('${_store.packageInfo.version} (${_store.packageInfo.buildNumber})'),
+          trailing: store.appVersion.needUpgrade
+              ? Text('发现新版本：${_store.appVersion.number}')
+              : Text('${_store.packageInfo.version} (${_store.packageInfo.buildNumber})'),
+          onTap: (){
+            if (store.appVersion.needUpgrade) {
+              store.appVersion.updates(context, store);
+            }
+          },
+        ),
+        DividerExt(height: dividerHeight, indent: dividerIndent),
+        ListTile(
+          title: Text('关于'),
+          leading: Icon(Icons.child_care),
+          trailing: Icon(Icons.chevron_right),
         ),
       ],
     );
   }
-
 }
