@@ -73,8 +73,8 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
         }
     ).then((result) {
       if (result != null) {
-        _store.personSet.removeItem(widget._personItem);
         Navigator.of(context).pop();
+        _store.personSet.removeItem(widget._personItem);
       }
     });
   }
@@ -104,16 +104,16 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
             onPressed: (){
               Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
                 return EditerPersonItemRoute(widget._personItem);
-              })).then((resultItem){
+              })).then((resultItem) {
                 if (resultItem is PersonItem) {
                   String oldName = widget._personItem.name;
                   String newName = resultItem.name;
                   if (oldName != newName) {
-                    print('person name is change');
+                    debugPrint('人物的姓名已更改');
                     for (var event in widget._personItem.detailsList) {
                       for (var line in event.noteLines) {
-                        print('line content: ${line.getContent()}');
-                        if (line.type == RichType.Task) print('line is task type');
+                        debugPrint('line的内容: ${line.getContent()}');
+                        if (line.type == RichType.Task) debugPrint('line是task类型');
                         String dec = line.getContent().replaceAll(oldName, newName);
                         line.setContent(dec);
                       }
@@ -122,7 +122,6 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
                   }
                   widget._personItem.copyWith(resultItem);
                   _store.personSet.changeItem(widget._personItem);
-                  //_platformDataSource.invokeMethod("PutPersonItem", json.encode(widget._personItem));
                 }
               });
             },
@@ -143,7 +142,6 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
   }
 
   Widget buildBody(BuildContext context, GlobalStoreState store) {
-    //var dailyRecord = store.calendarMap.getDailyRecordFromIndex(dayIndex);
     final detailsList = widget._personItem.detailsList;
     if (detailsList.isEmpty) {
       return Center(child: Text('还没有记录'));
@@ -159,7 +157,6 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
           onTap: (tapObject) {
             var richLine = tapObject.richLine;
             FocusEvent event = richLine.note;
-            //FocusEvent event = detailsList[index];
             DailyRecord dailyRecord = store.getDailyRecord(event.dayIndex);
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {

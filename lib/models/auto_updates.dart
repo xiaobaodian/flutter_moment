@@ -8,32 +8,35 @@ import 'package:open_file/open_file.dart';
 class AppVersion {
   AppVersion({
     this.title,
-    this.number,
-    this.log,
     this.version,
+    this.buildNumber,
+    this.log,
     this.path,
   });
 
-  String log;
   String title;
-  String number;
-  int version;
+  String version;
+  String buildNumber;
+  String log;
   String path;
 
   bool needUpgrade = false;
 
   factory AppVersion.fromJson(Map<String, dynamic> json) {
     return AppVersion(
-      title: json['version_title'],
-      number: json['version_number'],
-      log: json['update_log'],
-      version: json['version_i'],
+      title: json['title'],
+      version: json['version'],
+      buildNumber: json['buildNumber'],
+      log: json['log'],
       path: json['path'],
     );
   }
 
   void diffVersion(GlobalStoreState store) {
-    int diff = number.compareTo(store.packageInfo.version);
+    int diff = version.compareTo(store.packageInfo.version);
+    if (diff <= 0) {
+      diff = buildNumber.compareTo(store.packageInfo.buildNumber);
+    }
     needUpgrade = diff > 0;
   }
 

@@ -147,7 +147,6 @@ class RichItem extends RichLine {
       }
     });
 
-    sde
   }
 
   RichItem.from({

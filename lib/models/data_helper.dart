@@ -21,7 +21,7 @@ class BasicData<T extends BoxItem> {
   T getItemFromId(int id) => _itemMap[id];
 
   Future<List<T>> loadItemsFromDataSource() async {
-    assert(dataSource.database != null);
+    await dataSource.openDataBase();
     return await dataSource.database
         .rawQuery(
             'SELECT * FROM ${dataSource.tables[BoxItem.typeName(T)].name}')
@@ -61,6 +61,7 @@ class BasicData<T extends BoxItem> {
   Future<int> addItem(T item) async {
     itemList.add(item);
     Map<String, dynamic> data = item.toJson();
+    await dataSource.openDataBase();
     int id = await dataSource.database.insert(dataSource.tables[BoxItem.typeName(T)].name, data);
     item.boxId = id;
     _itemMap[id] = item;
@@ -71,9 +72,9 @@ class BasicData<T extends BoxItem> {
   /// 通过[_itemMap]找到[itemList]中原来的实例，进行对比，如果是同一个对象，就不用
   /// 处理。否则，通过indexOf方法定位到index，然后进行替换，并把[_itemMap]也进行
   /// 替换。
-  void changeItem(T item) {
-
-    print('changeItem id: ${item.boxId}');
+  Future<int> changeItem(T item) async {
+    debugPrint('changeItem id: ${item.boxId}');
+    assert(item != null);
 
     T temp = _itemMap[item.boxId];
     assert(temp != null);
@@ -81,51 +82,58 @@ class BasicData<T extends BoxItem> {
     if (temp != item) {
       int position = itemList.indexOf(temp);
 
-      print('itemList.indexOf(temp) = $position');
+      debugPrint('itemList.indexOf(temp) = $position');
 
       assert(position != -1);
       itemList[position] = item;
       _itemMap[item.boxId] = item;
     }
     Map<String, dynamic> data = item.toJson();
-    data.remove('boxId');
-    dataSource.database.update(
+    await dataSource.openDataBase();
+    int changes = await dataSource.database.update(
         dataSource.tables[BoxItem.typeName(T)].name, data,
         where: 'boxId = ?', whereArgs: [item.boxId]);
+    return changes;
   }
 
   /// 删除item的时候，传进来的可能是一个全新的副本，直接删除是有可能出错的。
   /// 所以需要通过传进来的[item.boxId]执行删除才能保证正确执行。
-  void removeItem(T item) {
-    removeItemByBoxId(item.boxId);
+  Future<int> removeItem(T item) async {
+    return await removeItemByBoxId(item.boxId);
   }
 
-  void changeItemByBoxId(int id) {
+  Future<int> changeItemByBoxId(int id) async {
     T item = _itemMap[id];
     assert(item != null);
+    int changes = 0;
     if (item != null) {
       Map<String, dynamic> data = item.toJson();
-      data.remove('boxId');
-      dataSource.database.update(
+      await dataSource.openDataBase();
+      changes = await dataSource.database.update(
           dataSource.tables[BoxItem.typeName(T)].name, data,
           where: 'boxId = ?', whereArgs: [item.boxId]);
     }
+    return changes;
   }
 
-  void removeItemByBoxId(int id) {
+  Future<int> removeItemByBoxId(int id) async {
     T item = _itemMap[id];
     assert(item != null);
+    int changes = 0;
     if (item != null) {
       itemList.remove(item);
       _itemMap.remove(item.boxId);
-      dataSource.database.delete(dataSource.tables[BoxItem.typeName(T)].name,
+      await dataSource.openDataBase();
+      changes = await dataSource.database.delete(dataSource.tables[BoxItem.typeName(T)].name,
           where: 'boxId = ?', whereArgs: [item.boxId]);
     }
+    return changes;
   }
 
   // 'dayIndex = ?' 'boxId = ?'
   Future<List<T>> findByWhere(String where, List<dynamic> whereArgs) async {
     List<T> list = [];
+    await dataSource.openDataBase();
     List<Map<String, dynamic>> rawList = await dataSource.database
         .query(dataSource.tables[BoxItem.typeName(T)].name,
             where: where, whereArgs: whereArgs);

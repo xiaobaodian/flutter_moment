@@ -73,8 +73,8 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
           );
         }).then((result) {
       if (result != null) {
-        _store.placeSet.removeItem(widget._placeItem);
         Navigator.of(context).pop();
+        _store.placeSet.removeItem(widget._placeItem);
       }
     });
   }
@@ -111,18 +111,13 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
                   String oldTitle = widget._placeItem.title;
                   String newTitle = resultItem.title;
                   if (oldTitle != newTitle) {
-                    print('place title is change');
                     for (var event in widget._placeItem.detailsList) {
                       for (var line in event.noteLines) {
-                        print('line content: ${line.getContent()}');
-                        if (line.type == RichType.Task)
-                          print('line is task type');
                         String dec =
                             line.getContent().replaceAll(oldTitle, newTitle);
                         line.setContent(dec);
                       }
-                      _store.changeFocusEventAndTasks(
-                          PassingObject(newObject: event));
+                      _store.changeFocusEventAndTasks(PassingObject(newObject: event));
                     }
                   }
                   widget._placeItem.copyWith(resultItem);
@@ -142,11 +137,11 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
           ),
         ],
       ),
-      body: buildBody(context, _store),
+      body: buildBody(context),
     );
   }
 
-  Widget buildBody(BuildContext context, GlobalStoreState store) {
+  Widget buildBody(BuildContext context) {
     final detailsList = widget._placeItem.detailsList;
     if (detailsList.isEmpty) {
       return Center(child: Text('还没有记录'));
@@ -155,7 +150,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
       itemCount: detailsList.length,
       itemBuilder: (context, index) {
         final date =
-            store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
+            _store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
         final str = DateTimeExt.chineseDateString(date);
         Widget content = RichNote.fixed(
           store: _store,
@@ -163,8 +158,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
           onTap: (tapObject) {
             var richLine = tapObject.richLine;
             FocusEvent event = richLine.note;
-            //FocusEvent event = detailsList[index];
-            DailyRecord dailyRecord = store.getDailyRecord(event.dayIndex);
+            DailyRecord dailyRecord = _store.getDailyRecord(event.dayIndex);
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return EditerFocusEventRoute(event);
@@ -172,13 +166,13 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
               if (resultItem is PassingObject<FocusEvent>) {
                 dailyRecord.richLines.clear();
                 Future(() {
-                  store.changeFocusEventAndTasks(resultItem);
+                  _store.changeFocusEventAndTasks(resultItem);
                 }).then((_) {
                   event.copyWith(resultItem.newObject);
                 });
               } else if (resultItem is int) {
                 dailyRecord.richLines.clear();
-                store.removeFocusEventAndTasks(event);
+                _store.removeFocusEventAndTasks(event);
               }
             });
           },

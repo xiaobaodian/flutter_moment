@@ -100,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     debugPrint('退出了这个App ！！！');
     _store.dataSource.closeDataBase();
@@ -125,246 +124,256 @@ class _HomeScreenState extends State<HomeScreen> {
     return dailyRecord.richLines.length;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    _store.updateCurrentDate();
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+  Widget drawerHeaderChild(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-              ),
-              child: InkWell(
-                child: Center(
-                  child: SizedBox(
-                    width: 90,
-                    height: 90,
-                    child: CircleAvatar(
-                      radius: 5,
-                      backgroundImage: AssetImage('assets/image/xuelei01.jpg'),
-                      //child: Text('雪嫘'),
-                    ),
-                  ),
-                ),
-                onTap: (){
-                  Navigator.pop(context);
-                  Navigator.of(context).pushNamed('UserAccount');
-                },
+            SizedBox(
+              width: 90,
+              height: 90,
+              child: CircleAvatar(
+                radius: 5,
+                backgroundImage: AssetImage('assets/image/xuelei01.jpg'),
+                //child: Text('雪嫘'),
               ),
             ),
-            ListTile(
-              leading: Icon(Icons.assignment_turned_in),
-              title: Text(
-                '任务',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () {
-                var navigator = Navigator.of(context);
-                navigator.pop(context);
-                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseTaskRoute();
-                }));
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.filter_center_focus),
-              title: Text(
-                '焦点',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () {
-                var navigator = Navigator.of(context);
-                navigator.pop(context);
-                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseDailyFocusRoute(0);
-                }));
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.people),
-              title: Text(
-                '人物',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () {
-                var navigator = Navigator.of(context);
-                navigator.pop(context);
-                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseDailyFocusRoute(1);
-                }));
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.photo),
-              title: Text(
-                '相片',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () {
-                var navigator = Navigator.of(context);
-                navigator.pop(context);
-                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseDailyFocusRoute(4);
-                }));
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.location_on),
-              title: Text(
-                '位置',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () {
-                var navigator = Navigator.of(context);
-                navigator.pop(context);
-                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseDailyFocusRoute(2);
-                }));
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.label),
-              title: Text(
-                '标签',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () {
-                var navigator = Navigator.of(context);
-                navigator.pop(context);
-                navigator.push(MaterialPageRoute(builder: (BuildContext context) {
-                  return BrowseDailyFocusRoute(3);
-                }));
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.child_care),
-              title: Text(
-                '关于',
-                style: TextStyle(fontSize: 18),
-              ),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () {
-                //TrimPicture
-                Navigator.of(context).pop();
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AboutDialog(
-                      applicationIcon: Image.asset("assets/image/defaultPersonPhoto1.png"),
-                      applicationName: '时光',
-                      applicationVersion: "${_store.packageInfo.version} (${_store.packageInfo.buildNumber})",
-                      applicationLegalese: '数据框架构成版',
-                      children: <Widget>[
-                        Divider(),
-                        Text('${_store.androidInfo.brand} ${_store.androidInfo.model}'),
-                        //Text("${_store.androidInfo.version}"),
-                        //Text("${_store.androidInfo.device}"),
-                        Text("${_store.androidInfo.display}"),
-                        Text("${_store.androidInfo.board}"),
-                      ],
-                    );
-                  }
-                );
+            Spacer(),
+            IconButton(
+              icon: Icon(Icons.settings),
+              color: Colors.white,
+              onPressed: (){
+                Navigator.of(context).pushNamed('UserAccount');
               },
             ),
           ],
         ),
-      ),
-      appBar: AppBar(
-        title: Text('时光'),
-        actions: <Widget>[
-          Offstage(
-            offstage: hideGoTodayButton,
-            child: IconButton(
-              icon: Icon(Icons.trip_origin),
-              onPressed: () {
-                jumpToCurrentPage();
-              },
-            ),
+        Row(
+          children: <Widget>[
+            Text('白金会员', style: Theme.of(context).textTheme.body1,)
+          ],
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _store.updateCurrentDate();
+    return WillPopScope(
+      onWillPop: () async {
+        debugPrint('退出了主页');
+        await _store.dataSource.closeDataBase();
+        return true;
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                ),
+                child: drawerHeaderChild(context),
+              ),
+              ListTile(
+                leading: Icon(Icons.assignment_turned_in),
+                title: Text(
+                  '任务',
+                  style: TextStyle(fontSize: 18),
+                ),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  var navigator = Navigator.of(context);
+                  navigator.pop(context);
+                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                    return BrowseTaskRoute();
+                  }));
+                },
+              ),
+              Divider(height: 3,),
+              ListTile(
+                leading: Icon(Icons.filter_center_focus),
+                title: Text(
+                  '焦点',
+                  style: TextStyle(fontSize: 18),
+                ),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  var navigator = Navigator.of(context);
+                  navigator.pop(context);
+                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                    return BrowseDailyFocusRoute(0);
+                  }));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.people),
+                title: Text(
+                  '人物',
+                  style: TextStyle(fontSize: 18),
+                ),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  var navigator = Navigator.of(context);
+                  navigator.pop(context);
+                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                    return BrowseDailyFocusRoute(1);
+                  }));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo),
+                title: Text(
+                  '相片',
+                  style: TextStyle(fontSize: 18),
+                ),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  var navigator = Navigator.of(context);
+                  navigator.pop(context);
+                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                    return BrowseDailyFocusRoute(4);
+                  }));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.location_on),
+                title: Text(
+                  '位置',
+                  style: TextStyle(fontSize: 18),
+                ),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  var navigator = Navigator.of(context);
+                  navigator.pop(context);
+                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                    return BrowseDailyFocusRoute(2);
+                  }));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.label),
+                title: Text(
+                  '标签',
+                  style: TextStyle(fontSize: 18),
+                ),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  var navigator = Navigator.of(context);
+                  navigator.pop(context);
+                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                    return BrowseDailyFocusRoute(3);
+                  }));
+                },
+              ),
+              Divider(height: 3,),
+              ListTile(
+                leading: Icon(Icons.child_care),
+                title: Text(
+                  '消息',
+                  style: TextStyle(fontSize: 18),
+                ),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  //TrimPicture
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.today),
-            onPressed: () {
-              Navigator.of(context).pushNamed('CalendarRoute').then((day) {
-                if (day != null) {
-                  if (_calendarMap.isNotSelectedDate(day)) {
-                    _calendarMap.selectedDate = day;
-                    jumpToSelectedPage();
+        ),
+        appBar: AppBar(
+          title: Text('时光'),
+          actions: <Widget>[
+            Offstage(
+              offstage: hideGoTodayButton,
+              child: IconButton(
+                icon: Icon(Icons.trip_origin),
+                onPressed: () {
+                  jumpToCurrentPage();
+                },
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.today),
+              onPressed: () {
+                Navigator.of(context).pushNamed('CalendarRoute').then((day) {
+                  if (day != null) {
+                    if (_calendarMap.isNotSelectedDate(day)) {
+                      _calendarMap.selectedDate = day;
+                      jumpToSelectedPage();
+                    }
+                  }
+                });
+              },
+            )
+          ],
+        ),
+        body: PageStorage(
+          bucket: _pageStorageBucket,
+          child: PageView.builder(
+            controller: _pageController,
+            itemBuilder: (context, index) {
+              var dailyRecord = _store.getDailyRecord(index);
+              if (dailyRecord != null) {
+                if (dailyRecord.focusEventIsNull) {
+                  _store.setFocusEventsToDailyRecord(dailyRecord);
+                  buildDailyEventNote(dailyRecord);
+                } else {
+                  if (dailyRecord.richLines == null ||
+                      dailyRecord.richLines.isEmpty) {
+                    buildDailyEventNote(dailyRecord);
                   }
                 }
-              });
+              }
+              return getDayNote(context, index);
             },
-          )
-        ],
-      ),
-      body: PageStorage(
-        bucket: _pageStorageBucket,
-        child: PageView.builder(
-          controller: _pageController,
-          itemBuilder: (context, index) {
-            var dailyRecord = _store.getDailyRecord(index);
-            if (dailyRecord != null) {
-              if (dailyRecord.focusEventIsNull) {
-                _store.setFocusEventsToDailyRecord(dailyRecord);
-                buildDailyEventNote(dailyRecord);
+            itemCount: _calendarMap.daysTotal,
+            onPageChanged: (index) {
+              _calendarMap.setSelectedDateFromIndex(index);
+              if (_calendarMap.currentDateIndexed == index) {
+                setState(() {
+                  hideGoTodayButton = true;
+                });
               } else {
-                if (dailyRecord.richLines == null ||
-                    dailyRecord.richLines.isEmpty) {
-                  buildDailyEventNote(dailyRecord);
+                if (hideGoTodayButton != false) {
+                  setState(() {
+                    hideGoTodayButton = false;
+                  });
                 }
               }
-            }
-            return getDayNote(context, index);
-          },
-          itemCount: _calendarMap.daysTotal,
-          onPageChanged: (index) {
-            _calendarMap.setSelectedDateFromIndex(index);
-            if (_calendarMap.currentDateIndexed == index) {
-              setState(() {
-                hideGoTodayButton = true;
-              });
-            } else {
-              if (hideGoTodayButton != false) {
-                setState(() {
-                  hideGoTodayButton = false;
-                });
-              }
-            }
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          var events = _store.getFocusEventsFromSelectedDay();
-          var list = List<FocusItem>();
-          if (events.length == 0) {
-            list.addAll(_store.focusItemSet.itemList);
-          } else {
-            _store.focusItemSet.itemList.forEach((focus) {
-              if (!events
-                  .any((event) => event.focusItemBoxId == focus.boxId)) {
-                list.add(focus);
-              }
-            });
-          }
-          showModalBottomSheet(
-            context: context,
-            builder: (context) {
-              return _buildFocusModelSheet(_store, list);
             },
-          );
-        },
-        child: Icon(Icons.edit),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            var events = _store.getFocusEventsFromSelectedDay();
+            var list = List<FocusItem>();
+            if (events.length == 0) {
+              list.addAll(_store.focusItemSet.itemList);
+            } else {
+              _store.focusItemSet.itemList.forEach((focus) {
+                if (!events
+                    .any((event) => event.focusItemBoxId == focus.boxId)) {
+                  list.add(focus);
+                }
+              });
+            }
+            showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return _buildFocusModelSheet(_store, list);
+              },
+            );
+          },
+          child: Icon(Icons.edit),
+        ),
       ),
     );
   }
@@ -446,7 +455,7 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
                     dayIndex: store.selectedDateIndex,
                     focusItemBoxId: usableList[index].boxId,
                   ));
-                })).then((resultItem) {
+                })).then((resultItem) async {
                   if (resultItem is PassingObject<FocusEvent>) {
                     store.addFocusEventToSelectedDay(resultItem.newObject);
                   } else {
@@ -506,10 +515,13 @@ Widget _getListView(BuildContext context, int dayIndex) {
     onTap: (tapObject) {
       var richLine = tapObject.richLine;
       FocusEvent focusEvent = richLine.note;
+
+      debugPrint('edit focusEvent id: ${focusEvent.boxId}');
+
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (BuildContext context) {
         return EditerFocusEventRoute(focusEvent);
-      })).then((resultItem) {
+      })).then((resultItem) async {
         if (resultItem is PassingObject<FocusEvent>) {
           store.changeFocusEventAndTasks(resultItem);
           focusEvent.copyWith(resultItem.newObject);

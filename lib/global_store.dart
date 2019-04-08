@@ -68,7 +68,7 @@ class GlobalStoreState extends State<GlobalStore> {
     dataSource = DataSource(version: 1);
     Future.wait([
       dataSource.openDataBase().then((_){
-        print('openDataBase loading');
+        debugPrint('已打开数据库');
       })
     ]).then((_){
       focusItemSet = ReferencesData(dataSource: dataSource);
@@ -129,23 +129,20 @@ class GlobalStoreState extends State<GlobalStore> {
       if (line.type == RichType.Task) {
         TaskItem task = line.expandData;
         if (task.boxId == 0) {
-          print('批处理FocusEvent包含的任务，未入库Task：${task.title}');
-          //addTaskItem(task);
+          debugPrint('批处理FocusEvent包含的任务，未入库Task：${task.title}');
           taskSet.addItem(task);
           s++;
         } else {
-          //changeTaskItem(task);
           taskSet.changeItem(task);
-          print('批处理FocusEvent包含的任务，修改了Task(${task.boxId})：${task.title}');
+          debugPrint('批处理FocusEvent包含的任务，修改了Task(${task.boxId})：${task.title}');
         }
       } else {
         if (line.expandData != null) {
           if (line.expandData is TaskItem) {
             TaskItem task = line.expandData;
             if (task.boxId > 0) {
-              //removeTaskItem(task);
               taskSet.removeItem(task);
-              print('批处理FocusEvent包含的任务，删除了Task：${task.title}');
+              debugPrint('批处理FocusEvent包含的任务，删除了Task：${task.title}');
             }
           }
           line.expandData = null;
@@ -203,7 +200,7 @@ class GlobalStoreState extends State<GlobalStore> {
     }
   }
 
-  void addFocusEventToSelectedDay(FocusEvent focusEvent) {
+  Future addFocusEventToSelectedDay(FocusEvent focusEvent) async {
     /// 获取FocusItem，引用增加一次，保存到数据库
     //focusItemAddReferences(focusEvent.focusItemBoxId);
     focusItemSet.addReferencesByBoxId(focusEvent.focusItemBoxId);
@@ -231,14 +228,17 @@ class GlobalStoreState extends State<GlobalStore> {
 
     focusEvent.tagKeys.keyList.forEach((id) => tagSet.addReferencesByBoxId(id));
 
-    Future.delayed(Duration(milliseconds: r), () {
-      //putFocusEvent(focusEvent);
-      focusEventSet.addItem(focusEvent);
-    });
+//    Future.delayed(Duration(milliseconds: r), () {
+//      //putFocusEvent(focusEvent);
+//      focusEventSet.addItem(focusEvent);
+//    });
+    focusEventSet.addItem(focusEvent);
   }
 
-  void changeFocusEventForDayIndex(
-      FocusEvent focusEvent, int focusEventsIndex, int dayIndex) {
+  Future changeFocusEventForDayIndex(
+    FocusEvent focusEvent,
+    int focusEventsIndex,
+    int dayIndex) async {
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = dayIndex;
 
@@ -246,16 +246,19 @@ class GlobalStoreState extends State<GlobalStore> {
     var dayEvents = calendarMap.getFocusEventsFromDayIndex(dayIndex);
     dayEvents[focusEventsIndex] = focusEvent;
     int i = changeTaskItemFromFocusEvent(focusEvent);
-    Future.delayed(Duration(milliseconds: 100 * i), () {
-      //changeFocusEvent(focusEvent);
-      focusEventSet.changeItem(focusEvent);
-    });
+//    Future.delayed(Duration(milliseconds: 100 * i), () {
+//      //changeFocusEvent(focusEvent);
+//      focusEventSet.changeItem(focusEvent);
+//    });
+    focusEventSet.changeItem(focusEvent);
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
   }
 
   Future changeFocusEventAndTasks(PassingObject<FocusEvent> passingObject) async {
     FocusEvent newFocus = passingObject.newObject;
     FocusEvent oldFocus = passingObject.oldObject;
+
+    debugPrint('newFocus boxId: ${newFocus.boxId}');
 
     DailyRecord dailyRecord = getDailyRecord(newFocus.dayIndex);
     dailyRecord.richLines.clear();
@@ -306,12 +309,12 @@ class GlobalStoreState extends State<GlobalStore> {
     }
 
     await Future.delayed(Duration(milliseconds: r), () {
-      //changeFocusEvent(newFocus);
       focusEventSet.changeItem(newFocus);
     });
+    //focusEventSet.changeItem(newFocus);
   }
 
-  void removeFocusEventAndTasks(FocusEvent focusEvent) {
+  Future removeFocusEventAndTasks(FocusEvent focusEvent) async {
     print('开始执行: removeFocusEventAndTasks');
 
     /// 获取FocusItem，引用减少一次
@@ -319,11 +322,10 @@ class GlobalStoreState extends State<GlobalStore> {
     focusItemSet.minusReferencesByBoxId(focusEvent.focusItemBoxId);
 
     /// 删除index位置focusEvent记录里面的TaskItem
-    focusEvent.noteLines.forEach((line) {
+    focusEvent.noteLines.forEach((line) async {
       if (line.expandData is TaskItem) {
-        //removeTaskItem(line.expandData);
         TaskItem task = line.expandData;
-        taskSet.removeItem(task);
+        await taskSet.removeItem(task);
       }
     });
 
@@ -331,14 +333,12 @@ class GlobalStoreState extends State<GlobalStore> {
     focusEvent.placeKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
     focusEvent.tagKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
 
-    //removeFocusEvent(focusEvent);
     focusEventSet.removeItem(focusEvent);
     DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
     dailyRecord.richLines.clear();
     dailyRecord.focusEvents.remove(focusEvent);
 
     if (dailyRecord.focusEventIsNull) {
-      //removeDailyRecord(dailyRecord);
       dailyRecordSet.removeItem(dailyRecord);
       clearDailyRecordOfDayIndex(focusEvent.dayIndex);
     }

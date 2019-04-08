@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:path/path.dart';
@@ -19,13 +20,8 @@ class TableDefinition {
 class DataSource {
   DataSource({
     this.version = 1,
-  }) {
+  }){
     initTable();
-//    setPath().then((databasesPath){
-//      _path = join(databasesPath, "TimeMoment.db");
-//      print('database path : $_path');
-//      //openDataBase();
-//    });
   }
 
   String _path;
@@ -36,36 +32,41 @@ class DataSource {
   String get path => _path;
   Database get database => _database;
 
-  Future setPath() async {
-    assert(tables.isNotEmpty);
-    return await getDatabasesPath();
+  Future init() async {
+    var p = await getDatabasesPath();
+    _path = join(p, "TimeMoment.db");
+    debugPrint('database path : $_path');
   }
 
   Future openDataBase() async {
-    var p = await getDatabasesPath();
-    _path = join(p, "TimeMoment.db");
-    print('database path : $_path');
+    if (_database != null) {
+      if (_database.isOpen) return;
+    }
+    if (_path == null) {
+      await init();
+    }
     _database = await openDatabase(_path, version: version,
-        onCreate: (Database db, int version) async {
-      await db.execute(
-          'CREATE TABLE ${tables['FocusItem'].name} (${tables['FocusItem'].structure})');
-      await db.execute(
-          'CREATE TABLE ${tables['PersonItem'].name} (${tables['PersonItem'].structure})');
-      await db.execute(
-          'CREATE TABLE ${tables['PlaceItem'].name} (${tables['PlaceItem'].structure})');
-      await db.execute(
-          'CREATE TABLE ${tables['TagItem'].name} (${tables['TagItem'].structure})');
-      await db.execute(
-          'CREATE TABLE ${tables['DailyRecord'].name} (${tables['DailyRecord'].structure})');
-      await db.execute(
-          'CREATE TABLE ${tables['FocusEvent'].name} (${tables['FocusEvent'].structure})');
-      await db.execute(
-          'CREATE TABLE ${tables['TaskItem'].name} (${tables['TaskItem'].structure})');
-    });
+      onCreate: (Database db, int version) async {
+        await db.execute(
+            'CREATE TABLE ${tables['FocusItem'].name} (${tables['FocusItem'].structure})');
+        await db.execute(
+            'CREATE TABLE ${tables['PersonItem'].name} (${tables['PersonItem'].structure})');
+        await db.execute(
+            'CREATE TABLE ${tables['PlaceItem'].name} (${tables['PlaceItem'].structure})');
+        await db.execute(
+            'CREATE TABLE ${tables['TagItem'].name} (${tables['TagItem'].structure})');
+        await db.execute(
+            'CREATE TABLE ${tables['DailyRecord'].name} (${tables['DailyRecord'].structure})');
+        await db.execute(
+            'CREATE TABLE ${tables['FocusEvent'].name} (${tables['FocusEvent'].structure})');
+        await db.execute(
+            'CREATE TABLE ${tables['TaskItem'].name} (${tables['TaskItem'].structure})');
+      }
+    );
   }
 
-  void closeDataBase() {
-    closeDataBase();
+  Future<void> closeDataBase() async {
+    await _database?.close();
   }
 
   Future deleteDataBase() async {

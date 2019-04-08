@@ -46,18 +46,15 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
   void editFocusItem(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
       return EditerFocusItemRoute(widget._focusItem);
-    })).then((resultItem){
-      if (resultItem != null) {
-        if (resultItem is int) {
-          Navigator.of(context).pop();
-        } else {
-          final focusItem = resultItem as FocusItem;
-          // focusItem是编辑路由新生成的实例，只携带了修改的数据，所以必须对widget._focusItem进行修改
-          widget._focusItem.title = focusItem.title;
-          widget._focusItem.comment = focusItem.comment;
-//          _store.changeFocusItem(widget._focusItem);
-          _store.focusItemSet.changeItem(widget._focusItem);
-        }
+    })).then((resultItem) {
+      if (resultItem is int) {
+        Navigator.of(context).pop();
+      } else {
+        final focusItem = resultItem as FocusItem;
+        // focusItem是编辑路由新生成的实例，只携带了修改的数据，所以必须对widget._focusItem进行修改
+        widget._focusItem.title = focusItem.title;
+        widget._focusItem.comment = focusItem.comment;
+        _store.focusItemSet.changeItem(widget._focusItem);
       }
     });
   }
@@ -89,9 +86,8 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
       }
     ).then((result) {
       if (result != null) {
-//        _store.removeFocusItem(widget._focusItem);
-        _store.focusItemSet.removeItem(widget._focusItem);
         Navigator.of(context).pop();
+        _store.focusItemSet.removeItem(widget._focusItem);
       }
     });
   }
@@ -156,11 +152,11 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
           ),
         ],
       ),
-      body: buildBody(context, _store),
+      body: buildBody(context),
     );
   }
 
-  Widget buildBody(BuildContext context, GlobalStoreState store) {
+  Widget buildBody(BuildContext context) {
     final detailsList = widget._focusItem.detailsList;
     if (detailsList.isEmpty) {
       return Center(child: Text('还没有记录'));
@@ -168,33 +164,25 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
     return ListView.separated(
       itemCount: detailsList.length,
       itemBuilder: (context, index){
-        final date = store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
+        final date = _store.calendarMap.getDateFromIndex(detailsList[index].dayIndex);
         final str = DateTimeExt.chineseDateString(date);
         Widget content = RichNote.fixed(
           store: _store,
           richSource: RichSource(detailsList[index].noteLines),
           onTap: (tapObject) {
-            print('tap rich line');
             var richLine = tapObject.richLine;
             FocusEvent event = richLine.note;
-            //FocusEvent event = detailsList[index];
-            DailyRecord dailyRecord = store.getDailyRecord(event.dayIndex);
+            DailyRecord dailyRecord = _store.getDailyRecord(event.dayIndex);
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return EditerFocusEventRoute(event);
             })).then((resultItem) {
               if (resultItem is PassingObject<FocusEvent>) {
-//                dailyRecord.richLines.clear();
-//                Future(() {
-//                  store.changeFocusEventAndTasks(resultItem);
-//                }).then((_) {
-//                  event.copyWith(resultItem.newObject);
-//                });
-                store.changeFocusEventAndTasks(resultItem);
+                _store.changeFocusEventAndTasks(resultItem);
                 event.copyWith(resultItem.newObject);
               } else if (resultItem is int) {
                 dailyRecord.richLines.clear();
-                store.removeFocusEventAndTasks(event);
+                _store.removeFocusEventAndTasks(event);
               }
             });
           },
