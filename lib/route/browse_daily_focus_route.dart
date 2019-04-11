@@ -225,7 +225,6 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
           if (resultItem is PersonItem) {
             personItem.copyWith(resultItem);
             _store.personSet.changeItem(personItem);
-            // 从上页返回后，好像自动执行了setState，下面语句不用了
           }
         });
       },

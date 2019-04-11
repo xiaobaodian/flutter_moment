@@ -59,8 +59,8 @@ class RichNote extends StatefulWidget {
         isFixed = false,
         focusEvent = richSource.focusEvent {
     richSource.richNote = this;
-    debugPrint('RichNote.editable 模式初始化');
     richSource.markEditerItem();
+    debugPrint('RichNote.editable 模式初始化');
   }
 
   RichNote.fixed({
@@ -958,6 +958,7 @@ class RichNoteState extends State<RichNote> {
                                   titleMap[id] = person.name;
                                   setDialogState((){
                                     resultList.add(person);
+                                    labelKeys.addOrRemove(person.boxId);
                                     clipText = StringExt.listStringToString(titleMap.values.toList());
                                   });
                                 });
@@ -966,9 +967,8 @@ class RichNoteState extends State<RichNote> {
                                 widget.store.placeSet.addItem(place).then((id){
                                   titleMap[id] = place.title;
                                   setDialogState((){
-                                    //resultList.clear();
-                                    //resultList.addAll(labels);
                                     resultList.add(place);
+                                    labelKeys.addOrRemove(place.boxId);
                                     clipText = StringExt.listStringToString(titleMap.values.toList());
                                   });
                                 });
@@ -1007,77 +1007,41 @@ class RichNoteState extends State<RichNote> {
                           var item = resultList[index];
                           bool isSelected = labelKeys.findKey(item.boxId);
                           String labelText = resultList[index].getLabel();
-                          CatListTile catListTile;
-                          if (type != LabelType.Tag) {
-                            catListTile = CatListTile(
-                              title: Text(labelText),
-                              selected: isSelected,
-                              onTap: (){
-                                if (titleMap.containsKey(item.boxId)) {
-                                  titleMap.remove(item.boxId);
-                                } else {
-                                  titleMap[item.boxId] = labelText;
-                                }
-                                setDialogState((){
-                                  clipText = StringExt.listStringToString(titleMap.values.toList());
-                                });
-                              },
-                            );
-                          } else {
-                            catListTile = CatListTile(
-                              leading: SizedBox(
-                                height: 32,
-                                width: 32,
-                                child: Checkbox(
-                                  value: isSelected,
-                                  onChanged: (selected) {
-                                    setDialogState((){
-                                      labelKeys.addOrRemove(item.boxId);
-                                      //clipText = StringExt.listIntToString(labelKeys.keyList);
-                                    });
-                                  },
-                                ),
-                              ),
-                              title: Text(labelText),
-                              selected: isSelected,
-                              onTap: (){
-                                setDialogState((){
-                                  labelKeys.addOrRemove(item.boxId);
-                                  //clipText = StringExt.listIntToString(labelKeys.keyList);
-                                });
-                              },
-                            );
-                          }
-                          return catListTile;
-                        },
-                      ),
-                    ),
-                  ),
-                  Offstage(
-                    offstage: type == LabelType.Tag,
-                    child: Container(
-                      height: 48,
-                      width: double.infinity,
-                      color: Color.fromARGB(127, 245, 245, 245),
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(16, 6, 6, 6),
-                              child: Text(clipText,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                          CatListTile catListTile = CatListTile(
+                            leading: SizedBox(
+                              height: 32,
+                              width: 32,
+                              child: Checkbox(
+                                value: isSelected,
+                                onChanged: (selected) {
+                                  if (titleMap.containsKey(item.boxId)) {
+                                    titleMap.remove(item.boxId);
+                                  } else {
+                                    titleMap[item.boxId] = labelText;
+                                  }
+                                  setDialogState((){
+                                    labelKeys.addOrRemove(item.boxId);
+                                    clipText = StringExt.listIntToString(labelKeys.keyList);
+                                  });
+                                },
                               ),
                             ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.input),
-                            color: Theme.of(context).accentColor,
-                            onPressed: (){
-                              Navigator.of(context).pop(clipText);
+                            title: Text(labelText),
+                            selected: isSelected,
+                            onTap: (){
+                              if (titleMap.containsKey(item.boxId)) {
+                                titleMap.remove(item.boxId);
+                              } else {
+                                titleMap[item.boxId] = labelText;
+                              }
+                              setDialogState((){
+                                labelKeys.addOrRemove(item.boxId);
+                                clipText = StringExt.listIntToString(labelKeys.keyList);
+                              });
                             },
-                          ),
-                        ],
+                          );
+                          return catListTile;
+                        },
                       ),
                     ),
                   ),
@@ -1087,14 +1051,11 @@ class RichNoteState extends State<RichNote> {
             }
           ),
           actions: <Widget>[
-//            Offstage(
-//              offstage: type == LabelType.Tag,
-//              child: FlatButton(
-//                child: Text('返回'),
-//                onPressed: () {
-//                  Navigator.of(context).pop(null);
-//                },
-//              ),
+//            FlatButton(
+//              child: Text('字符串'),
+//              onPressed: () {
+//                Navigator.of(context).pop(clipText);
+//              },
 //            ),
             FlatButton(
               child: Text('返回'),//type == LabelType.Tag ? Text('返回') : Text('插入'),
@@ -1129,31 +1090,52 @@ class RichNoteState extends State<RichNote> {
           }
         }
       }
+      setState(() {
+
+      });
     });
   }
 
 
   Widget _buildLabelIconsBar() {
+    int tagCount = widget.focusEvent.tagKeys.keyList.length;
+    String tagLabel = tagCount == 0 ? '' : '$tagCount';
+    int personCount = widget.focusEvent.personKeys.keyList.length;
+    String personLabel = tagCount == 0 ? '' : '$personCount';
+    int placeCount = widget.focusEvent.placeKeys.keyList.length;
+    String placeLabel = tagCount == 0 ? '' : '$placeCount';
     return ListView(
       scrollDirection: Axis.horizontal,
       children: <Widget>[
         IconButton(
           icon: Icon(Icons.people),
+          color: personCount == 0 ? null : Theme.of(context).accentColor,
           onPressed: (){
             editLabels(LabelType.Person);
           },
         ),
+        Center(
+          child: Text(personLabel),
+        ),
         IconButton(
-          icon: Icon(Icons.place),
+          icon: Icon(Icons.map),
+          color: placeCount == 0 ? null : Theme.of(context).accentColor,
           onPressed: (){
             editLabels(LabelType.Place);
           },
         ),
+        Center(
+          child: Text(placeLabel),
+        ),
         IconButton(
           icon: Icon(Icons.label),
+          color: tagCount == 0 ? null : Theme.of(context).accentColor,
           onPressed: (){
             editLabels(LabelType.Tag);
           },
+        ),
+        Center(
+          child: Text(tagLabel),
         ),
       ],
     );

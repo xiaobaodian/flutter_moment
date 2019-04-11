@@ -85,57 +85,115 @@ class UserAccountRouteState extends State<UserAccountRoute> {
     const dividerHeight = 3.0;
     const dividerIndent = 48.0;
     const dividerThickness = 6.0;
+    TextStyle subStyle = Theme.of(context).textTheme.caption.merge( TextStyle(fontSize: 12,));
     return ListView(
       children: <Widget>[
-        ListTile(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
+          child: Row(
+            children: <Widget>[
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: CircleAvatar(
+                  radius: 5,
+                  backgroundImage: AssetImage('assets/image/xuelei01.jpg'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('账户名'),
+                    Text('会员等级'),
+                  ],
+                ),
+              ),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.chevron_right),
+                onPressed: (){},
+              ),
+            ],
+          ),
+        ),
+        DividerExt(height: dividerHeight, thickness: dividerThickness),
+        CatListTile(
           title: Text('视图'),
           leading: Icon(Icons.view_agenda),
           trailing: Icon(Icons.chevron_right),
         ),
-        DividerExt(height: dividerHeight, thickness: dividerThickness),
-        ListTile(
+        DividerExt(height: dividerHeight, indent: dividerIndent),
+        CatListTile(
           title: Text('提醒'),
           leading: Icon(Icons.alarm),
           trailing: Icon(Icons.chevron_right),
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
-        ListTile(
+        CatListTile(
           title: Text('照片'),
+          subtitle: Text('照片保存时的大小', style: subStyle,),
           leading: Icon(Icons.photo),
+          trailText: Text('中'),
           trailing: Icon(Icons.chevron_right),
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
-        ListTile(
+        CatListTile(
           title: Text('日历'),
           leading: Icon(Icons.calendar_today),
           trailing: Icon(Icons.chevron_right),
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
-        ListTile(
+        CatListTile(
           title: Text('任务'),
-          leading: Icon(Icons.work),
+          leading: Icon(Icons.assignment_turned_in),
           trailing: Icon(Icons.chevron_right),
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
-        ListTile(
-          title: Text('标签'),
+        CatListTile(
+          title: Text('提取标签'),
+          subtitle: Text('从正文中自动提取人物和位置标签', style: subStyle,),
           leading: Icon(Icons.label_outline),
-          trailing: Icon(Icons.chevron_right),
+          trailing: Switch(
+            value: _store.prefs.detectFlags,
+            onChanged: (value) {
+              setState(() {
+                _store.prefs.detectFlags = value;
+              });
+            },
+          ),
+        ),
+        DividerExt(height: dividerHeight, indent: dividerIndent),
+        CatListTile(
+          title: Text('自动保存'),
+          subtitle: Text('编辑正文时，返回即保存内容', style: subStyle,),
+          leading: Icon(Icons.save),
+          trailing: Switch(
+              value: _store.prefs.autoSave,
+              onChanged: (value) {
+                setState(() {
+                  _store.prefs.autoSave = value;
+                });
+              },
+          ),
         ),
         DividerExt(height: dividerHeight, thickness: dividerThickness),
-        ListTile(
+        CatListTile(
           title: Text('语言'),
+          subtitle: Text('跟随系统语言', style: subStyle,),
           leading: Icon(Icons.language),
+          trailText: Text('简体中文'),
           trailing: Icon(Icons.chevron_right),
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
-        ListTile(
+        CatListTile(
           title: Text('帮助'),
           leading: Icon(Icons.help_outline),
           trailing: Icon(Icons.chevron_right),
         ),
         DividerExt(height: dividerHeight, thickness: dividerThickness),
-        ListTile(
+        CatListTile(
           title: Text('版本'),
           leading: Icon(Icons.update),
           trailing: store.appVersion.needUpgrade
@@ -148,7 +206,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
           },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
-        ListTile(
+        CatListTile(
           title: Text('关于'),
           leading: Icon(Icons.child_care),
           trailing: Icon(Icons.chevron_right),

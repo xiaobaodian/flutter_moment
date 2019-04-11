@@ -114,6 +114,7 @@ class GlobalStoreState extends State<GlobalStore> {
     packageInfo = await PackageInfo.fromPlatform();
     androidInfo = await deviceInfo.androidInfo;
     appVersion = await checkUpdatesFile();
+    prefs = AppPreferences();
   }
 
   int get selectedDateIndex => calendarMap.selectedDateIndex;
@@ -200,7 +201,7 @@ class GlobalStoreState extends State<GlobalStore> {
     }
   }
 
-  Future addFocusEventToSelectedDay(FocusEvent focusEvent) async {
+  void addFocusEventToSelectedDay(FocusEvent focusEvent) {
     /// 获取FocusItem，引用增加一次，保存到数据库
     //focusItemAddReferences(focusEvent.focusItemBoxId);
     focusItemSet.addReferencesByBoxId(focusEvent.focusItemBoxId);
@@ -213,7 +214,6 @@ class GlobalStoreState extends State<GlobalStore> {
 
     /// 如果还没有保存过就加入到数据库
     if (selectedDailyRecord.boxId == 0) {
-      //putDailyRecord(selectedDailyRecord);
       dailyRecordSet.addItem(selectedDailyRecord);
     }
     int r = changeTaskItemFromFocusEvent(focusEvent) * 100;
@@ -228,17 +228,16 @@ class GlobalStoreState extends State<GlobalStore> {
 
     focusEvent.tagKeys.keyList.forEach((id) => tagSet.addReferencesByBoxId(id));
 
-//    Future.delayed(Duration(milliseconds: r), () {
-//      //putFocusEvent(focusEvent);
-//      focusEventSet.addItem(focusEvent);
-//    });
-    focusEventSet.addItem(focusEvent);
+    Future.delayed(Duration(milliseconds: r), () {
+      focusEventSet.addItem(focusEvent);
+    });
+//    focusEventSet.addItem(focusEvent);
   }
 
-  Future changeFocusEventForDayIndex(
+  void changeFocusEventForDayIndex (
     FocusEvent focusEvent,
     int focusEventsIndex,
-    int dayIndex) async {
+    int dayIndex) {
     /// 为focusEvent设置dayIndex值，重要
     focusEvent.dayIndex = dayIndex;
 
@@ -246,15 +245,14 @@ class GlobalStoreState extends State<GlobalStore> {
     var dayEvents = calendarMap.getFocusEventsFromDayIndex(dayIndex);
     dayEvents[focusEventsIndex] = focusEvent;
     int i = changeTaskItemFromFocusEvent(focusEvent);
-//    Future.delayed(Duration(milliseconds: 100 * i), () {
-//      //changeFocusEvent(focusEvent);
-//      focusEventSet.changeItem(focusEvent);
-//    });
-    focusEventSet.changeItem(focusEvent);
+    Future.delayed(Duration(milliseconds: 100 * i), () {
+      focusEventSet.changeItem(focusEvent);
+    });
+//    focusEventSet.changeItem(focusEvent);
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
   }
 
-  Future changeFocusEventAndTasks(PassingObject<FocusEvent> passingObject) async {
+  void changeFocusEventAndTasks(PassingObject<FocusEvent> passingObject) {
     FocusEvent newFocus = passingObject.newObject;
     FocusEvent oldFocus = passingObject.oldObject;
 
@@ -266,10 +264,11 @@ class GlobalStoreState extends State<GlobalStore> {
     int r = changeTaskItemFromFocusEvent(newFocus) * 100;
 
     if (oldFocus != null) {
-      newFocus.extractingPersonList(personSet.itemList);
-      newFocus.extractingPlaceList(placeSet.itemList);
-
-      debugPrint('当前标签的个数: ${newFocus.tagKeys.keyList.length}');
+      if (prefs.detectFlags) {
+        newFocus.extractingPersonList(personSet.itemList);
+        newFocus.extractingPlaceList(placeSet.itemList);
+      }
+      //debugPrint('当前标签的个数: ${newFocus.tagKeys.keyList.length}');  a
 
       // 比较人物的引用
       DiffKeysResult result = LabelKeys.diffKeys(oldFocus.personKeys.keyList, newFocus.personKeys.keyList);
@@ -308,24 +307,23 @@ class GlobalStoreState extends State<GlobalStore> {
       result.unusedKeys.forEach((id) => tagSet.minusReferencesByBoxId(id));
     }
 
-    await Future.delayed(Duration(milliseconds: r), () {
+    Future.delayed(Duration(milliseconds: r), () {
       focusEventSet.changeItem(newFocus);
     });
-    //focusEventSet.changeItem(newFocus);
+//    focusEventSet.changeItem(newFocus);
   }
 
   Future removeFocusEventAndTasks(FocusEvent focusEvent) async {
     print('开始执行: removeFocusEventAndTasks');
 
     /// 获取FocusItem，引用减少一次
-    //focusItemMinusReferences(focusEvent.focusItemBoxId);
     focusItemSet.minusReferencesByBoxId(focusEvent.focusItemBoxId);
 
     /// 删除index位置focusEvent记录里面的TaskItem
-    focusEvent.noteLines.forEach((line) async {
+    focusEvent.noteLines.forEach((line) {
       if (line.expandData is TaskItem) {
         TaskItem task = line.expandData;
-        await taskSet.removeItem(task);
+        taskSet.removeItem(task);
       }
     });
 
@@ -453,12 +451,9 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   FocusEvent getFocusEventFormTask(TaskItem task) {
-    //FocusEvent focusEvent;
     DailyRecord dailyRecord =
         calendarMap.getDailyRecordFromIndex(task.createDate);
-    FocusEvent focusEvent =
-        getFocusEventFormDailyRecord(dailyRecord, task.focusItemId);
-    return focusEvent;
+    return getFocusEventFormDailyRecord(dailyRecord, task.focusItemId);
   }
 
   // updates

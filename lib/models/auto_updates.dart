@@ -14,6 +14,8 @@ class AppVersion {
     this.path,
   });
 
+  final AppName = '/app-release.apk';
+
   String title;
   String version;
   String buildNumber;
@@ -59,7 +61,7 @@ class AppVersion {
 
     showDialog(
       context: context,
-      //barrierDismissible: true,
+      barrierDismissible: true,
       builder: (context) {
         double downloadProgress = 0.2;
         return AlertDialog(
@@ -69,7 +71,7 @@ class AppVersion {
             builder: (context, setDialogState) {
               FlutterDownloader.registerCallback((id, status, progress) {
                 if (status == DownloadTaskStatus.complete) {
-                  OpenFile.open(_updatesPath + '/app-release.apk');
+                  OpenFile.open(_updatesPath + AppName);
                   FlutterDownloader.registerCallback(null);
                   Navigator.of(context).pop(null);
                 } else {

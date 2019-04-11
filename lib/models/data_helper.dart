@@ -291,7 +291,7 @@ class LabelKeys {
   }
 
   void fromExtracting(List<RichLine> lines, List<ReferencesBoxItem> objectList) {
-    _keys.clear();
+    //_keys.clear();
     for (var line in lines) {
       for (var obj in objectList) {
         if (line.getContent().contains(obj.getLabel())) {

@@ -455,12 +455,14 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
                     dayIndex: store.selectedDateIndex,
                     focusItemBoxId: usableList[index].boxId,
                   ));
-                })).then((resultItem) async {
-                  if (resultItem is PassingObject<FocusEvent>) {
-                    store.addFocusEventToSelectedDay(resultItem.newObject);
-                  } else {
-                    store.checkDailyRecord();
-                  }
+                })).then((resultItem) {
+                  debugPrint('resultItem is null: ${resultItem == null} , resultItem is int: ${resultItem is int}');
+                  store.checkDailyRecord();
+//                  if (resultItem is PassingObject<FocusEvent>) {
+//                    store.addFocusEventToSelectedDay(resultItem.newObject);
+//                  } else {
+//                    store.checkDailyRecord();
+//                  }
                 });
               },
             );
@@ -522,12 +524,13 @@ Widget _getListView(BuildContext context, int dayIndex) {
           .push(MaterialPageRoute(builder: (BuildContext context) {
         return EditerFocusEventRoute(focusEvent);
       })).then((resultItem) async {
-        if (resultItem is PassingObject<FocusEvent>) {
-          store.changeFocusEventAndTasks(resultItem);
-          focusEvent.copyWith(resultItem.newObject);
-        } else if (resultItem is int) {
-          store.removeFocusEventAndTasks(focusEvent);
-        }
+        debugPrint('resultItem is null: ${resultItem == null} , resultItem is int: ${resultItem is int}');
+//        if (resultItem is PassingObject<FocusEvent>) {
+//          store.changeFocusEventAndTasks(resultItem);
+//          focusEvent.copyWith(resultItem.newObject);
+//        } else if (resultItem is int) {
+//          store.removeFocusEventAndTasks(focusEvent);
+//        }
       });
     },
     onLongTap: (tapObject) {
