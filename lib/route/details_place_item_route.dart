@@ -162,19 +162,20 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return EditerFocusEventRoute(event);
-            })).then((resultItem) {
-              if (resultItem is PassingObject<FocusEvent>) {
-                dailyRecord.richLines.clear();
-                Future(() {
-                  _store.changeFocusEventAndTasks(resultItem);
-                }).then((_) {
-                  event.copyWith(resultItem.newObject);
-                });
-              } else if (resultItem is int) {
-                dailyRecord.richLines.clear();
-                _store.removeFocusEventAndTasks(event);
-              }
-            });
+            }));
+//            .then((resultItem) {
+//            if (resultItem is PassingObject<FocusEvent>) {
+//            dailyRecord.richLines.clear();
+//            Future(() {
+//            _store.changeFocusEventAndTasks(resultItem);
+//            }).then((_) {
+//            event.copyWith(resultItem.newObject);
+//            });
+//            } else if (resultItem is int) {
+//            dailyRecord.richLines.clear();
+//            _store.removeFocusEventAndTasks(event);
+//            }
+//            })
           },
         );
         return Padding(

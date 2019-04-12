@@ -412,13 +412,13 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Text(
-          '${date.year}年${date.month}月${date.day}日',
+          '${date.year}年${date.month}月${date.day}日 - ${DateTimeExt.chineseWeekName(date, longName: true)}',
           style: TextStyle(
             fontSize: 14.0,
           ),
         ),
         Text(
-          '$dayLeap  ${DateTimeExt.chineseWeekName(date, longName: true)}',
+          '$dayLeap',
           style: TextStyle(
             fontSize: 14.0,
           ),
@@ -457,7 +457,7 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
                   ));
                 })).then((resultItem) {
                   debugPrint('resultItem is null: ${resultItem == null} , resultItem is int: ${resultItem is int}');
-                  store.checkDailyRecord();
+//                  store.checkDailyRecord();
 //                  if (resultItem is PassingObject<FocusEvent>) {
 //                    store.addFocusEventToSelectedDay(resultItem.newObject);
 //                  } else {

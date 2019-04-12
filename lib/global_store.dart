@@ -314,7 +314,7 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   Future removeFocusEventAndTasks(FocusEvent focusEvent) async {
-    print('开始执行: removeFocusEventAndTasks');
+    debugPrint('开始执行: removeFocusEventAndTasks');
 
     /// 获取FocusItem，引用减少一次
     focusItemSet.minusReferencesByBoxId(focusEvent.focusItemBoxId);
@@ -328,11 +328,11 @@ class GlobalStoreState extends State<GlobalStore> {
     });
 
     focusEvent.personKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
-    focusEvent.placeKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
-    focusEvent.tagKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
+    focusEvent.placeKeys.keyList.forEach((id) => placeSet.minusReferencesByBoxId(id));
+    focusEvent.tagKeys.keyList.forEach((id) => tagSet.minusReferencesByBoxId(id));
 
     focusEventSet.removeItem(focusEvent);
-    DailyRecord dailyRecord = getDailyRecord(focusEvent.dayIndex);
+    var dailyRecord = getDailyRecord(focusEvent.dayIndex);
     dailyRecord.richLines.clear();
     dailyRecord.focusEvents.remove(focusEvent);
 
@@ -462,7 +462,8 @@ class GlobalStoreState extends State<GlobalStore> {
     Response response = await dio.get("https://share.heiluo.com/share/download?type=1&shareId=ce2e6c74d2b0428f80ff8203b84b7379&fileId=2609208");
     debugPrint('获取的文件内容：${response.data.toString()}');
     AppVersion appVer = AppVersion.fromJson(jsonDecode(response.data.toString()));
-    debugPrint('版本：${appVer.title}');
+    //debugPrint('版本：${appVer.title}');
+    appVer.init(this);
     return appVer;
   }
 

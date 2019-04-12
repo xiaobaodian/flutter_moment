@@ -161,19 +161,7 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return EditerFocusEventRoute(event);
-            })).then((resultItem) {
-              if (resultItem is PassingObject<FocusEvent>) {
-                dailyRecord.richLines.clear();
-                Future(() {
-                  store.changeFocusEventAndTasks(resultItem);
-                }).then((_) {
-                  event.copyWith(resultItem.newObject);
-                });
-              } else if (resultItem is int) {
-                dailyRecord.richLines.clear();
-                store.removeFocusEventAndTasks(event);
-              }
-            });
+            }));
           },
         );
         return Padding(

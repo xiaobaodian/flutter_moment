@@ -176,15 +176,7 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return EditerFocusEventRoute(event);
-            })).then((resultItem) {
-              if (resultItem is PassingObject<FocusEvent>) {
-                _store.changeFocusEventAndTasks(resultItem);
-                event.copyWith(resultItem.newObject);
-              } else if (resultItem is int) {
-                dailyRecord.richLines.clear();
-                _store.removeFocusEventAndTasks(event);
-              }
-            });
+            }));
           },
         );
         return Padding(

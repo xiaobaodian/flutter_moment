@@ -189,6 +189,7 @@ class ReferencesData<T extends ReferencesBoxItem> extends BasicData<T> {
   }
 
   int addReferencesByBoxId(int id) {
+    debugPrint('增加一次对id($id)的引用');
     int sum = 0;
     T item = _itemMap[id];
     if (item != null) {
@@ -198,6 +199,7 @@ class ReferencesData<T extends ReferencesBoxItem> extends BasicData<T> {
   }
 
   int minusReferencesByBoxId(int id) {
+    debugPrint('减去一次对id($id)的引用');
     int sum = 0;
     T item = _itemMap[id];
     if (item != null) {

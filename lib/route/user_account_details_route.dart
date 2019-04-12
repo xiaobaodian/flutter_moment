@@ -197,7 +197,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
           title: Text('版本'),
           leading: Icon(Icons.update),
           trailing: store.appVersion.needUpgrade
-              ? Text('发现新版本：${_store.appVersion.buildNumber}')
+              ? Text('发现新版本：${_store.appVersion.version} (${_store.appVersion.buildNumber})')
               : Text('${_store.packageInfo.version} (${_store.packageInfo.buildNumber})'),
           onTap: (){
             if (store.appVersion.needUpgrade) {

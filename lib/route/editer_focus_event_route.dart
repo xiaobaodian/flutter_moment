@@ -133,6 +133,8 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
       onWillPop: () async {
         if (_store.prefs.autoSave) {
           saveFocusEventItem();
+        } else {
+          _store.checkDailyRecord();
         }
         return true;
       },
@@ -158,6 +160,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
               onPressed: () {
                 if (_store.prefs.autoSave) {
                   Navigator.of(context).pop(-1);
+                  _store.checkDailyRecord();
                 } else {
                   saveFocusEventItem();
                   Navigator.of(context).pop();

@@ -1100,10 +1100,12 @@ class RichNoteState extends State<RichNote> {
   Widget _buildLabelIconsBar() {
     int tagCount = widget.focusEvent.tagKeys.keyList.length;
     String tagLabel = tagCount == 0 ? '' : '$tagCount';
+
     int personCount = widget.focusEvent.personKeys.keyList.length;
-    String personLabel = tagCount == 0 ? '' : '$personCount';
+    String personLabel = personCount == 0 ? '' : '$personCount';
+
     int placeCount = widget.focusEvent.placeKeys.keyList.length;
-    String placeLabel = tagCount == 0 ? '' : '$placeCount';
+    String placeLabel = placeCount == 0 ? '' : '$placeCount';
     return ListView(
       scrollDirection: Axis.horizontal,
       children: <Widget>[

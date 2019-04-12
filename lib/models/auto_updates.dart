@@ -14,14 +14,14 @@ class AppVersion {
     this.path,
   });
 
-  final AppName = '/app-release.apk';
-
   String title;
   String version;
   String buildNumber;
   String log;
   String path;
 
+  String _updatesPath;
+  String _filePath;
   bool needUpgrade = false;
 
   factory AppVersion.fromJson(Map<String, dynamic> json) {
@@ -34,7 +34,22 @@ class AppVersion {
     );
   }
 
-  void diffVersion(GlobalStoreState store) {
+  void init(GlobalStoreState store) {
+    _updatesPath = store.localDir + '/Update';
+    _filePath = _updatesPath + '/app-release.apk';
+  }
+
+  Future diffVersion(GlobalStoreState store) async {
+    final savedDir = Directory(_updatesPath);
+    bool hasDir = await savedDir.exists();
+    if (!hasDir) {
+      savedDir.create();
+    }
+    File file = File(_filePath);
+    bool hasFile = await file.exists();
+    if (hasFile) {
+      file.delete();
+    }
     int diff = version.compareTo(store.packageInfo.version);
     if (diff <= 0) {
       diff = buildNumber.compareTo(store.packageInfo.buildNumber);
@@ -43,7 +58,6 @@ class AppVersion {
   }
 
   Future updates(BuildContext context, GlobalStoreState store) async {
-    String _updatesPath = store.localDir + '/Update';
     debugPrint('下载升级文件的目录：$_updatesPath');
     final savedDir = Directory(_updatesPath);
     bool hasExisted = await savedDir.exists();
@@ -51,7 +65,8 @@ class AppVersion {
       savedDir.create();
     }
     final taskId = await FlutterDownloader.enqueue(
-      url: 'https://share.heiluo.com/share/download?type=1&shareId=e6414385ca4a48b98899a7d51ca29af7&fileId=2445569',
+      //url: 'https://share.heiluo.com/share/download?type=1&shareId=e6414385ca4a48b98899a7d51ca29af7&fileId=2445569',
+      url: path,
       savedDir: _updatesPath,
       showNotification:  true, // show download progress in status bar (for Android)
       openFileFromNotification: true, // click on notification to open downloaded file (for Android)
@@ -63,7 +78,7 @@ class AppVersion {
       context: context,
       barrierDismissible: true,
       builder: (context) {
-        double downloadProgress = 0.2;
+        double downloadProgress;
         return AlertDialog(
           title: Text('下载'),
           contentPadding: EdgeInsets.all(32),
@@ -71,7 +86,7 @@ class AppVersion {
             builder: (context, setDialogState) {
               FlutterDownloader.registerCallback((id, status, progress) {
                 if (status == DownloadTaskStatus.complete) {
-                  OpenFile.open(_updatesPath + AppName);
+                  OpenFile.open(_filePath);
                   FlutterDownloader.registerCallback(null);
                   Navigator.of(context).pop(null);
                 } else {

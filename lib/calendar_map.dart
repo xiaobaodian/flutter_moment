@@ -139,8 +139,10 @@ class CalendarMap {
     int base = currentDateIndexed - 2;
     int offset = dayIndex - base;
     String dayLeap;
-    if (offset < 0 || offset > 4) {
-      dayLeap = '';
+    if (offset < 0) {  // offset < 0 || offset > 4
+      dayLeap = '${currentDateIndexed - dayIndex}天以前';
+    } else if(offset > 4){
+      dayLeap = '${dayIndex - currentDateIndexed}天以后';
     } else {
       dayLeap = dayName[offset];
     }
