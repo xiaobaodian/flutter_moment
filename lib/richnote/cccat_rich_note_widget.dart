@@ -23,16 +23,9 @@ class RichNoteTapObject {
   RichLine richLine;
 }
 
-enum BarType {
-  FormatBar,
-  LabelBar
-}
+enum BarType { FormatBar, LabelBar }
 
-enum LabelType {
-  Person,
-  Place,
-  Tag
-}
+enum LabelType { Person, Place, Tag }
 
 class RichNote extends StatefulWidget {
   RichNote({
@@ -95,6 +88,12 @@ class RichNoteState extends State<RichNote> {
   TextTheme textTheme;
   RichNoteLayout layout;
   BarType barType;
+
+  /// [personTempKeys]存放临时的从正文中提取的人物标签列表。
+  /// [placeTempKeys]存放临时的从正文中提取的位置标签列表。
+  /// 这两个列表用于辅助选择标签项时，判断需要隔离的已从正文中自动提取的标签项。
+  LabelKeys personTempKeys;
+  LabelKeys placeTempKeys;
 
   @override
   void initState() {
@@ -194,45 +193,42 @@ class RichNoteState extends State<RichNote> {
           break;
         }
         Widget checkBox = Checkbox(
-          value: task.state == TaskState.Complete,
-          onChanged: (isSelected) {
-            setState(() {
-              task.state =
-              isSelected ? TaskState.Complete : TaskState.StandBy;
-              if (widget.isNotEditable) {
-                widget.store.taskSet.changeItem(task);
-              }
+            value: task.state == TaskState.Complete,
+            onChanged: (isSelected) {
+              setState(() {
+                task.state =
+                    isSelected ? TaskState.Complete : TaskState.StandBy;
+                if (widget.isNotEditable) {
+                  widget.store.taskSet.changeItem(task);
+                }
+              });
             });
-          }
-        );
         var effectiveSytle = layout.taskStyle == null
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.taskStyle;
         if (task.state == TaskState.Complete) {
           effectiveSytle = effectiveSytle.merge(TextStyle(
-              color: Colors.black54,
-              decoration: TextDecoration.lineThrough,
-              decorationStyle: TextDecorationStyle.solid,
+            color: Colors.black54,
+            decoration: TextDecoration.lineThrough,
+            decorationStyle: TextDecorationStyle.solid,
           ));
         }
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutTask(
-            checkBox,
-            _buildTextField(index, effectiveSytle),
-            Text(
-              '全天',
-              style: textTheme.caption,
-            )
-          );
+              checkBox,
+              _buildTextField(index, effectiveSytle),
+              Text(
+                '全天',
+                style: textTheme.caption,
+              ));
         } else {
           paragraphWidget = layout.richLayoutTask(
-            checkBox,
-            Text(item.getContent(), style: effectiveSytle),
-            Text(
-              '全天',
-              style: textTheme.caption,
-            )
-          );
+              checkBox,
+              Text(item.getContent(), style: effectiveSytle),
+              Text(
+                '全天',
+                style: textTheme.caption,
+              ));
         }
         break;
       case RichType.OrderedLists:
@@ -241,19 +237,17 @@ class RichNoteState extends State<RichNote> {
             : layout.orderedListsStyle;
         if (widget.isEditable) {
           paragraphWidget = layout.richLayoutList(
-            item.indent,
-            Text(item.leading, style: effectiveSytle),
-            _buildTextField(index, effectiveSytle)
-          );
+              item.indent,
+              Text(item.leading, style: effectiveSytle),
+              _buildTextField(index, effectiveSytle));
         } else {
           paragraphWidget = layout.richLayoutList(
-            item.indent,
-            Text(item.leading, style: effectiveSytle),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
-              child: Text(item.getContent(), style: effectiveSytle),
-            )
-          );
+              item.indent,
+              Text(item.leading, style: effectiveSytle),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
+                child: Text(item.getContent(), style: effectiveSytle),
+              ));
         }
         break;
       case RichType.UnorderedList:
@@ -392,14 +386,20 @@ class RichNoteState extends State<RichNote> {
         children: <Widget>[
           SizedBox(height: 12),
           //Divider(),
-          DividerExt(thickness: 6, color: Color.fromARGB(127, 235, 235, 235),),
+          DividerExt(
+            thickness: 6,
+            color: Color.fromARGB(127, 235, 235, 235),
+          ),
         ],
       );
-    } else if (current.type != RichType.Related && next.type == RichType.Related) {
+    } else if (current.type != RichType.Related &&
+        next.type == RichType.Related) {
       double right = MediaQuery.of(context).size.width * 0.8;
       return Padding(
         padding: EdgeInsets.fromLTRB(16, 12, right, 12),
-        child: Divider(height: 1,),
+        child: Divider(
+          height: 1,
+        ),
       );
     }
     return SizedBox(height: layout.segmentSpacing);
@@ -629,17 +629,16 @@ class RichNoteState extends State<RichNote> {
         type: newType,
         content: lines[1], // 加入'\u0000'在RichItem内部完成
       );
-      newItem.controller.selection =
-          TextSelection.fromPosition(TextPosition(
-            affinity: TextAffinity.downstream,
-            offset: 1,
-          ));
+      newItem.controller.selection = TextSelection.fromPosition(TextPosition(
+        affinity: TextAffinity.downstream,
+        offset: 1,
+      ));
       newItem.indent = indent;
       newItem.canChanged = false;
       setState(() {
         widget.richSource.richLineList.insert(index + 1, newItem);
       });
-      Future.delayed(const Duration(milliseconds: 100),(){
+      Future.delayed(const Duration(milliseconds: 100), () {
         _requestFocus(newItem?.focusNode);
       });
     }
@@ -663,10 +662,8 @@ class RichNoteState extends State<RichNote> {
       textInputAction: TextInputAction.newline,
       decoration: InputDecoration(
           border: InputBorder.none,
-          contentPadding: EdgeInsets.fromLTRB(0, 3, 0 ,3)
-      ),
+          contentPadding: EdgeInsets.fromLTRB(0, 3, 0, 3)),
       onChanged: (text) {
-
         //debugPrint('触发内容修改事件：$text, 内容长度: ${text.length}');
         //debugPrint('内容长度: ${text.length}');
 
@@ -837,11 +834,13 @@ class RichNoteState extends State<RichNote> {
   }
 
   void editLabels(LabelType type) {
+    bool detectFlags = widget.store.prefs.detectFlags;
     String title;
     List<ReferencesBoxItem> labels;
     LabelKeys labelKeys;
     Map<int, String> titleMap = Map<int, String>();
     String clipText = '';
+    LabelKeys tempKeys = LabelKeys();
 
     RichItem item = _getCurrentRichItem();
     var currentFocusNode = item.focusNode;
@@ -855,11 +854,24 @@ class RichNoteState extends State<RichNote> {
         title = '人物';
         labels = widget.store.personSet.itemList;
         labelKeys = widget.focusEvent.personKeys;
+        if (detectFlags) {
+          debugPrint('提取临时的人物标签');
+          tempKeys.fromExtracting(widget.richSource.exportingRichLists(),
+              widget.store.personSet.itemList,
+              clean: true);
+        }
+
         break;
       case LabelType.Place:
         title = '位置';
         labels = widget.store.placeSet.itemList;
         labelKeys = widget.focusEvent.placeKeys;
+        if (detectFlags) {
+          debugPrint('提取临时的位置标签');
+          tempKeys.fromExtracting(widget.richSource.exportingRichLists(),
+              widget.store.placeSet.itemList,
+              clean: true);
+        }
         break;
       case LabelType.Tag:
         title = '标签';
@@ -867,6 +879,7 @@ class RichNoteState extends State<RichNote> {
         labelKeys = widget.focusEvent.tagKeys;
         break;
     }
+
     bool offstageAddButton = true;
     List<ReferencesBoxItem> resultList = [];
     resultList.addAll(labels);
@@ -874,15 +887,14 @@ class RichNoteState extends State<RichNote> {
     String newLabel;
 
     showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        double width = MediaQuery.of(context).size.width * 0.85;
-        double height = MediaQuery.of(context).size.height * 0.5;
-        return AlertDialog(
-          contentPadding: EdgeInsets.all(0),
-          content: StatefulBuilder(
-            builder: (context, setDialogState) {
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          double width = MediaQuery.of(context).size.width * 0.85;
+          double height = MediaQuery.of(context).size.height * 0.5;
+          return AlertDialog(
+            contentPadding: EdgeInsets.all(0),
+            content: StatefulBuilder(builder: (context, setDialogState) {
               return Column(
                 children: <Widget>[
                   Container(
@@ -895,26 +907,28 @@ class RichNoteState extends State<RichNote> {
                               controller: controller,
                               //autofocus: true,
                               decoration: InputDecoration(
-                                icon: Icon(Icons.search),
-                                hintText: '点击此处搜索或加入新的$title',
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.fromLTRB(0, 3, 0, 3)
-                              ),
-                              onChanged: (text){
+                                  icon: Icon(Icons.search),
+                                  hintText: '点击此处搜索或加入新的$title',
+                                  border: InputBorder.none,
+                                  contentPadding:
+                                      EdgeInsets.fromLTRB(0, 3, 0, 3)),
+                              onChanged: (text) {
                                 if (text.isEmpty) {
-                                  setDialogState((){
+                                  setDialogState(() {
                                     resultList.clear();
                                     resultList.addAll(labels);
                                     offstageAddButton = true;
                                   });
                                 } else {
                                   resultList.clear();
-                                  labels.forEach((label){
-                                    if (label.getLabel().contains(controller.text)) {
+                                  labels.forEach((label) {
+                                    if (label
+                                        .getLabel()
+                                        .contains(controller.text)) {
                                       resultList.add(label);
                                     }
                                   });
-                                  setDialogState((){
+                                  setDialogState(() {
                                     if (resultList.isEmpty) {
                                       offstageAddButton = false;
                                       newLabel = text;
@@ -934,7 +948,7 @@ class RichNoteState extends State<RichNote> {
                             color: Theme.of(context).accentColor,
                             onPressed: () {
                               controller.clear();
-                              setDialogState((){
+                              setDialogState(() {
                                 resultList.clear();
                                 resultList.addAll(labels);
                                 offstageAddButton = true;
@@ -947,35 +961,39 @@ class RichNoteState extends State<RichNote> {
                           child: IconButton(
                             icon: Icon(Icons.add),
                             color: Theme.of(context).accentColor,
-                            onPressed: (){
+                            onPressed: () {
                               controller.clear();
                               resultList.clear();
                               resultList.addAll(labels);
                               offstageAddButton = true;
                               if (type == LabelType.Person) {
                                 PersonItem person = PersonItem(name: newLabel);
-                                widget.store.personSet.addItem(person).then((id){
+                                widget.store.personSet
+                                    .addItem(person)
+                                    .then((id) {
                                   titleMap[id] = person.name;
-                                  setDialogState((){
+                                  setDialogState(() {
                                     resultList.add(person);
                                     labelKeys.addOrRemove(person.boxId);
-                                    clipText = StringExt.listStringToString(titleMap.values.toList());
+                                    clipText = StringExt.listStringToString(
+                                        titleMap.values.toList());
                                   });
                                 });
                               } else if (type == LabelType.Place) {
                                 PlaceItem place = PlaceItem(title: newLabel);
-                                widget.store.placeSet.addItem(place).then((id){
+                                widget.store.placeSet.addItem(place).then((id) {
                                   titleMap[id] = place.title;
-                                  setDialogState((){
+                                  setDialogState(() {
                                     resultList.add(place);
                                     labelKeys.addOrRemove(place.boxId);
-                                    clipText = StringExt.listStringToString(titleMap.values.toList());
+                                    clipText = StringExt.listStringToString(
+                                        titleMap.values.toList());
                                   });
                                 });
                               } else {
                                 TagItem tag = TagItem(title: newLabel);
-                                widget.store.tagSet.addItem(tag).then((id){
-                                  setDialogState((){
+                                widget.store.tagSet.addItem(tag).then((id) {
+                                  setDialogState(() {
                                     resultList.add(tag);
                                     labelKeys.addOrRemove(tag.boxId);
                                   });
@@ -990,10 +1008,7 @@ class RichNoteState extends State<RichNote> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 5.0
-                        ),
+                        BoxShadow(color: Colors.black12, blurRadius: 5.0),
                       ],
                     ),
                   ),
@@ -1005,38 +1020,57 @@ class RichNoteState extends State<RichNote> {
                         itemCount: resultList.length,
                         itemBuilder: (context, index) {
                           var item = resultList[index];
+                          bool isDetectTag = false;
+                          bool isEnabled = true;
                           bool isSelected = labelKeys.findKey(item.boxId);
-                          String labelText = resultList[index].getLabel();
+                          if (detectFlags) {
+                            isDetectTag = tempKeys.findKey(item.boxId);
+                            isEnabled = !isDetectTag;
+                            if (isDetectTag) isSelected = true;
+                          }
+                          debugPrint(
+                              '${item.getLabel()} isDetectTag: $isDetectTag, isEnabled: $isEnabled, isSelected: $isSelected');
+                          String labelText = item.getLabel();
                           CatListTile catListTile = CatListTile(
                             leading: SizedBox(
                               height: 32,
                               width: 32,
                               child: Checkbox(
                                 value: isSelected,
-                                onChanged: (selected) {
-                                  if (titleMap.containsKey(item.boxId)) {
-                                    titleMap.remove(item.boxId);
-                                  } else {
-                                    titleMap[item.boxId] = labelText;
-                                  }
-                                  setDialogState((){
-                                    labelKeys.addOrRemove(item.boxId);
-                                    clipText = StringExt.listIntToString(labelKeys.keyList);
-                                  });
-                                },
+                                onChanged: isDetectTag
+                                    ? null
+                                    : (selected) {
+                                        if (titleMap.containsKey(item.boxId)) {
+                                          titleMap.remove(item.boxId);
+                                        } else {
+                                          titleMap[item.boxId] = labelText;
+                                        }
+                                        setDialogState(() {
+                                          labelKeys.addOrRemove(item.boxId);
+                                          clipText = StringExt.listIntToString(
+                                              labelKeys.keyList);
+                                        });
+                                      },
                               ),
                             ),
                             title: Text(labelText),
+                            subtitle: isDetectTag
+                                ? Text('提取的标签',
+                                    style: TextStyle(fontSize: 12),
+                                  )
+                                : null,
                             selected: isSelected,
-                            onTap: (){
+                            enabled: isEnabled,
+                            onTap: () {
                               if (titleMap.containsKey(item.boxId)) {
                                 titleMap.remove(item.boxId);
                               } else {
                                 titleMap[item.boxId] = labelText;
                               }
-                              setDialogState((){
+                              setDialogState(() {
                                 labelKeys.addOrRemove(item.boxId);
-                                clipText = StringExt.listIntToString(labelKeys.keyList);
+                                clipText = StringExt.listIntToString(
+                                    labelKeys.keyList);
                               });
                             },
                           );
@@ -1045,29 +1079,30 @@ class RichNoteState extends State<RichNote> {
                       ),
                     ),
                   ),
-                  Divider(height: 1,),
+                  Divider(
+                    height: 1,
+                  ),
                 ],
               );
-            }
-          ),
-          actions: <Widget>[
+            }),
+            actions: <Widget>[
 //            FlatButton(
 //              child: Text('字符串'),
 //              onPressed: () {
 //                Navigator.of(context).pop(clipText);
 //              },
 //            ),
-            FlatButton(
-              child: Text('返回'),//type == LabelType.Tag ? Text('返回') : Text('插入'),
-              onPressed: () {
-                //Navigator.of(context).pop(clipText);
-                Navigator.of(context).pop(null);
-              },
-            ),
-          ],
-        );
-      }
-    ).then((result) {
+              FlatButton(
+                child: Text(
+                    '返回'), //type == LabelType.Tag ? Text('返回') : Text('插入'),
+                onPressed: () {
+                  //Navigator.of(context).pop(clipText);
+                  Navigator.of(context).pop(null);
+                },
+              ),
+            ],
+          );
+        }).then((result) {
       if (result != null) {
         if (type == LabelType.Tag) {
           debugPrint('确认了（${widget.focusEvent.tagKeys.keyList.length}）个标签');
@@ -1090,12 +1125,9 @@ class RichNoteState extends State<RichNote> {
           }
         }
       }
-      setState(() {
-
-      });
+      setState(() {});
     });
   }
-
 
   Widget _buildLabelIconsBar() {
     int tagCount = widget.focusEvent.tagKeys.keyList.length;
@@ -1112,7 +1144,7 @@ class RichNoteState extends State<RichNote> {
         IconButton(
           icon: Icon(Icons.people),
           color: personCount == 0 ? null : Theme.of(context).accentColor,
-          onPressed: (){
+          onPressed: () {
             editLabels(LabelType.Person);
           },
         ),
@@ -1122,7 +1154,7 @@ class RichNoteState extends State<RichNote> {
         IconButton(
           icon: Icon(Icons.map),
           color: placeCount == 0 ? null : Theme.of(context).accentColor,
-          onPressed: (){
+          onPressed: () {
             editLabels(LabelType.Place);
           },
         ),
@@ -1132,7 +1164,7 @@ class RichNoteState extends State<RichNote> {
         IconButton(
           icon: Icon(Icons.label),
           color: tagCount == 0 ? null : Theme.of(context).accentColor,
-          onPressed: (){
+          onPressed: () {
             editLabels(LabelType.Tag);
           },
         ),
@@ -1152,20 +1184,18 @@ class RichNoteState extends State<RichNote> {
             child: _buildFormatIconsBar(),
           ),
           Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  offset: Offset(-8, 0),
-                  color: Colors.black54,
-                  spreadRadius: -8,
-                  blurRadius: 5.0,
-                ),
-              ]
-            ),
+            decoration:
+                BoxDecoration(color: Colors.white, boxShadow: <BoxShadow>[
+              BoxShadow(
+                offset: Offset(-8, 0),
+                color: Colors.black54,
+                spreadRadius: -8,
+                blurRadius: 5.0,
+              ),
+            ]),
             child: IconButton(
               icon: Icon(Icons.arrow_forward_ios),
-              onPressed: (){
+              onPressed: () {
                 setState(() {
                   barType = BarType.LabelBar;
                 });
@@ -1178,20 +1208,18 @@ class RichNoteState extends State<RichNote> {
       bar = Row(
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    offset: Offset(8, 0),
-                    color: Colors.black54,
-                    spreadRadius: -8,
-                    blurRadius: 5.0,
-                  ),
-                ]
-            ),
+            decoration:
+                BoxDecoration(color: Colors.white, boxShadow: <BoxShadow>[
+              BoxShadow(
+                offset: Offset(8, 0),
+                color: Colors.black54,
+                spreadRadius: -8,
+                blurRadius: 5.0,
+              ),
+            ]),
             child: IconButton(
               icon: Icon(Icons.arrow_back_ios),
-              onPressed: (){
+              onPressed: () {
                 setState(() {
                   barType = BarType.FormatBar;
                 });

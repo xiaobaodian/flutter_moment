@@ -37,19 +37,24 @@ class AppVersion {
   void init(GlobalStoreState store) {
     _updatesPath = store.localDir + '/Update';
     _filePath = _updatesPath + '/app-release.apk';
+    cleanSaveDir();
+  }
+
+  Future cleanSaveDir() async {
+    final savedDir = Directory(_updatesPath);
+    bool hasDir = await savedDir.exists();
+    if (hasDir) {
+      List<FileSystemEntity> files = savedDir.listSync();
+      files.forEach((file){
+        debugPrint(file.path);
+        File(file.path).deleteSync();
+      });
+      await savedDir.delete(); debugPrint('删除原来的下载目录');
+    }
+    await savedDir.create(); debugPrint('创建下载目录');
   }
 
   Future diffVersion(GlobalStoreState store) async {
-    final savedDir = Directory(_updatesPath);
-    bool hasDir = await savedDir.exists();
-    if (!hasDir) {
-      savedDir.create();
-    }
-    File file = File(_filePath);
-    bool hasFile = await file.exists();
-    if (hasFile) {
-      file.delete();
-    }
     int diff = version.compareTo(store.packageInfo.version);
     if (diff <= 0) {
       diff = buildNumber.compareTo(store.packageInfo.buildNumber);
@@ -58,21 +63,17 @@ class AppVersion {
   }
 
   Future updates(BuildContext context, GlobalStoreState store) async {
-    debugPrint('下载升级文件的目录：$_updatesPath');
-    final savedDir = Directory(_updatesPath);
-    bool hasExisted = await savedDir.exists();
-    if (!hasExisted) {
-      savedDir.create();
-    }
+    bool isFailed = false;
+    await cleanSaveDir();
     final taskId = await FlutterDownloader.enqueue(
-      //url: 'https://share.heiluo.com/share/download?type=1&shareId=e6414385ca4a48b98899a7d51ca29af7&fileId=2445569',
       url: path,
       savedDir: _updatesPath,
-      showNotification:  true, // show download progress in status bar (for Android)
-      openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+      showNotification: true, // show download progress in status bar (for Android)
+      openFileFromNotification: false, // click on notification to open downloaded file (for Android)
     );
     //FlutterDownloader.open(taskId: taskId);
-    final tasks = await FlutterDownloader.loadTasks();
+    //final tasks = await FlutterDownloader.loadTasks();
+    await FlutterDownloader.loadTasks();
 
     showDialog(
       context: context,
@@ -89,6 +90,14 @@ class AppVersion {
                   OpenFile.open(_filePath);
                   FlutterDownloader.registerCallback(null);
                   Navigator.of(context).pop(null);
+                } else if (status == DownloadTaskStatus.failed){
+                  setDialogState((){
+                    isFailed = true;
+                    FlutterDownloader.registerCallback(null);
+                    Future.delayed(Duration(seconds: 2),(){
+                      Navigator.of(context).pop(null);
+                    });
+                  });
                 } else {
                   setDialogState((){
                     downloadProgress = progress / 100.0;
@@ -96,7 +105,7 @@ class AppVersion {
                 }
               });
               return Container(
-                child: LinearProgressIndicator(
+                child: isFailed ? Text('下载失败') : LinearProgressIndicator(
                   value: downloadProgress,
                 ),
               );

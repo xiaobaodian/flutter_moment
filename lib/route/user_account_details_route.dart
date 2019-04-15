@@ -204,6 +204,10 @@ class UserAccountRouteState extends State<UserAccountRoute> {
               store.appVersion.updates(context, store);
             }
           },
+          onLongPress: () async {
+            await store.appVersion.cleanSaveDir();
+            store.appVersion.updates(context, store);
+          },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
         CatListTile(
@@ -218,14 +222,15 @@ class UserAccountRouteState extends State<UserAccountRoute> {
                   applicationIcon: Image.asset("assets/image/defaultPersonPhoto1.png"),
                   applicationName: '时光',
                   applicationVersion: "${_store.packageInfo.version} (${_store.packageInfo.buildNumber})",
-                  applicationLegalese: '数据框架构成版',
+                  applicationLegalese: '${_store.appVersion.title}',
                   children: <Widget>[
                     Divider(),
                     Text('${_store.androidInfo.brand} ${_store.androidInfo.model}'),
                     //Text("${_store.androidInfo.version}"),
                     //Text("${_store.androidInfo.device}"),
-                    Text("${_store.androidInfo.display}"),
+                    //Text("${_store.androidInfo.display}"),
                     Text("${_store.androidInfo.board}"),
+                    Text("${_store.appVersion.path}"),
                   ],
                 );
               }

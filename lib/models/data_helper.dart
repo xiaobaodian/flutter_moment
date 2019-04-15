@@ -62,7 +62,8 @@ class BasicData<T extends BoxItem> {
     itemList.add(item);
     Map<String, dynamic> data = item.toJson();
     await dataSource.openDataBase();
-    int id = await dataSource.database.insert(dataSource.tables[BoxItem.typeName(T)].name, data);
+    int id = await dataSource.database
+        .insert(dataSource.tables[BoxItem.typeName(T)].name, data);
     item.boxId = id;
     _itemMap[id] = item;
     return id;
@@ -124,8 +125,10 @@ class BasicData<T extends BoxItem> {
       itemList.remove(item);
       _itemMap.remove(item.boxId);
       await dataSource.openDataBase();
-      changes = await dataSource.database.delete(dataSource.tables[BoxItem.typeName(T)].name,
-          where: 'boxId = ?', whereArgs: [item.boxId]);
+      changes = await dataSource.database.delete(
+          dataSource.tables[BoxItem.typeName(T)].name,
+          where: 'boxId = ?',
+          whereArgs: [item.boxId]);
     }
     return changes;
   }
@@ -134,9 +137,10 @@ class BasicData<T extends BoxItem> {
   Future<List<T>> findByWhere(String where, List<dynamic> whereArgs) async {
     List<T> list = [];
     await dataSource.openDataBase();
-    List<Map<String, dynamic>> rawList = await dataSource.database
-        .query(dataSource.tables[BoxItem.typeName(T)].name,
-            where: where, whereArgs: whereArgs);
+    List<Map<String, dynamic>> rawList = await dataSource.database.query(
+        dataSource.tables[BoxItem.typeName(T)].name,
+        where: where,
+        whereArgs: whereArgs);
 
     print('findByWhere 返回了(${rawList.length})条数据');
 
@@ -146,9 +150,8 @@ class BasicData<T extends BoxItem> {
       return item;
     }).toList();
 
-
     if (T == FocusEvent) {
-      list.forEach((r){
+      list.forEach((r) {
         FocusEvent e = r as FocusEvent;
         print('item : ${e.focusItemBoxId}');
       });
@@ -166,7 +169,7 @@ class BasicData<T extends BoxItem> {
 class ReferencesData<T extends ReferencesBoxItem> extends BasicData<T> {
   ReferencesData({
     DataSource dataSource,
-  }) : super(dataSource:  dataSource);
+  }) : super(dataSource: dataSource);
 
   Future<List<T>> loadItemsFromDataSource() async {
     var list = await super.loadItemsFromDataSource();
@@ -208,7 +211,7 @@ class ReferencesData<T extends ReferencesBoxItem> extends BasicData<T> {
     return sum;
   }
 
-  void sort(){
+  void sort() {
     //itemList.sort((one, two) => one.count.compareTo(two.count));
     itemList.sort((one, two) => two.count.compareTo(one.count));
   }
@@ -236,8 +239,8 @@ class DiffKeysResult {
 ///
 class LabelKeys {
   List<int> _keys = [];
-
   List<int> get keyList => _keys;
+
   void add(int key) {
     if (_keys.contains(key)) return;
     _keys.add(key);
@@ -292,11 +295,16 @@ class LabelKeys {
         newKeys: newList, oldKeys: oldList, unusedKeys: unusedList);
   }
 
-  void fromExtracting(List<RichLine> lines, List<ReferencesBoxItem> objectList) {
-    //_keys.clear();
+  void fromExtracting(List<RichLine> lines, List<ReferencesBoxItem> objectList,
+      {bool clean = false}) {
+    if (clean) {
+      _keys.clear(); debugPrint('执行了 -> _keys.clear()');
+    }
     for (var line in lines) {
       for (var obj in objectList) {
+        debugPrint('准备从“${line.getContent()}”中查找“${obj.getLabel()}”');
         if (line.getContent().contains(obj.getLabel())) {
+          debugPrint('解析：${line.getContent()}');
           debugPrint('找到了：${obj.getLabel()}');
           add(obj.boxId);
         }

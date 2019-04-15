@@ -110,11 +110,11 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   Future initSystem() async {
+    prefs = AppPreferences();
     localDir = await getLocalPath();
     packageInfo = await PackageInfo.fromPlatform();
     androidInfo = await deviceInfo.androidInfo;
     appVersion = await checkUpdatesFile();
-    prefs = AppPreferences();
   }
 
   int get selectedDateIndex => calendarMap.selectedDateIndex;
