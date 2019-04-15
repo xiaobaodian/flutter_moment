@@ -52,6 +52,18 @@ class RichNote extends StatefulWidget {
         isFixed = false,
         focusEvent = richSource.focusEvent {
     richSource.richNote = this;
+    if (store.prefs.detectFlags) {
+      _personTempKeys.fromExtracting(
+          richSource.richLineList, store.personSet.itemList);
+      _personTempKeys.keyList.forEach((id){
+        focusEvent.personKeys.remove(id);
+      });
+      _placeTempKeys.fromExtracting(
+          richSource.richLineList, store.placeSet.itemList);
+      _placeTempKeys.keyList.forEach((id){
+        focusEvent.placeKeys.remove(id);
+      });
+    }
     richSource.markEditerItem();
     debugPrint('RichNote.editable 模式初始化');
   }
@@ -77,8 +89,19 @@ class RichNote extends StatefulWidget {
   final GlobalStoreState store;
   final FocusEvent focusEvent;
 
+  /// [_personTempKeys]存放临时的从正文中提取的人物标签列表。
+  /// [_placeTempKeys]存放临时的从正文中提取的位置标签列表。
+  /// 这两个列表用于辅助选择标签项时，判断需要隔离的已从正文中自动提取的标签项。
+  final LabelKeys _personTempKeys = LabelKeys();
+  final LabelKeys _placeTempKeys = LabelKeys();
+
+  /// [_maxIndent]最大的缩进级别，从0开始算起。
   final _maxIndent = 1;
   bool get isNotEditable => !isEditable;
+
+  List<RichLine> exportingRichLists() {
+    return richSource.exportingRichLists();
+  }
 
   @override
   RichNoteState createState() => RichNoteState();
@@ -88,12 +111,6 @@ class RichNoteState extends State<RichNote> {
   TextTheme textTheme;
   RichNoteLayout layout;
   BarType barType;
-
-  /// [personTempKeys]存放临时的从正文中提取的人物标签列表。
-  /// [placeTempKeys]存放临时的从正文中提取的位置标签列表。
-  /// 这两个列表用于辅助选择标签项时，判断需要隔离的已从正文中自动提取的标签项。
-  LabelKeys personTempKeys;
-  LabelKeys placeTempKeys;
 
   @override
   void initState() {
@@ -860,7 +877,6 @@ class RichNoteState extends State<RichNote> {
               widget.store.personSet.itemList,
               clean: true);
         }
-
         break;
       case LabelType.Place:
         title = '位置';
@@ -1055,7 +1071,8 @@ class RichNoteState extends State<RichNote> {
                             ),
                             title: Text(labelText),
                             subtitle: isDetectTag
-                                ? Text('提取的标签',
+                                ? Text(
+                                    '提取的标签',
                                     style: TextStyle(fontSize: 12),
                                   )
                                 : null,
