@@ -114,7 +114,11 @@ class GlobalStoreState extends State<GlobalStore> {
     localDir = await getLocalPath();
     packageInfo = await PackageInfo.fromPlatform();
     androidInfo = await deviceInfo.androidInfo;
-    appVersion = await checkUpdatesFile();
+    initVersion();
+  }
+
+  Future initVersion() async {
+    appVersion = await checkUpdatesFile(this);
   }
 
   int get selectedDateIndex => calendarMap.selectedDateIndex;
@@ -454,17 +458,6 @@ class GlobalStoreState extends State<GlobalStore> {
     DailyRecord dailyRecord =
         calendarMap.getDailyRecordFromIndex(task.createDate);
     return getFocusEventFormDailyRecord(dailyRecord, task.focusItemId);
-  }
-
-  // updates
-  Future<AppVersion> checkUpdatesFile() async {
-    Dio dio = Dio();
-    Response response = await dio.get("https://share.heiluo.com/share/download?type=1&shareId=ce2e6c74d2b0428f80ff8203b84b7379&fileId=2609208");
-    debugPrint('获取的文件内容：${response.data.toString()}');
-    AppVersion appVer = AppVersion.fromJson(jsonDecode(response.data.toString()));
-    //debugPrint('版本：${appVer.title}');
-    appVer.init(this);
-    return appVer;
   }
 
   // build & inherited

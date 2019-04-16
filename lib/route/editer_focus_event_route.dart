@@ -22,10 +22,10 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalStoreState _store;
   FocusEvent _editerFocusEvent = FocusEvent();
-  String routeTitle;
+  String _routeTitle;
+  String _dateTitle;
   RichSource richSource;
   RichNote richNote;
-  String dateTitle;
 
   @override
   void initState() {
@@ -38,8 +38,8 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
-    routeTitle = _store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
-    dateTitle = _store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
+    _routeTitle = _store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
+    _dateTitle = _store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
     _editerFocusEvent.copyWith(widget._focusEvent);
     richSource = RichSource.fromFocusEvent(_editerFocusEvent);
     richNote = RichNote.editable(
@@ -89,34 +89,36 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
         _store.changeFocusEventAndTasks(passingObject);
         widget._focusEvent.copyWith(_editerFocusEvent);
       }
+    } else {
+      _store.removeFocusEventAndTasks(widget._focusEvent);
     }
   }
 
   void removeFocusEventItem(BuildContext context) {
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('将要删除'),
-            content: Text('确实需要删除 <$routeTitle> 吗？'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('取消'),
-                onPressed: () {
-                  Navigator.of(context).pop(null);
-                },
-              ),
-              FlatButton(
-                child: Text('确认'),
-                onPressed: () {
-                  _store.removeFocusEventAndTasks(widget._focusEvent);
-                  Navigator.of(context).pop(1);
-                },
-              ),
-            ],
-          );
-        }
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('将要删除'),
+          content: Text('确实需要删除 <$_routeTitle> 吗？'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop(null);
+              },
+            ),
+            FlatButton(
+              child: Text('确认'),
+              onPressed: () {
+                _store.removeFocusEventAndTasks(widget._focusEvent);
+                Navigator.of(context).pop(1);
+              },
+            ),
+          ],
+        );
+      }
     ).then((result) {
       if (result != null) {
         // 删除数据时传入任意一个整数（这里是-1），前一个页面收到返回之后判断一下
@@ -146,8 +148,8 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(routeTitle),
-              Text(dateTitle,
+              Text(_routeTitle),
+              Text(_dateTitle,
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.white54,

@@ -205,8 +205,13 @@ class UserAccountRouteState extends State<UserAccountRoute> {
             }
           },
           onLongPress: () async {
-            await store.appVersion.cleanSaveDir();
-            store.appVersion.updates(context, store);
+            if (store.appVersion == null) {
+              await store.initVersion();
+            }
+            if (store.appVersion != null) {
+              await store.appVersion.cleanSaveDir();
+              store.appVersion.updates(context, store);
+            }
           },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),

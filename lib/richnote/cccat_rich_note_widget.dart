@@ -381,6 +381,7 @@ class RichNoteState extends State<RichNote> {
     return mergeStyle;
   }
 
+  /// 构建行间距与分割线的widget
   Widget buildSeparatorWidget(int index) {
     final current = widget.richSource.richLineList[index];
     final next = widget.richSource.richLineList[index + 1];
@@ -1179,7 +1180,7 @@ class RichNoteState extends State<RichNote> {
           child: Text(placeLabel),
         ),
         IconButton(
-          icon: Icon(Icons.label),
+          icon: Icon(Icons.label_outline),
           color: tagCount == 0 ? null : Theme.of(context).accentColor,
           onPressed: () {
             editLabels(LabelType.Tag);

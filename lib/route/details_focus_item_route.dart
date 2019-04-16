@@ -9,18 +9,22 @@ import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
+import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class FocusItemDetailsRoute extends StatefulWidget {
-  final FocusItem _focusItem;
-
   FocusItemDetailsRoute(this._focusItem);
+
+  final FocusItem _focusItem;
 
   @override
   FocusItemDetailsRouteState createState() => FocusItemDetailsRouteState();
 }
 
 class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
+  final dividerHeight = 3.0;
+  final dividerIndent = 48.0;
+  final dividerThickness = 6.0;
   GlobalStoreState _store;
   bool _hideEditButton, _hideDeleteButton;
 
@@ -200,7 +204,7 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
         );
       },
       separatorBuilder: (context, index){
-        return Divider(height: 1,);
+        return DividerExt(height: dividerHeight, thickness: dividerThickness);
       },
     );
   }

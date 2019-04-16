@@ -445,7 +445,7 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
         child: ListView.builder(
           itemBuilder: (context, index) {
             return ListTile(
-              leading: Icon(Icons.all_out),
+              leading: Icon(Icons.remove_red_eye),
               title: Text(usableList[index].title),
               onTap: () {
                 Navigator.of(context).pop();
