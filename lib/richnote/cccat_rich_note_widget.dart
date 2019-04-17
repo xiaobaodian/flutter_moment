@@ -13,6 +13,7 @@ import 'package:flutter_moment/task/task_item.dart';
 import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 import 'package:flutter_moment/widgets/gender_label_choice_dialog.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class RichNoteTapObject {
   RichNoteTapObject(
@@ -1160,7 +1161,7 @@ class RichNoteState extends State<RichNote> {
       scrollDirection: Axis.horizontal,
       children: <Widget>[
         IconButton(
-          icon: Icon(Icons.people),
+          icon: Icon(MdiIcons.accountMultiple),
           color: personCount == 0 ? null : Theme.of(context).accentColor,
           onPressed: () {
             editLabels(LabelType.Person);
@@ -1170,7 +1171,7 @@ class RichNoteState extends State<RichNote> {
           child: Text(personLabel),
         ),
         IconButton(
-          icon: Icon(Icons.map),
+          icon: Icon(MdiIcons.mapMarkerMultiple),
           color: placeCount == 0 ? null : Theme.of(context).accentColor,
           onPressed: () {
             editLabels(LabelType.Place);
@@ -1180,7 +1181,7 @@ class RichNoteState extends State<RichNote> {
           child: Text(placeLabel),
         ),
         IconButton(
-          icon: Icon(Icons.label_outline),
+          icon: Icon(MdiIcons.tagMultiple),
           color: tagCount == 0 ? null : Theme.of(context).accentColor,
           onPressed: () {
             editLabels(LabelType.Tag);

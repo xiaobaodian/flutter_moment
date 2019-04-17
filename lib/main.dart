@@ -17,6 +17,7 @@ import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/browse_daily_focus_route.dart';
 import 'package:flutter_moment/route/user_account_details_route.dart';
 import 'package:flutter_moment/widgets/trim_picture_dialog.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 void main() => runApp(GlobalStore(child: MyApp()));
 
@@ -81,7 +82,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _calendarMap = _store.calendarMap;
     _pageController = PageController(initialPage: _calendarMap.getDateIndex());
     _pageStorageBucket = PageStorageBucket();
-    Future.delayed(Duration(seconds: 8),(){
+    _store.notifications.init(context);
+    Future.delayed(Duration(seconds: 5),(){
       _store.appVersion.diffVersion(_store);
       if (_store.appVersion.needUpgrade && firstReminderUpgrade) {
         _scaffoldKey.currentState.showSnackBar(
@@ -243,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.location_on),
+                leading: Icon(MdiIcons.mapMarkerMultiple),
                 title: Text(
                   '位置',
                   style: TextStyle(fontSize: 18),
@@ -258,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.label),
+                leading: Icon(MdiIcons.tagMultiple),
                 title: Text(
                   '标签',
                   style: TextStyle(fontSize: 18),
@@ -445,7 +447,7 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
         child: ListView.builder(
           itemBuilder: (context, index) {
             return ListTile(
-              leading: Icon(Icons.remove_red_eye),
+              leading: Icon(MdiIcons.accountStarOutline),
               title: Text(usableList[index].title),
               onTap: () {
                 Navigator.of(context).pop();

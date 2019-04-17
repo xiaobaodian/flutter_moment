@@ -1,17 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/global_store.dart';
-import 'package:flutter_moment/models/models.dart';
-import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
-import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
-import 'package:flutter_moment/route/editer_focus_event_route.dart';
-import 'package:flutter_moment/route/editer_focus_item_route.dart';
-import 'package:flutter_moment/task/task_item.dart';
 import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class UserAccountRoute extends StatefulWidget {
   @override
@@ -20,6 +13,7 @@ class UserAccountRoute extends StatefulWidget {
 
 class UserAccountRouteState extends State<UserAccountRoute> {
   GlobalStoreState _store;
+  String updatesTips;
 
   @override
   void initState() {
@@ -30,6 +24,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
+    updatesTips = _store.appVersion.needUpgrade ? '点击开始更新' : '点击检查更新';
   }
 
   @override
@@ -85,7 +80,9 @@ class UserAccountRouteState extends State<UserAccountRoute> {
     const dividerHeight = 3.0;
     const dividerIndent = 48.0;
     const dividerThickness = 6.0;
-    TextStyle subStyle = Theme.of(context).textTheme.caption.merge( TextStyle(fontSize: 12,));
+    TextStyle subStyle = Theme.of(context).textTheme.caption.merge(TextStyle(
+          fontSize: 12,
+        ));
     return ListView(
       children: <Widget>[
         Padding(
@@ -113,7 +110,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
               Spacer(),
               IconButton(
                 icon: Icon(Icons.chevron_right),
-                onPressed: (){},
+                onPressed: () {},
               ),
             ],
           ),
@@ -133,7 +130,10 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         DividerExt(height: dividerHeight, indent: dividerIndent),
         CatListTile(
           title: Text('照片'),
-          subtitle: Text('照片保存时的大小', style: subStyle,),
+          subtitle: Text(
+            '照片保存时的大小',
+            style: subStyle,
+          ),
           leading: Icon(Icons.photo),
           trailText: Text('中'),
           trailing: Icon(Icons.chevron_right),
@@ -143,17 +143,26 @@ class UserAccountRouteState extends State<UserAccountRoute> {
           title: Text('日历'),
           leading: Icon(Icons.calendar_today),
           trailing: Icon(Icons.chevron_right),
+          onTap: () {
+            store.notifications.showNotification();
+          },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
         CatListTile(
           title: Text('任务'),
           leading: Icon(Icons.assignment_turned_in),
           trailing: Icon(Icons.chevron_right),
+          onTap: () {
+            store.notifications.removeNotification();
+          },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
         CatListTile(
           title: Text('提取标签'),
-          subtitle: Text('从正文中自动提取人物和位置标签', style: subStyle,),
+          subtitle: Text(
+            '从正文中自动提取人物和位置标签',
+            style: subStyle,
+          ),
           leading: Icon(Icons.label_outline),
           trailing: Switch(
             value: _store.prefs.detectFlags,
@@ -167,21 +176,27 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         DividerExt(height: dividerHeight, indent: dividerIndent),
         CatListTile(
           title: Text('自动保存'),
-          subtitle: Text('编辑正文时，返回即保存内容', style: subStyle,),
+          subtitle: Text(
+            '编辑正文时，返回即保存内容',
+            style: subStyle,
+          ),
           leading: Icon(Icons.save),
           trailing: Switch(
-              value: _store.prefs.autoSave,
-              onChanged: (value) {
-                setState(() {
-                  _store.prefs.autoSave = value;
-                });
-              },
+            value: _store.prefs.autoSave,
+            onChanged: (value) {
+              setState(() {
+                _store.prefs.autoSave = value;
+              });
+            },
           ),
         ),
         DividerExt(height: dividerHeight, thickness: dividerThickness),
         CatListTile(
           title: Text('语言'),
-          subtitle: Text('跟随系统语言', style: subStyle,),
+          subtitle: Text(
+            '跟随系统语言',
+            style: subStyle,
+          ),
           leading: Icon(Icons.language),
           trailText: Text('简体中文'),
           trailing: Icon(Icons.chevron_right),
@@ -195,13 +210,31 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         DividerExt(height: dividerHeight, thickness: dividerThickness),
         CatListTile(
           title: Text('版本'),
+          subtitle:  Text(updatesTips, style: subStyle,),
           leading: Icon(Icons.update),
           trailing: store.appVersion.needUpgrade
-              ? Text('发现新版本：${_store.appVersion.version} (${_store.appVersion.buildNumber})')
-              : Text('${_store.packageInfo.version} (${_store.packageInfo.buildNumber})'),
-          onTap: (){
+              ? Text(
+                  '发现新版本：${_store.appVersion.version} (${_store.appVersion.buildNumber})')
+              : Text(
+                  '${_store.packageInfo.version} (${_store.packageInfo.buildNumber})'),
+          onTap: () {
             if (store.appVersion.needUpgrade) {
               store.appVersion.updates(context, store);
+            } else {
+              Fluttertoast.showToast(
+                  msg: "开始检查更新...",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: Colors.yellow,
+                  //textColor: Colors.white,
+                  fontSize: 16.0
+              );
+              Future.delayed(Duration(seconds: 2), (){
+                setState(() {
+                  store.initVersion();
+                  updatesTips = store.appVersion.needUpgrade? '点击开始更新' : '没有检测到更新';
+                });
+              });
             }
           },
           onLongPress: () async {
@@ -219,27 +252,29 @@ class UserAccountRouteState extends State<UserAccountRoute> {
           title: Text('关于'),
           leading: Icon(Icons.child_care),
           trailing: Icon(Icons.chevron_right),
-          onTap: (){
+          onTap: () {
             showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AboutDialog(
-                  applicationIcon: Image.asset("assets/image/defaultPersonPhoto1.png"),
-                  applicationName: '时光',
-                  applicationVersion: "${_store.packageInfo.version} (${_store.packageInfo.buildNumber})",
-                  applicationLegalese: '${_store.appVersion.title}',
-                  children: <Widget>[
-                    Divider(),
-                    Text('${_store.androidInfo.brand} ${_store.androidInfo.model}'),
-                    //Text("${_store.androidInfo.version}"),
-                    //Text("${_store.androidInfo.device}"),
-                    //Text("${_store.androidInfo.display}"),
-                    Text("${_store.androidInfo.board}"),
-                    Text("${_store.appVersion.path}"),
-                  ],
-                );
-              }
-            );
+                context: context,
+                builder: (BuildContext context) {
+                  return AboutDialog(
+                    applicationIcon:
+                        Image.asset("assets/image/defaultPersonPhoto1.png"),
+                    applicationName: '时光',
+                    applicationVersion:
+                        "${_store.packageInfo.version} (${_store.packageInfo.buildNumber})",
+                    applicationLegalese: '${_store.appVersion.title}',
+                    children: <Widget>[
+                      Divider(),
+                      Text(
+                          '${_store.androidInfo.brand} ${_store.androidInfo.model}'),
+                      //Text("${_store.androidInfo.version}"),
+                      //Text("${_store.androidInfo.device}"),
+                      //Text("${_store.androidInfo.display}"),
+                      Text("${_store.androidInfo.board}"),
+                      Text("${_store.appVersion.path}"),
+                    ],
+                  );
+                });
           },
         ),
       ],

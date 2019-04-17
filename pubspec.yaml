@@ -32,6 +32,9 @@ dependencies:
   image_picker: ^0.5.0+6
   open_file: ^2.0.1+2
   connectivity: ^0.4.3
+  fluttertoast: ^3.0.3
+  material_design_icons_flutter: ^3.2.3595
+  flutter_local_notifications: ^0.6.1
 
 dev_dependencies:
   flutter_test:

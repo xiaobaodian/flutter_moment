@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_moment/models/auto_updates.dart';
+import 'package:flutter_moment/models/local_notifications.dart';
 import 'package:flutter_moment/models/shared_preferences.dart';
 import 'package:package_info/package_info.dart';
 import 'package:dio/dio.dart';
@@ -35,9 +36,10 @@ class GlobalStore extends StatefulWidget {
 
 class GlobalStoreState extends State<GlobalStore> {
   DataSource dataSource;
-  static const _platformDataSource = const MethodChannel('DataSource');
+  //static const _platformDataSource = const MethodChannel('DataSource');
   String localDir;
   CalendarMap calendarMap = CalendarMap();
+  Notifications notifications;
   PackageInfo packageInfo;
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo;
@@ -114,6 +116,7 @@ class GlobalStoreState extends State<GlobalStore> {
     localDir = await getLocalPath();
     packageInfo = await PackageInfo.fromPlatform();
     androidInfo = await deviceInfo.androidInfo;
+    notifications = Notifications();
     initVersion();
   }
 
