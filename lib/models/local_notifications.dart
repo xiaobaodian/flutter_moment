@@ -25,10 +25,38 @@ class Notifications {
       debugPrint('notification payload: ' + payload);
     }
     //payload 可作为通知的一个标记，区分点击的通知。
-    if (payload != null && payload == "complete") {
-      await Navigator.pushNamed(context, 'UserAccount');
+    if (payload == "complete") {
+      await Navigator.pushNamed(context, 'HomeScreen');
     }
   }
+
+  Future showDailyAtTime(DateTime date) async {
+    Time time = Time(date.hour, date.minute, 0);
+    await notifications.cancel(11);
+
+    //安卓的通知配置，必填参数是渠道id, 名称, 和描述, 可选填通知的图标，重要度等等。
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        '11', 'MomentDailyNotification', '每天的定时通知',
+        importance: Importance.Max, priority: Priority.High,
+    );
+
+    //IOS的通知配置
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    //显示通知，其中 21 代表通知的 id，用于区分通知。
+    await notifications.showDailyAtTime(
+        11,
+        '时光',
+        '开始记录你的美好时光吧',
+        time,
+        platformChannelSpecifics,
+        payload: 'gotoMain'
+    );
+  }
+
+
 
   Future _showNotification() async {
     var scheduledNotificationDateTime =
@@ -79,15 +107,11 @@ class Notifications {
   }
 
 //删除所有通知
-  Future _cancelAllNotifications() async {
+  Future cancelAllNotifications() async {
     await notifications.cancelAll();
   }
 
   Future showNotification() async {
     await _showNotification();
-  }
-
-  Future removeNotification() async {
-    await _cancelAllNotifications();
   }
 }

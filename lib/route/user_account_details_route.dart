@@ -5,6 +5,8 @@ import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class UserAccountRoute extends StatefulWidget {
   @override
@@ -14,6 +16,8 @@ class UserAccountRoute extends StatefulWidget {
 class UserAccountRouteState extends State<UserAccountRoute> {
   GlobalStoreState _store;
   String updatesTips;
+  DateTime dailyReminders;
+  String reminders;
 
   @override
   void initState() {
@@ -25,6 +29,8 @@ class UserAccountRouteState extends State<UserAccountRoute> {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
     updatesTips = _store.appVersion.needUpgrade ? '点击开始更新' : '点击检查更新';
+    dailyReminders = DateTime.parse(_store.prefs.dailyReminders);
+    reminders = '${dailyReminders.hour}:${dailyReminders.minute}';
   }
 
   @override
@@ -83,6 +89,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
     TextStyle subStyle = Theme.of(context).textTheme.caption.merge(TextStyle(
           fontSize: 12,
         ));
+
     return ListView(
       children: <Widget>[
         Padding(
@@ -124,8 +131,28 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         DividerExt(height: dividerHeight, indent: dividerIndent),
         CatListTile(
           title: Text('提醒'),
+          subtitle: Text(
+            '每天提醒日记的时间',
+            style: subStyle,
+          ),
           leading: Icon(Icons.alarm),
+          trailText: Text(reminders),
           trailing: Icon(Icons.chevron_right),
+          onTap: () {
+            DatePicker.showTimePicker(context,
+              locale: LocaleType.zh,
+              showTitleActions: true,
+              currentTime: dailyReminders,
+              onConfirm: (time){
+                dailyReminders = time;
+                store.prefs.dailyReminders = time.toIso8601String();
+                store.notifications.showDailyAtTime(time);
+                setState(() {
+                  reminders = '${time.hour}:${time.minute}';
+                });
+              },
+            );
+          },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
         CatListTile(
@@ -144,7 +171,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
           leading: Icon(Icons.calendar_today),
           trailing: Icon(Icons.chevron_right),
           onTap: () {
-            store.notifications.showNotification();
+
           },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
@@ -153,7 +180,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
           leading: Icon(Icons.assignment_turned_in),
           trailing: Icon(Icons.chevron_right),
           onTap: () {
-            store.notifications.removeNotification();
+
           },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
@@ -163,7 +190,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
             '从正文中自动提取人物和位置标签',
             style: subStyle,
           ),
-          leading: Icon(Icons.label_outline),
+          leading: Icon(MdiIcons.tagMultiple),
           trailing: Switch(
             value: _store.prefs.detectFlags,
             onChanged: (value) {

@@ -118,10 +118,16 @@ class GlobalStoreState extends State<GlobalStore> {
     androidInfo = await deviceInfo.androidInfo;
     notifications = Notifications();
     initVersion();
+    initDailyReminders();
   }
 
   Future initVersion() async {
     appVersion = await checkUpdatesFile(this);
+  }
+
+  Future initDailyReminders() async {
+    var date = DateTime.parse(prefs.dailyReminders);
+    await notifications.showDailyAtTime(date);
   }
 
   int get selectedDateIndex => calendarMap.selectedDateIndex;
