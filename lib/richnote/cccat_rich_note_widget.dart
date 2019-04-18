@@ -336,7 +336,7 @@ class RichNoteState extends State<RichNote> {
         } else if (item.indent == 1) {
           iconData = Icons.map;
         } else if (item.indent == 2) {
-          iconData = Icons.label;
+          iconData = MdiIcons.tagMultiple;
         } else {
           iconData = Icons.favorite_border;
         }

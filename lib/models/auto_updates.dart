@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_moment/models/helper_net.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:open_file/open_file.dart';
 
 Future<AppVersion> checkUpdatesFile(GlobalStoreState store) async {
@@ -84,16 +85,17 @@ class AppVersion {
 
   Future updates(BuildContext context, GlobalStoreState store) async {
     bool notConnect = await ConnectState.notConnect();
-    if (notConnect) return;
+    if (notConnect) {
+      Fluttertoast.showToast(msg: '没有网络连接，请检查你的网络...');
+      return;
+    }
     bool isFailed = false;
     await cleanSaveDir();
     final taskId = await FlutterDownloader.enqueue(
       url: path,
       savedDir: _updatesPath,
-      showNotification:
-          true, // show download progress in status bar (for Android)
-      openFileFromNotification:
-          false, // click on notification to open downloaded file (for Android)
+      showNotification: true,
+      openFileFromNotification: false,
     );
     //FlutterDownloader.open(taskId: taskId);
     //final tasks = await FlutterDownloader.loadTasks();

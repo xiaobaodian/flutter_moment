@@ -11,7 +11,7 @@ class ConnectState {
   }
   static Future<bool> notConnect() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult != ConnectivityResult.wifi ||
+    if (connectivityResult != ConnectivityResult.wifi &&
         connectivityResult != ConnectivityResult.mobile) {
       return true;
     }

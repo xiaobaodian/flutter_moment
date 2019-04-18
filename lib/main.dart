@@ -18,6 +18,7 @@ import 'package:flutter_moment/route/browse_daily_focus_route.dart';
 import 'package:flutter_moment/route/user_account_details_route.dart';
 import 'package:flutter_moment/widgets/trim_picture_dialog.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 void main() => runApp(GlobalStore(child: MyApp()));
 
@@ -83,12 +84,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _pageController = PageController(initialPage: _calendarMap.getDateIndex());
     _pageStorageBucket = PageStorageBucket();
     _store.notifications.init(context);
-    Future.delayed(Duration(seconds: 5),(){
+    Future.delayed(Duration(seconds: 10), () {
       _store.appVersion.diffVersion(_store);
       if (_store.appVersion.needUpgrade && firstReminderUpgrade) {
-        _scaffoldKey.currentState.showSnackBar(
-            SnackBar(content: Text('有新的版本发布'),)
-        );
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text('有新的版本发布'),
+        ));
         firstReminderUpgrade = false;
       }
     });
@@ -147,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: Icon(Icons.settings),
               color: Colors.white,
-              onPressed: (){
+              onPressed: () {
                 Navigator.of(context).pushNamed('UserAccount');
               },
             ),
@@ -155,7 +156,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Row(
           children: <Widget>[
-            Text('白金会员', style: Theme.of(context).textTheme.body1,)
+            Text(
+              '白金会员',
+              style: Theme.of(context)
+                  .textTheme
+                  .body1
+                  .merge(TextStyle(color: Colors.white)),
+            )
           ],
         ),
       ],
@@ -193,12 +200,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   var navigator = Navigator.of(context);
                   navigator.pop(context);
-                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                  navigator
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
                     return BrowseTaskRoute();
                   }));
                 },
               ),
-              Divider(height: 3,),
+              Divider(
+                height: 3,
+              ),
               ListTile(
                 leading: Icon(Icons.filter_center_focus),
                 title: Text(
@@ -209,7 +219,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   var navigator = Navigator.of(context);
                   navigator.pop(context);
-                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                  navigator
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
                     return BrowseDailyFocusRoute(0);
                   }));
                 },
@@ -224,7 +235,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   var navigator = Navigator.of(context);
                   navigator.pop(context);
-                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                  navigator
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
                     return BrowseDailyFocusRoute(1);
                   }));
                 },
@@ -239,7 +251,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   var navigator = Navigator.of(context);
                   navigator.pop(context);
-                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                  navigator
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
                     return BrowseDailyFocusRoute(4);
                   }));
                 },
@@ -254,7 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   var navigator = Navigator.of(context);
                   navigator.pop(context);
-                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                  navigator
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
                     return BrowseDailyFocusRoute(2);
                   }));
                 },
@@ -269,12 +283,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   var navigator = Navigator.of(context);
                   navigator.pop(context);
-                  navigator.push(MaterialPageRoute(builder: (BuildContext context) {
+                  navigator
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
                     return BrowseDailyFocusRoute(3);
                   }));
                 },
               ),
-              Divider(height: 3,),
+              Divider(
+                height: 3,
+              ),
               ListTile(
                 leading: Icon(Icons.child_care),
                 title: Text(
@@ -413,12 +430,27 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text(
-          '${date.year}年${date.month}月${date.day}日 - ${DateTimeExt.chineseWeekName(date, longName: true)}',
-          style: TextStyle(
-            fontSize: 14.0,
+        SizedBox(
+          height: 20,
+          child: ColorizeAnimatedTextKit(
+            text: ["${date.year}年${date.month}月${date.day}日", "${DateTimeExt.chineseWeekName(date, longName: true)}",],
+            colors: [
+              Colors.purple,
+              Colors.blue,
+              Colors.yellow,
+              Colors.red,
+            ],
+            textStyle: TextStyle(fontSize: 14.0, fontFamily: "Horizon"),
+            textAlign: TextAlign.start,
+            alignment: AlignmentDirectional.topStart,
           ),
         ),
+//        Text(
+//          '${date.year}年${date.month}月${date.day}日 - ${DateTimeExt.chineseWeekName(date, longName: true)}',
+//          style: TextStyle(
+//            fontSize: 14.0,
+//          ),
+//        ),
         Text(
           '$dayLeap',
           style: TextStyle(
@@ -430,7 +462,8 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
   );
 }
 
-Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList) {
+Widget _buildFocusModelSheet(
+    GlobalStoreState store, List<FocusItem> usableList) {
   final dailyRecord = store.calendarMap.getDailyRecordFromSelectedDay();
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
@@ -458,7 +491,8 @@ Widget _buildFocusModelSheet(GlobalStoreState store, List<FocusItem> usableList)
                     focusItemBoxId: usableList[index].boxId,
                   ));
                 })).then((resultItem) {
-                  debugPrint('resultItem is null: ${resultItem == null} , resultItem is int: ${resultItem is int}');
+                  debugPrint(
+                      'resultItem is null: ${resultItem == null} , resultItem is int: ${resultItem is int}');
 //                  store.checkDailyRecord();
 //                  if (resultItem is PassingObject<FocusEvent>) {
 //                    store.addFocusEventToSelectedDay(resultItem.newObject);
@@ -526,7 +560,8 @@ Widget _getListView(BuildContext context, int dayIndex) {
           .push(MaterialPageRoute(builder: (BuildContext context) {
         return EditerFocusEventRoute(focusEvent);
       })).then((resultItem) async {
-        debugPrint('resultItem is null: ${resultItem == null} , resultItem is int: ${resultItem is int}');
+        debugPrint(
+            'resultItem is null: ${resultItem == null} , resultItem is int: ${resultItem is int}');
 //        if (resultItem is PassingObject<FocusEvent>) {
 //          store.changeFocusEventAndTasks(resultItem);
 //          focusEvent.copyWith(resultItem.newObject);

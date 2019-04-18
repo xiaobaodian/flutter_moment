@@ -30,7 +30,8 @@ class UserAccountRouteState extends State<UserAccountRoute> {
     _store = GlobalStore.of(context);
     updatesTips = _store.appVersion.needUpgrade ? '点击开始更新' : '点击检查更新';
     dailyReminders = DateTime.parse(_store.prefs.dailyReminders);
-    reminders = '${dailyReminders.hour}:${dailyReminders.minute}';
+    String minuteLabel = dailyReminders.minute == 0 ? '00' : '${dailyReminders.minute}';
+    reminders = '${dailyReminders.hour}:$minuteLabel';
   }
 
   @override
@@ -43,40 +44,6 @@ class UserAccountRouteState extends State<UserAccountRoute> {
     return Scaffold(
       appBar: AppBar(
         title: Text('账户'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {},
-          ),
-          PopupMenuButton(
-            onSelected: (int v) {
-              if (v == 1) {
-              } else if (v == 2) {}
-            },
-            itemBuilder: (BuildContext context) {
-              return <PopupMenuItem<int>>[
-                PopupMenuItem(
-                  value: 1,
-                  child: CatListTile(
-                    leading: Icon(Icons.edit),
-                    leadingSpace: 24,
-                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
-                    title: Text('编辑'),
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: CatListTile(
-                    leading: Icon(Icons.delete),
-                    leadingSpace: 24,
-                    contentPadding: EdgeInsets.fromLTRB(8, 8, 0, 8),
-                    title: Text('删除'),
-                  ),
-                ),
-              ];
-            },
-          ),
-        ],
       ),
       body: buildBody(context, _store),
     );
@@ -148,7 +115,8 @@ class UserAccountRouteState extends State<UserAccountRoute> {
                 store.prefs.dailyReminders = time.toIso8601String();
                 store.notifications.showDailyAtTime(time);
                 setState(() {
-                  reminders = '${time.hour}:${time.minute}';
+                  String minuteLabel = time.minute == 0 ? '00' : '${time.minute}';
+                  reminders = '${time.hour}:$minuteLabel';
                 });
               },
             );
@@ -253,7 +221,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
                   toastLength: Toast.LENGTH_SHORT,
                   gravity: ToastGravity.BOTTOM,
                   backgroundColor: Colors.yellow,
-                  //textColor: Colors.white,
+                  textColor: Colors.black45,
                   fontSize: 16.0
               );
               Future.delayed(Duration(seconds: 2), (){
