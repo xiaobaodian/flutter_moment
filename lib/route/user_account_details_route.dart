@@ -15,7 +15,8 @@ class UserAccountRoute extends StatefulWidget {
 
 class UserAccountRouteState extends State<UserAccountRoute> {
   GlobalStoreState _store;
-  String updatesTips;
+  List<String> updatesTips = ['无法获取版本信息', '点击开始更新', '点击检查更新', '没有检测到更新'];
+  int updatesState;
   DateTime dailyReminders;
   String reminders;
 
@@ -28,10 +29,30 @@ class UserAccountRouteState extends State<UserAccountRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
-    updatesTips = _store.appVersion.needUpgrade ? '点击开始更新' : '点击检查更新';
     dailyReminders = DateTime.parse(_store.prefs.dailyReminders);
     String minuteLabel = dailyReminders.minute == 0 ? '00' : '${dailyReminders.minute}';
     reminders = '${dailyReminders.hour}:$minuteLabel';
+    checkUpgrade();
+  }
+
+  Future checkUpgrade() async {
+    debugPrint('开始检查更新');
+    if (_store.appVersion == null) {
+      await _store.initVersion();
+    }
+    // 继续判断_store.appVersion是否为空，如果是，就说明网络问题，取不到数据
+    if (_store.appVersion == null) {
+      updatesState = 0;
+    } else {
+      if (updatesState == null) {
+        updatesState = _store.appVersion.hasUpgrade(_store) ? 1 : 2;
+      } else {
+        updatesState = _store.appVersion.hasUpgrade(_store) ? 1 : 3;
+      }
+    }
+    setState(() {
+      debugPrint('updatesState = $updatesState');
+    });
   }
 
   @override
@@ -205,15 +226,15 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         DividerExt(height: dividerHeight, thickness: dividerThickness),
         CatListTile(
           title: Text('版本'),
-          subtitle:  Text(updatesTips, style: subStyle,),
+          subtitle: Text(updatesTips[updatesState], style: subStyle,),
           leading: Icon(Icons.update),
-          trailing: store.appVersion.needUpgrade
+          trailing: store.appVersion.hasUpgrade(store)
               ? Text(
                   '发现新版本：${_store.appVersion.version} (${_store.appVersion.buildNumber})')
               : Text(
                   '${_store.packageInfo.version} (${_store.packageInfo.buildNumber})'),
           onTap: () {
-            if (store.appVersion.needUpgrade) {
+            if (store.appVersion.hasUpgrade(store)) {
               store.appVersion.updates(context, store);
             } else {
               Fluttertoast.showToast(
@@ -226,17 +247,14 @@ class UserAccountRouteState extends State<UserAccountRoute> {
               );
               Future.delayed(Duration(seconds: 2), (){
                 setState(() {
-                  store.initVersion();
-                  updatesTips = store.appVersion.needUpgrade? '点击开始更新' : '没有检测到更新';
+                  checkUpgrade();
                 });
               });
             }
           },
           onLongPress: () async {
-            if (store.appVersion == null) {
-              await store.initVersion();
-            }
-            if (store.appVersion != null) {
+            await checkUpgrade();
+            if (updatesState > 0) {
               await store.appVersion.cleanSaveDir();
               store.appVersion.updates(context, store);
             }

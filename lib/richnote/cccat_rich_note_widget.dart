@@ -24,10 +24,11 @@ class RichNoteTapObject {
   RichLine richLine;
 }
 
-enum BarType { FormatBar, LabelBar }
+enum BarType { FormatBar, LabelBar, TaskBar }
 
 enum LabelType { Person, Place, Tag }
 
+// ignore: must_be_immutable
 class RichNote extends StatefulWidget {
   RichNote({
     @required this.store,
@@ -81,6 +82,8 @@ class RichNote extends StatefulWidget {
     richSource.richNote = this;
   }
 
+  RichNoteState _state;
+
   final bool isEditable;
   final bool isFixed;
   final ValueChanged<RichNoteTapObject> onTap;
@@ -103,15 +106,21 @@ class RichNote extends StatefulWidget {
   List<RichLine> exportingRichLists() {
     return richSource.exportingRichLists();
   }
+  void sendLineType(RichType type) {
+    _state.lineTypeByHasFocus(type);
+  }
 
   @override
-  RichNoteState createState() => RichNoteState();
+  RichNoteState createState() {
+    _state = RichNoteState();
+    return _state;
+  }
 }
 
 class RichNoteState extends State<RichNote> {
   TextTheme textTheme;
   RichNoteLayout layout;
-  BarType barType;
+  BarType barType, oldBarType;
 
   @override
   void initState() {
@@ -434,6 +443,23 @@ class RichNoteState extends State<RichNote> {
       }
     }
     return index;
+  }
+
+  void lineTypeByHasFocus(RichType type) {
+    debugPrint('LineTypeByHasFocus -> ${type.toString()}');
+    if (type == RichType.Task) {
+      oldBarType = barType;
+      setState(() {
+        barType = BarType.TaskBar;
+      });
+    } else {
+      if (barType == BarType.TaskBar) {
+        setState(() {
+          barType = oldBarType;
+        });
+      }
+    }
+
   }
 
   FocusNode _getCurrentFocusNode() {
@@ -852,6 +878,32 @@ class RichNoteState extends State<RichNote> {
     );
   }
 
+  Widget _buildTaskIconsBar() {
+    return ListView(
+      scrollDirection: Axis.horizontal,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.alarm),
+          onPressed: () {
+
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.note_add),
+          onPressed: () {
+
+          },
+        ),
+        IconButton(
+          icon: Icon(MdiIcons.tagMultiple),
+          onPressed: () {
+
+          },
+        ),
+      ],
+    );
+  }
+
   void editLabels(LabelType type) {
     bool detectFlags = widget.store.prefs.detectFlags;
     String title;
@@ -908,7 +960,7 @@ class RichNoteState extends State<RichNote> {
         context: context,
         barrierDismissible: true,
         builder: (context) {
-          double width = MediaQuery.of(context).size.width * 0.85;
+          double width = MediaQuery.of(context).size.width * 0.9;
           double height = MediaQuery.of(context).size.height * 0.5;
           return AlertDialog(
             contentPadding: EdgeInsets.all(0),
@@ -1223,7 +1275,7 @@ class RichNoteState extends State<RichNote> {
           ),
         ],
       );
-    } else {
+    } else if (barType == BarType.LabelBar) {
       bar = Row(
         children: <Widget>[
           Container(
@@ -1250,6 +1302,8 @@ class RichNoteState extends State<RichNote> {
           ),
         ],
       );
+    } else {
+      bar = _buildTaskIconsBar();
     }
     return bar;
   }

@@ -77,22 +77,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void didChangeDependencies() {
+  Future didChangeDependencies() async {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
     _calendarMap = _store.calendarMap;
     _pageController = PageController(initialPage: _calendarMap.getDateIndex());
     _pageStorageBucket = PageStorageBucket();
     _store.notifications.init(context);
-    Future.delayed(Duration(seconds: 10), () {
-      _store.appVersion.diffVersion(_store);
-      if (_store.appVersion.needUpgrade && firstReminderUpgrade) {
+
+    if (_store.appVersion == null) {
+      await _store.initVersion();
+    }
+    // 如果_store.appVersion继续为空，说明网络有问题
+    if (_store.appVersion != null) {
+      if (_store.appVersion.hasUpgrade(_store) && firstReminderUpgrade) {
         _scaffoldKey.currentState.showSnackBar(SnackBar(
           content: Text('有新的版本发布'),
         ));
         firstReminderUpgrade = false;
       }
-    });
+    }
   }
 
   @override

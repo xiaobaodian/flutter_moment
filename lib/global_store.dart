@@ -117,11 +117,12 @@ class GlobalStoreState extends State<GlobalStore> {
     packageInfo = await PackageInfo.fromPlatform();
     androidInfo = await deviceInfo.androidInfo;
     notifications = Notifications();
-    initVersion();
+    //initVersion();
     initDailyReminders();
   }
 
   Future initVersion() async {
+    debugPrint('初始化版本信息');
     appVersion = await checkUpdatesFile(this);
   }
 

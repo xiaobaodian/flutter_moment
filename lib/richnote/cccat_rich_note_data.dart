@@ -144,6 +144,7 @@ class RichItem extends RichLine {
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         canChanged = true;
+        source.richNote.sendLineType(type);
       }
     });
 
@@ -158,6 +159,7 @@ class RichItem extends RichLine {
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         canChanged = true;
+        source.richNote.sendLineType(type);
       }
     });
 
@@ -294,7 +296,7 @@ class RichSource {
   }
 
   void markEditerItem() {
-    debugPrint('生成编辑器使用的line');
+    debugPrint('生成编辑器使用的RichItem');
     if (richNote.isNotEditable) return;
     List<RichLine> tempList = [];
     if (richLineList.length == 0) {

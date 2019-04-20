@@ -17,7 +17,6 @@ Future<AppVersion> checkUpdatesFile(GlobalStoreState store) async {
         "https://share.heiluo.com/share/download?type=1&shareId=ce2e6c74d2b0428f80ff8203b84b7379&fileId=2609208");
     debugPrint('获取的文件内容：${response.data.toString()}');
     AppVersion appVer = AppVersion.fromJson(jsonDecode(response.data.toString()));
-    //debugPrint('版本：${appVer.title}');
     appVer.init(store);
     return appVer;
   }
@@ -41,7 +40,6 @@ class AppVersion {
 
   String _updatesPath;
   String _filePath;
-  bool needUpgrade = false;
 
   factory AppVersion.fromJson(Map<String, dynamic> json) {
     return AppVersion(
@@ -75,12 +73,12 @@ class AppVersion {
     debugPrint('创建下载目录');
   }
 
-  Future diffVersion(GlobalStoreState store) async {
+  bool hasUpgrade(GlobalStoreState store) {
     int diff = version.compareTo(store.packageInfo.version);
     if (diff <= 0) {
       diff = buildNumber.compareTo(store.packageInfo.buildNumber);
     }
-    needUpgrade = diff > 0;
+    return diff > 0;
   }
 
   Future updates(BuildContext context, GlobalStoreState store) async {
