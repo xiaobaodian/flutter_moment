@@ -647,7 +647,7 @@ class DailyRecord extends BoxItem {
     } else {
       richLines.clear();
     }
-    focusEvents?.forEach((event) {
+    focusEvents.forEach((event) {
       // 加入FocusTitle
       richLines.add(RichLine(
         type: RichType.FocusTitle,

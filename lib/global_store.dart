@@ -364,11 +364,11 @@ class GlobalStoreState extends State<GlobalStore> {
     for (int i = everyDay.length - 1; i > 0; i--) {
       var day = everyDay[i];
       if (day.dailyRecord != null) {
-        day.dailyRecord.initRichList(this, true);
         if (day.dailyRecord.focusEventIsNull) {
           setFocusEventsToDailyRecord(day.dailyRecord);
         }
-        day.dailyRecord.focusEvents?.forEach((event) {
+        day.dailyRecord.initRichList(this, true);
+        day.dailyRecord.focusEvents.forEach((event) {
           if (event.focusItemBoxId == id) {
             resultFocusEvents.add(event);
           }

@@ -28,7 +28,7 @@ class AppPreferences {
   bool get autoSave => getBoolValue('AutoSave', true);
   set autoSave(bool value) => prefs.setBool('AutoSave', value);
 
-  /// [dailyReminders]每日提醒，预设值只取小时、分钟部分。
+  /// [dailyReminders]每日提醒。设置值只取小时、分钟部分。
   String get dailyReminders => getStringValue('DailyReminders', '2019-04-17T20:30:00.000000');
   set dailyReminders(String value) => this.prefs.setString('DailyReminders', value);
 

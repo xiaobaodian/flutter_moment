@@ -28,8 +28,8 @@ enum RichStyle {
 }
 
 /// 富文本的行
-/// {type} 是行的类型，{fontStyle}是行的显示字体风格，一般不用设定，自动设置为默认值
-/// (Leading)是列表类型的前导符号，目前不用设置。如果是有序列表，将由整理方法自动设置成
+/// [type] 是行的类型，[fontStyle]是行的显示字体风格，一般不用设定，自动设置为默认值
+/// [leading]是列表类型的前导符号，目前不用设置。如果是有序列表，将由整理方法自动设置成
 /// 序号，如果是无序列表，将由整理方法设置成指定符号
 class RichLine {
   RichLine({
@@ -253,9 +253,7 @@ class RichItem extends RichLine {
 }
 
 class RichSource {
-  RichSource(
-    lineList
-  ) : assert(lineList != null) {
+  RichSource(lineList) : assert(lineList != null) {
     this.richLineList = lineList ?? [];
   }
 
