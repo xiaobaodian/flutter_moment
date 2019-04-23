@@ -134,19 +134,21 @@ class RichItem extends RichLine {
       expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemId);
     }
     textkey = GlobalKey();
-    controller = TextEditingController();
-    controller.addListener((){
-      correctCursorPosition();
-    });
-
-    controller.text = buildEditerText(content);
     focusNode = FocusNode();
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         canChanged = true;
         source.richNote.sendLineType(type);
+        String text = controller.text.replaceAll('\u0000', '');
+        debugPrint('Line 详细数据: controller.text -> $text, type -> ${type.toString()}');
       }
     });
+
+    controller = TextEditingController();
+    controller.addListener((){
+      correctCursorPosition();
+    });
+    controller.text = buildEditerText(content);
 
   }
 
@@ -160,6 +162,8 @@ class RichItem extends RichLine {
       if (focusNode.hasFocus) {
         canChanged = true;
         source.richNote.sendLineType(type);
+        String text = controller.text.replaceAll('\u0000', '');
+        debugPrint('Line 详细数据: controller.text -> $text, type -> ${type.toString()}');
       }
     });
 

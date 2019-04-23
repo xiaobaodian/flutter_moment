@@ -30,8 +30,8 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   @override
   void initState() {
     super.initState();
-    //focusEventController.text = widget._focusEvent.note;
-    //richSource = RichSource.fromJson(widget._focusEvent.note);
+    _editerFocusEvent.copyWith(widget._focusEvent);
+    richSource = RichSource.fromFocusEvent(_editerFocusEvent);
   }
 
   @override
@@ -40,8 +40,8 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     _store = GlobalStore.of(context);
     _routeTitle = _store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
     _dateTitle = _store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
-    _editerFocusEvent.copyWith(widget._focusEvent);
-    richSource = RichSource.fromFocusEvent(_editerFocusEvent);
+    //_editerFocusEvent.copyWith(widget._focusEvent);
+    //richSource = RichSource.fromFocusEvent(_editerFocusEvent);
     richNote = RichNote.editable(
       richSource: richSource,
       store: _store,
@@ -90,7 +90,12 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
         widget._focusEvent.copyWith(_editerFocusEvent);
       }
     } else {
-      _store.removeFocusEventAndTasks(widget._focusEvent);
+      /// [widget._focusEvent.boxId] > 0 是原来存在的focusEvent，当用户删除所有内
+      /// 容后执行保存动作，说明用户需要删除。[widget._focusEvent.boxId] = 0 时，说
+      /// 明是刚刚新建的focusEvent，没有内容就退出就是放弃的新建，不需要执行删除。
+      if (widget._focusEvent.boxId > 0) {
+        _store.removeFocusEventAndTasks(widget._focusEvent);
+      }
     }
   }
 

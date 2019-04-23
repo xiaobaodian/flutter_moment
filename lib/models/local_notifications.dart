@@ -36,7 +36,7 @@ class Notifications {
 
     //安卓的通知配置，必填参数是渠道id, 名称, 和描述, 可选填通知的图标，重要度等等。
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        '11', 'MomentDailyNotification', '每天的定时通知',
+        '11', '每日提醒', '每天的定时通知',
         importance: Importance.Max, priority: Priority.High,
     );
 

@@ -434,27 +434,27 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        SizedBox(
-          height: 20,
-          child: ColorizeAnimatedTextKit(
-            text: ["${date.year}年${date.month}月${date.day}日", "${DateTimeExt.chineseWeekName(date, longName: true)}",],
-            colors: [
-              Colors.purple,
-              Colors.blue,
-              Colors.yellow,
-              Colors.red,
-            ],
-            textStyle: TextStyle(fontSize: 14.0, fontFamily: "Horizon"),
-            textAlign: TextAlign.start,
-            alignment: AlignmentDirectional.topStart,
-          ),
-        ),
-//        Text(
-//          '${date.year}年${date.month}月${date.day}日 - ${DateTimeExt.chineseWeekName(date, longName: true)}',
-//          style: TextStyle(
-//            fontSize: 14.0,
+//        SizedBox(
+//          height: 20,
+//          child: ColorizeAnimatedTextKit(
+//            text: ["${date.year}年${date.month}月${date.day}日", "${DateTimeExt.chineseWeekName(date, longName: true)}",],
+//            colors: [
+//              Colors.purple,
+//              Colors.blue,
+//              Colors.yellow,
+//              Colors.red,
+//            ],
+//            textStyle: TextStyle(fontSize: 14.0, fontFamily: "Horizon"),
+//            textAlign: TextAlign.start,
+//            alignment: AlignmentDirectional.topStart,
 //          ),
 //        ),
+        Text(
+          '${date.year}年${date.month}月${date.day}日 - ${DateTimeExt.chineseWeekName(date, longName: true)}',
+          style: TextStyle(
+            fontSize: 14.0,
+          ),
+        ),
         Text(
           '$dayLeap',
           style: TextStyle(

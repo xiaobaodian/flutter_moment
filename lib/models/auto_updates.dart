@@ -13,12 +13,26 @@ Future<AppVersion> checkUpdatesFile(GlobalStoreState store) async {
   bool hasConnect = await ConnectState.hasConnect();
   if (hasConnect) {
     Dio dio = Dio();
-    Response response = await dio.get(
-        "https://share.heiluo.com/share/download?type=1&shareId=ce2e6c74d2b0428f80ff8203b84b7379&fileId=2609208");
-    debugPrint('获取的文件内容：${response.data.toString()}');
-    AppVersion appVer = AppVersion.fromJson(jsonDecode(response.data.toString()));
-    appVer.init(store);
-    return appVer;
+    CancelToken token = CancelToken();
+    String configPath = store.prefs.upgradeConfigPath;
+    debugPrint('获取的配置路径：$configPath');
+    try {
+      Response response = await dio.get(configPath, cancelToken: token);
+      debugPrint('获取的文件内容：${response.data.toString()}');
+      AppVersion appVer = AppVersion.fromJson(jsonDecode(response.data.toString()));
+      appVer.init(store);
+      return appVer;
+    } on DioError catch (e) {
+      if (e.response != null) {
+        debugPrint('e.response.data -> ${e.response.data.toString()}');
+        debugPrint('e.response.headers -> ${e.response.headers.toString()}');
+        debugPrint('e.response.request -> ${e.response.request.toString()}');
+      } else {
+        // Something happened in setting up or sending the request that triggered an Error
+        debugPrint('e.request -> ${e.request.toString()}');
+        debugPrint('e.message -> ${e.message}');
+      }
+    }
   }
   return null;
 }
@@ -29,14 +43,16 @@ class AppVersion {
     this.version,
     this.buildNumber,
     this.log,
-    this.path,
+    this.configPath,
+    this.appPath,
   });
 
   String title;
   String version;
   String buildNumber;
   String log;
-  String path;
+  String configPath;
+  String appPath;
 
   String _updatesPath;
   String _filePath;
@@ -47,19 +63,22 @@ class AppVersion {
       version: json['version'],
       buildNumber: json['buildNumber'],
       log: json['log'],
-      path: json['path'],
+      configPath: json['configPath'],
+      appPath: json['appPath'],
     );
   }
 
   void init(GlobalStoreState store) {
     _updatesPath = store.localDir + '/Update';
     _filePath = _updatesPath + '/app-release.apk';
+    store.prefs.upgradeConfigPath = configPath;
+    store.prefs.upgradeAppPath = appPath;
     cleanSaveDir();
   }
 
   Future cleanSaveDir() async {
     final savedDir = Directory(_updatesPath);
-    bool hasDir = await savedDir.exists();
+    bool hasDir = savedDir.existsSync();
     if (hasDir) {
       List<FileSystemEntity> files = savedDir.listSync();
       files.forEach((file) {
@@ -90,7 +109,7 @@ class AppVersion {
     bool isFailed = false;
     await cleanSaveDir();
     final taskId = await FlutterDownloader.enqueue(
-      url: path,
+      url: appPath,
       savedDir: _updatesPath,
       showNotification: true,
       openFileFromNotification: false,
@@ -130,10 +149,10 @@ class AppVersion {
               });
               return Container(
                 child: isFailed
-                    ? Text('下载失败')
-                    : LinearProgressIndicator(
-                        value: downloadProgress,
-                      ),
+                  ? Text('下载失败')
+                  : LinearProgressIndicator(
+                      value: downloadProgress,
+                    ),
               );
             },
           ),

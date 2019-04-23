@@ -15,8 +15,8 @@ class UserAccountRoute extends StatefulWidget {
 
 class UserAccountRouteState extends State<UserAccountRoute> {
   GlobalStoreState _store;
-  List<String> updatesTips = ['无法获取版本信息', '点击开始更新', '点击检查更新', '没有检测到更新'];
-  int updatesState;
+  List<String> updatesTips = ['正在检测...','无法获取版本信息', '点击开始更新', '点击检查更新', '没有检测到更新'];
+  int updatesState = 0;
   DateTime dailyReminders;
   String reminders;
 
@@ -42,12 +42,12 @@ class UserAccountRouteState extends State<UserAccountRoute> {
     }
     // 继续判断_store.appVersion是否为空，如果是，就说明网络问题，取不到数据
     if (_store.appVersion == null) {
-      updatesState = 0;
+      updatesState = 1;
     } else {
-      if (updatesState == null) {
-        updatesState = _store.appVersion.hasUpgrade(_store) ? 1 : 2;
+      if (updatesState == 0) {
+        updatesState = _store.appVersion.hasUpgrade(_store) ? 2 : 3;
       } else {
-        updatesState = _store.appVersion.hasUpgrade(_store) ? 1 : 3;
+        updatesState = _store.appVersion.hasUpgrade(_store) ? 2 : 4;
       }
     }
     setState(() {
@@ -228,13 +228,13 @@ class UserAccountRouteState extends State<UserAccountRoute> {
           title: Text('版本'),
           subtitle: Text(updatesTips[updatesState], style: subStyle,),
           leading: Icon(Icons.update),
-          trailing: store.appVersion.hasUpgrade(store)
+          trailing: updatesState == 2
               ? Text(
                   '发现新版本：${_store.appVersion.version} (${_store.appVersion.buildNumber})')
               : Text(
                   '${_store.packageInfo.version} (${_store.packageInfo.buildNumber})'),
           onTap: () {
-            if (store.appVersion.hasUpgrade(store)) {
+            if (updatesState == 2) {
               store.appVersion.updates(context, store);
             } else {
               Fluttertoast.showToast(
@@ -284,7 +284,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
                       //Text("${_store.androidInfo.device}"),
                       //Text("${_store.androidInfo.display}"),
                       Text("${_store.androidInfo.board}"),
-                      Text("${_store.appVersion.path}"),
+                      Text("${_store.appVersion.appPath}"),
                     ],
                   );
                 });

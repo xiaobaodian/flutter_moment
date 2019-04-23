@@ -121,11 +121,13 @@ class RichNoteState extends State<RichNote> {
   TextTheme textTheme;
   RichNoteLayout layout;
   BarType barType, oldBarType;
+  bool InitialInto;
 
   @override
   void initState() {
     super.initState();
     barType = BarType.FormatBar;
+    InitialInto = true;
   }
 
   @override
@@ -157,17 +159,17 @@ class RichNoteState extends State<RichNote> {
 
   Widget buildLineLayoutWidget(int index) {
     var item = widget.richSource.richLineList[index];
-    Widget paragraphWidget;
+    Widget lineWidget;
     switch (item.type) {
       case RichType.FocusTitle:
         var effectiveSytle = layout.titleStyle == null
             ? textTheme.title.merge(mergeRichStyle(item.style))
             : layout.titleStyle;
         if (widget.isEditable) {
-          paragraphWidget =
+          lineWidget =
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
-          paragraphWidget = layout.richLayoutTitle(Text(
+          lineWidget = layout.richLayoutTitle(Text(
               widget.store.getFocusTitleBy(int.parse(item.getContent())),
               style: effectiveSytle));
         }
@@ -177,10 +179,10 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.title.merge(mergeRichStyle(item.style))
             : layout.titleStyle;
         if (widget.isEditable) {
-          paragraphWidget =
+          lineWidget =
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
-          paragraphWidget = Text(
+          lineWidget = Text(
             item.getContent(),
             style: effectiveSytle,
           );
@@ -191,10 +193,10 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.subhead.merge(mergeRichStyle(item.style))
             : layout.subTitleStyle;
         if (widget.isEditable) {
-          paragraphWidget =
+          lineWidget =
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
-          paragraphWidget = Text(
+          lineWidget = Text(
             item.getContent(),
             style: effectiveSytle,
           );
@@ -205,10 +207,10 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.contentStyle;
         if (widget.isEditable) {
-          paragraphWidget =
+          lineWidget =
               layout.richLayoutText(_buildTextField(index, effectiveSytle));
         } else {
-          paragraphWidget = layout
+          lineWidget = layout
               .richLayoutText(Text(item.getContent(), style: effectiveSytle));
         }
         break;
@@ -241,7 +243,7 @@ class RichNoteState extends State<RichNote> {
           ));
         }
         if (widget.isEditable) {
-          paragraphWidget = layout.richLayoutTask(
+          lineWidget = layout.richLayoutTask(
               checkBox,
               _buildTextField(index, effectiveSytle),
               Text(
@@ -249,7 +251,7 @@ class RichNoteState extends State<RichNote> {
                 style: textTheme.caption,
               ));
         } else {
-          paragraphWidget = layout.richLayoutTask(
+          lineWidget = layout.richLayoutTask(
               checkBox,
               Text(item.getContent(), style: effectiveSytle),
               Text(
@@ -263,12 +265,12 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.orderedListsStyle;
         if (widget.isEditable) {
-          paragraphWidget = layout.richLayoutList(
+          lineWidget = layout.richLayoutList(
               item.indent,
               Text(item.leading, style: effectiveSytle),
               _buildTextField(index, effectiveSytle));
         } else {
-          paragraphWidget = layout.richLayoutList(
+          lineWidget = layout.richLayoutList(
               item.indent,
               Text(item.leading, style: effectiveSytle),
               Padding(
@@ -282,7 +284,7 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.unorderedListStyle;
         if (widget.isEditable) {
-          paragraphWidget = layout.richLayoutList(
+          lineWidget = layout.richLayoutList(
             item.indent,
             Text(item.leading,
                 style: effectiveSytle
@@ -290,7 +292,7 @@ class RichNoteState extends State<RichNote> {
             _buildTextField(index, effectiveSytle),
           );
         } else {
-          paragraphWidget = layout.richLayoutList(
+          lineWidget = layout.richLayoutList(
               item.indent,
               Text(item.leading,
                   style: effectiveSytle
@@ -306,10 +308,10 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.referenceStyle;
         if (widget.isEditable) {
-          paragraphWidget = layout.richLayoutReference(
+          lineWidget = layout.richLayoutReference(
               _buildTextField(index, effectiveSytle)); //richLayoutReference
         } else {
-          paragraphWidget = layout.richLayoutReference(
+          lineWidget = layout.richLayoutReference(
               Text(item.getContent(), style: effectiveSytle));
         }
         break;
@@ -318,17 +320,17 @@ class RichNoteState extends State<RichNote> {
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.referenceStyle;
         if (widget.isEditable) {
-          paragraphWidget =
+          lineWidget =
               layout.richLayoutComment(_buildTextField(index, effectiveSytle));
         } else {
-          paragraphWidget = layout.richLayoutComment(
+          lineWidget = layout.richLayoutComment(
               Text(item.getContent(), style: effectiveSytle));
         }
         break;
       case RichType.Image:
         if (widget.isEditable) {
         } else {
-          paragraphWidget = layout.richLayoutImage(
+          lineWidget = layout.richLayoutImage(
             Text(
               '这里是图片',
               style: TextStyle(fontSize: 12),
@@ -349,7 +351,7 @@ class RichNoteState extends State<RichNote> {
         } else {
           iconData = Icons.favorite_border;
         }
-        paragraphWidget = Row(
+        lineWidget = Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -364,7 +366,7 @@ class RichNoteState extends State<RichNote> {
         );
         break;
     }
-    return paragraphWidget;
+    return lineWidget;
   }
 
   TextStyle mergeRichStyle(RichStyle style) {
@@ -447,6 +449,12 @@ class RichNoteState extends State<RichNote> {
 
   void lineTypeByHasFocus(RichType type) {
     debugPrint('LineTypeByHasFocus -> ${type.toString()}');
+    RichType currentType = getCurrentRichType();
+    debugPrint('currentType -> ${currentType.toString()}');
+    changeLineTypeIconsBar(currentType);
+  }
+
+  void changeLineTypeIconsBar(RichType type) {
     if (type == RichType.Task) {
       oldBarType = barType;
       setState(() {
@@ -455,11 +463,13 @@ class RichNoteState extends State<RichNote> {
     } else {
       if (barType == BarType.TaskBar) {
         setState(() {
+          if (oldBarType == BarType.TaskBar) {
+            oldBarType = BarType.FormatBar;
+          }
           barType = oldBarType;
         });
       }
     }
-
   }
 
   FocusNode _getCurrentFocusNode() {
@@ -534,7 +544,7 @@ class RichNoteState extends State<RichNote> {
     return item;
   }
 
-  void changeParagraphTypeTo(RichType type) {
+  void changeLineTypeTo(RichType type) {
     int index = _getCurrentLineIndex();
     if (index > -1) {
       RichItem item = widget.richSource.richLineList[index];
@@ -647,6 +657,7 @@ class RichNoteState extends State<RichNote> {
         oldItem.controller.text = '\u0000' + '';
         oldItem.controller.selection = TextSelection.fromPosition(
             TextPosition(affinity: TextAffinity.downstream, offset: 1));
+        changeLineTypeIconsBar(RichType.Text);
         //item.canChanged = true;
       });
     } else {
@@ -682,6 +693,7 @@ class RichNoteState extends State<RichNote> {
       newItem.canChanged = false;
       setState(() {
         widget.richSource.richLineList.insert(index + 1, newItem);
+        changeLineTypeIconsBar(newType);
       });
       Future.delayed(const Duration(milliseconds: 100), () {
         _requestFocus(newItem?.focusNode);
@@ -779,7 +791,7 @@ class RichNoteState extends State<RichNote> {
           icon: Icon(Icons.reorder),
           color: Colors.black87,
           onPressed: () {
-            changeParagraphTypeTo(RichType.Text);
+            changeLineTypeTo(RichType.Text);
           },
         ),
         IconButton(
@@ -795,9 +807,9 @@ class RichNoteState extends State<RichNote> {
           onPressed: () {
             final item = getCurrentRichItem();
             if (item.type == RichType.OrderedLists) {
-              changeParagraphTypeTo(RichType.Text);
+              changeLineTypeTo(RichType.Text);
             } else {
-              changeParagraphTypeTo(RichType.OrderedLists);
+              changeLineTypeTo(RichType.OrderedLists);
             }
           },
         ),
@@ -807,9 +819,9 @@ class RichNoteState extends State<RichNote> {
           onPressed: () {
             final item = getCurrentRichItem();
             if (item.type == RichType.UnorderedList) {
-              changeParagraphTypeTo(RichType.Text);
+              changeLineTypeTo(RichType.Text);
             } else {
-              changeParagraphTypeTo(RichType.UnorderedList);
+              changeLineTypeTo(RichType.UnorderedList);
             }
           },
         ),
@@ -849,9 +861,9 @@ class RichNoteState extends State<RichNote> {
           onPressed: () {
             final item = getCurrentRichItem();
             if (item.type == RichType.Comment) {
-              changeParagraphTypeTo(RichType.Text);
+              changeLineTypeTo(RichType.Text);
             } else {
-              changeParagraphTypeTo(RichType.Comment);
+              changeLineTypeTo(RichType.Comment);
             }
           },
         ),
@@ -861,9 +873,11 @@ class RichNoteState extends State<RichNote> {
           onPressed: () {
             final item = getCurrentRichItem();
             if (item.type == RichType.Task) {
-              changeParagraphTypeTo(RichType.Text);
+              changeLineTypeTo(RichType.Text);
+              changeLineTypeIconsBar(RichType.Text);
             } else {
-              changeParagraphTypeTo(RichType.Task);
+              changeLineTypeTo(RichType.Task);
+              changeLineTypeIconsBar(RichType.Task);
             }
           },
         ),
@@ -882,6 +896,13 @@ class RichNoteState extends State<RichNote> {
     return ListView(
       scrollDirection: Axis.horizontal,
       children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.reorder),
+          onPressed: () {
+            changeLineTypeTo(RichType.Text);
+            changeLineTypeIconsBar(RichType.Text);
+          },
+        ),
         IconButton(
           icon: Icon(Icons.alarm),
           onPressed: () {
@@ -1350,6 +1371,11 @@ class RichNoteState extends State<RichNote> {
           child: _getIconsBar(),
         ),
       );
+    }
+    if (widget.isEditable && InitialInto) {
+      var lastLine = widget.richSource.richLineList.last as RichItem;
+      _requestFocus(lastLine.focusNode);
+      InitialInto = false;
     }
     return bodyItems;
   }

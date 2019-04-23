@@ -174,9 +174,9 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
           store: _store,
           richSource: RichSource(detailsList[index].noteLines),
           onTap: (tapObject) {
-            var richLine = tapObject.richLine;
-            FocusEvent event = richLine.note;
-            DailyRecord dailyRecord = _store.getDailyRecord(event.dayIndex);
+            //var richLine = tapObject.richLine;
+            FocusEvent event = tapObject.richLine.note;
+            //DailyRecord dailyRecord = _store.getDailyRecord(event.dayIndex);
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return EditerFocusEventRoute(event);
