@@ -37,6 +37,13 @@ Future<AppVersion> checkUpdatesFile(GlobalStoreState store) async {
   return null;
 }
 
+enum CheckUpdateState {
+  Wait,
+  Updating,
+  Fail,
+  Complete
+}
+
 class AppVersion {
   AppVersion({
     this.title,

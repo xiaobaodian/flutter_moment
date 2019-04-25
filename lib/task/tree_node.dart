@@ -3,14 +3,16 @@
 import 'package:flutter/material.dart';
 
 abstract class Node<I> {
-  Node({
-    this.onLost,
+  Node(this.title, {
+    this.onLostItem,
   });
 
+  String title;
   List<Node<I>> children = [];
-  ValueChanged<I> onLost;
+  ValueChanged<I> onLostItem;
 
   bool isMember(I item);
+  int getItemCount();
 
   int addItem(I item) {
     if (isMember(item)) {
@@ -20,8 +22,8 @@ abstract class Node<I> {
           count++;
         }
       });
-      if (count == 0 && onLost != null) {
-        onLost(item);
+      if (count == 0 && onLostItem != null) {
+        onLostItem(item);
       }
       return count;
     }
@@ -41,4 +43,10 @@ abstract class Group<I> {
     }
     return -1;
   }
+}
+
+abstract class ItemBase {
+
+  ///所属的group的list，便于快速处理与group相关的操作，如删除等
+  List<Group> groups;
 }
