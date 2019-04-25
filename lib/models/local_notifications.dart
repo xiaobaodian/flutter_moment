@@ -30,26 +30,40 @@ class Notifications {
     }
   }
 
-  Future showDailyAtTime(DateTime date) async {
+  Future setNotificationAtTime(
+      DateTime date,
+      String channelId,
+      String channelName,
+      String channelDescription,
+      String title,
+      String message,
+      int notificationId,
+  ) async {
     Time time = Time(date.hour, date.minute, 0);
     await notifications.cancel(11);
 
     //安卓的通知配置，必填参数是渠道id, 名称, 和描述, 可选填通知的图标，重要度等等。
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        '11', '每日提醒', '每天的定时通知',
-        importance: Importance.Max, priority: Priority.High,
+      channelId,
+      channelName,
+      channelDescription,
+      importance: Importance.Max,
+      priority: Priority.High,
     );
 
     //IOS的通知配置
     var iOSPlatformChannelSpecifics = IOSNotificationDetails();
 
     var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    //显示通知，其中 21 代表通知的 id，用于区分通知。
+        androidPlatformChannelSpecifics,
+        iOSPlatformChannelSpecifics
+    );
+
+    //显示每天的通知，其中 21 代表通知的 id，用于区分通知。
     await notifications.showDailyAtTime(
-        11,
-        '时光',
-        '开始记录你的美好时光吧',
+        notificationId,
+        title,
+        message,
         time,
         platformChannelSpecifics,
         payload: 'gotoMain'
@@ -114,4 +128,28 @@ class Notifications {
   Future showNotification() async {
     await _showNotification();
   }
+
+  Future setDailyReminderAtTime(DateTime date, String message) async {
+    await setNotificationAtTime(
+        date,
+        'DailyReminder',
+        '每日提醒',
+        '每天提醒你记下美好时光',
+        '时光',
+        message,
+        999999999
+    );
+  }
+
+  ///设置每日提醒one
+  Future setDailyReminderOneAtTime(DateTime date) async {
+    await setDailyReminderAtTime(date, '记下你的美好时光吧');
+  }
+
+  ///删除每日提醒one
+  Future removeDailyReminderOne() async {
+    await notifications.cancel(11);
+    await notifications.cancel(999999999);
+  }
+
 }

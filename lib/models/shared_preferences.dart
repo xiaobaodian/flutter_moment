@@ -9,6 +9,9 @@ class AppPreferences {
 
   Future init() async {
     prefs = await SharedPreferences.getInstance();
+
+    // 用于删除废弃的参数，以后去掉这个语句
+    prefs.remove('dailyReminders');
   }
 
   //Config
@@ -28,9 +31,13 @@ class AppPreferences {
   bool get autoSave => getBoolValue('AutoSave', true);
   set autoSave(bool value) => prefs.setBool('AutoSave', value);
 
-  /// [dailyReminders]每日提醒。设置值只取小时、分钟部分。
-  String get dailyReminders => getStringValue('DailyReminders', '2019-04-17T20:30:00.000000');
-  set dailyReminders(String value) => this.prefs.setString('DailyReminders', value);
+  /// [canDailyReminder]允许每日提醒
+  bool get canDailyReminder => getBoolValue('CanDailyReminder', true);
+  set canDailyReminder(bool value) => prefs.setBool('CanDailyReminder', value);
+
+  /// [dailyReminderOne]每日提醒。设置值只取小时、分钟部分。
+  String get dailyReminderOne => getStringValue('DailyReminders', '2019-04-17T20:30:00.000000');
+  set dailyReminderOne(String value) => this.prefs.setString('DailyReminders', value);
 
   /// bool类型参数的存取操作
   bool getBoolValue(String key, bool defaultValue) {

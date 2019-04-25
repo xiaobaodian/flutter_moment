@@ -14,10 +14,11 @@ class UserAccountRoute extends StatefulWidget {
 }
 
 class UserAccountRouteState extends State<UserAccountRoute> {
+  ModalRoute  currentRoute;
   GlobalStoreState _store;
   List<String> updatesTips = ['正在检测...','无法获取版本信息', '点击开始更新', '点击检查更新', '没有检测到更新'];
   int updatesState = 0;
-  DateTime dailyReminders;
+  DateTime dailyReminderOne;
   String reminders;
 
   @override
@@ -29,17 +30,27 @@ class UserAccountRouteState extends State<UserAccountRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
-    dailyReminders = DateTime.parse(_store.prefs.dailyReminders);
-    String minuteLabel = dailyReminders.minute == 0 ? '00' : '${dailyReminders.minute}';
-    reminders = '${dailyReminders.hour}:$minuteLabel';
+    reminders = _dailyReminderLabel();
+    currentRoute = ModalRoute.of(context);
     checkUpgrade();
+  }
+
+  String _dailyReminderLabel() {
+    String label;
+    if (_store.prefs.canDailyReminder) {
+      dailyReminderOne = DateTime.parse(_store.prefs.dailyReminderOne);
+      String minuteLabel = dailyReminderOne.minute == 0 ? '00' : '${dailyReminderOne.minute}';
+      label = '会在每天${dailyReminderOne.hour}:$minuteLabel提醒你记下美好时刻';
+    } else {
+      label = '建议打开每日提醒';
+    }
+    return label;
   }
 
   Future checkUpgrade() async {
     debugPrint('开始检查更新');
-    if (_store.appVersion == null) {
-      await _store.initVersion();
-    }
+    await _store.initVersion();
+
     // 继续判断_store.appVersion是否为空，如果是，就说明网络问题，取不到数据
     if (_store.appVersion == null) {
       updatesState = 1;
@@ -77,7 +88,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
     TextStyle subStyle = Theme.of(context).textTheme.caption.merge(TextStyle(
           fontSize: 12,
         ));
-
+    reminders = _dailyReminderLabel();
     return ListView(
       children: <Widget>[
         Padding(
@@ -118,23 +129,34 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
         CatListTile(
-          title: Text('提醒'),
-          subtitle: Text(
-            '每天提醒日记的时间',
+          title: Text('每日提醒'),
+          subtitle: Text(reminders,
             style: subStyle,
           ),
           leading: Icon(Icons.alarm),
-          trailText: Text(reminders),
-          trailing: Icon(Icons.chevron_right),
+          trailing: Switch(
+            value: _store.prefs.canDailyReminder,
+            onChanged: (value) {
+              setState(() {
+                _store.prefs.canDailyReminder = value;
+                if (value) {
+                  var date = DateTime.parse(_store.prefs.dailyReminderOne);
+                  _store.notifications.setDailyReminderOneAtTime(date);
+                } else {
+                  _store.notifications.removeDailyReminderOne();
+                }
+              });
+            },
+          ),
           onTap: () {
             DatePicker.showTimePicker(context,
               locale: LocaleType.zh,
               showTitleActions: true,
-              currentTime: dailyReminders,
+              currentTime: dailyReminderOne,
               onConfirm: (time){
-                dailyReminders = time;
-                store.prefs.dailyReminders = time.toIso8601String();
-                store.notifications.showDailyAtTime(time);
+                dailyReminderOne = time;
+                store.prefs.dailyReminderOne = time.toIso8601String();
+                store.notifications.setDailyReminderOneAtTime(time);
                 setState(() {
                   String minuteLabel = time.minute == 0 ? '00' : '${time.minute}';
                   reminders = '${time.hour}:$minuteLabel';

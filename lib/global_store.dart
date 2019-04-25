@@ -127,8 +127,8 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   Future initDailyReminders() async {
-    var date = DateTime.parse(prefs.dailyReminders);
-    await notifications.showDailyAtTime(date);
+    var date = DateTime.parse(prefs.dailyReminderOne);
+    await notifications.setDailyReminderOneAtTime(date);
   }
 
   int get selectedDateIndex => calendarMap.selectedDateIndex;
@@ -357,85 +357,45 @@ class GlobalStoreState extends State<GlobalStore> {
     //debugPrint('remove SelectedDay Events: ${json.encode(selectedDailyRecord.focusEvents)}');
   }
 
-  /// 获取指定FocusItem相关的全部FocusEvent
+  /// 传出[FocusEvent]类型的参数，获取匿名函数为真的FocusEvent列表
+  List<FocusEvent> getFocusEventsFrom(bool f(FocusEvent event)) {
+    List<FocusEvent> resultFocusEvents = [];
+    var everyDay = calendarMap.everyDayIndex;
+    for (int i = everyDay.length - 1; i > 0; i--) {
+      var day = everyDay[i];
+      if (day.dailyRecord != null) {
+        if (day.dailyRecord.focusEventIsNull) {
+          setFocusEventsToDailyRecord(day.dailyRecord);
+        }
+        day.dailyRecord.initRichList(this, true);
+        day.dailyRecord.focusEvents.forEach((event) {
+          if (f(event)) {
+            resultFocusEvents.add(event);
+          }
+        });
+      }
+    }
+    return resultFocusEvents;
+  }
+
+  /// 获取指定FocusItemId相关的全部FocusEvent
   List<FocusEvent> getFocusEventsFromFocusItemId(int id) {
-    List<FocusEvent> resultFocusEvents = [];
-    var everyDay = calendarMap.everyDayIndex;
-    for (int i = everyDay.length - 1; i > 0; i--) {
-      var day = everyDay[i];
-      if (day.dailyRecord != null) {
-        if (day.dailyRecord.focusEventIsNull) {
-          setFocusEventsToDailyRecord(day.dailyRecord);
-        }
-        day.dailyRecord.initRichList(this, true);
-        day.dailyRecord.focusEvents.forEach((event) {
-          if (event.focusItemBoxId == id) {
-            resultFocusEvents.add(event);
-          }
-        });
-      }
-    }
-    return resultFocusEvents;
+    return getFocusEventsFrom((event) => event.focusItemBoxId == id);
   }
 
+  /// 获取指定PersonItemId相关的全部FocusEvent
   List<FocusEvent> getFocusEventsFromPersonItemId(int id) {
-    List<FocusEvent> resultFocusEvents = [];
-    var everyDay = calendarMap.everyDayIndex;
-    for (int i = everyDay.length - 1; i > 0; i--) {
-      var day = everyDay[i];
-      if (day.dailyRecord != null) {
-        day.dailyRecord.initRichList(this, true);
-        if (day.dailyRecord.focusEventIsNull) {
-          setFocusEventsToDailyRecord(day.dailyRecord);
-        }
-        day.dailyRecord.focusEvents.forEach((event) {
-          if (event.personKeys.keyList.indexOf(id) > -1) {
-            resultFocusEvents.add(event);
-          }
-        });
-      }
-    }
-    return resultFocusEvents;
+    return getFocusEventsFrom((event) => event.personKeys.keyList.indexOf(id) > -1);
   }
 
+  /// 获取指定PlaceItemId相关的全部FocusEvent
   List<FocusEvent> getFocusEventsFromPlaceItemId(int id) {
-    List<FocusEvent> resultFocusEvents = [];
-    var everyDay = calendarMap.everyDayIndex;
-    for (int i = everyDay.length - 1; i > 0; i--) {
-      var day = everyDay[i];
-      if (day.dailyRecord != null) {
-        day.dailyRecord.initRichList(this, true);
-        if (day.dailyRecord.focusEventIsNull) {
-          setFocusEventsToDailyRecord(day.dailyRecord);
-        }
-        day.dailyRecord.focusEvents.forEach((event) {
-          if (event.placeKeys.keyList.indexOf(id) > -1) {
-            resultFocusEvents.add(event);
-          }
-        });
-      }
-    }
-    return resultFocusEvents;
+    return getFocusEventsFrom((event) => event.placeKeys.keyList.indexOf(id) > -1);
   }
 
+  /// 获取指定TagItemId相关的全部FocusEvent
   List<FocusEvent> getFocusEventsFromTagItemId(int id) {
-    List<FocusEvent> resultFocusEvents = [];
-    var everyDay = calendarMap.everyDayIndex;
-    for (int i = everyDay.length - 1; i > 0; i--) {
-      var day = everyDay[i];
-      if (day.dailyRecord != null) {
-        day.dailyRecord.initRichList(this, true);
-        if (day.dailyRecord.focusEventIsNull) {
-          setFocusEventsToDailyRecord(day.dailyRecord);
-        }
-        day.dailyRecord.focusEvents.forEach((event) {
-          if (event.tagKeys.keyList.contains(id)) {
-            resultFocusEvents.add(event);
-          }
-        });
-      }
-    }
-    return resultFocusEvents;
+    return getFocusEventsFrom((event) => event.tagKeys.keyList.contains(id));
   }
 
   void setFocusEventsToDailyRecord(DailyRecord dailyRecord) {
