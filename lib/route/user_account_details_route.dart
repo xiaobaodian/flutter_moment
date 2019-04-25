@@ -50,7 +50,6 @@ class UserAccountRouteState extends State<UserAccountRoute> {
   Future checkUpgrade() async {
     debugPrint('开始检查更新');
     await _store.initVersion();
-
     // 继续判断_store.appVersion是否为空，如果是，就说明网络问题，取不到数据
     if (_store.appVersion == null) {
       updatesState = 1;
@@ -61,9 +60,13 @@ class UserAccountRouteState extends State<UserAccountRoute> {
         updatesState = _store.appVersion.hasUpgrade(_store) ? 2 : 4;
       }
     }
-    setState(() {
-      debugPrint('updatesState = $updatesState');
-    });
+    if (currentRoute.isCurrent) {
+      setState(() {
+        debugPrint('updatesState = $updatesState');
+      });
+    } else {
+      debugPrint('UserAccountRoute 已经关闭');
+    }
   }
 
   @override
@@ -82,7 +85,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
   }
 
   Widget buildBody(BuildContext context, GlobalStoreState store) {
-    const dividerHeight = 3.0;
+    const dividerHeight = 7.0;
     const dividerIndent = 48.0;
     const dividerThickness = 6.0;
     TextStyle subStyle = Theme.of(context).textTheme.caption.merge(TextStyle(
@@ -297,7 +300,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
                     applicationName: '时光',
                     applicationVersion:
                         "${_store.packageInfo.version} (${_store.packageInfo.buildNumber})",
-                    applicationLegalese: '${_store.appVersion.title}',
+                    //applicationLegalese: '${_store.appVersion.title}',
                     children: <Widget>[
                       Divider(),
                       Text(
@@ -305,8 +308,8 @@ class UserAccountRouteState extends State<UserAccountRoute> {
                       //Text("${_store.androidInfo.version}"),
                       //Text("${_store.androidInfo.device}"),
                       //Text("${_store.androidInfo.display}"),
-                      Text("${_store.androidInfo.board}"),
-                      Text("${_store.appVersion.appPath}"),
+                      //Text("${_store.androidInfo.board}"),
+                      //Text("${_store.appVersion.appPath}"),
                     ],
                   );
                 });

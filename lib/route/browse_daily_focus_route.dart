@@ -235,7 +235,7 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     var placeItem = placeList[index];
     var gz = placeItem.count == 0 ? '' : '${placeItem.count} ';
     return CatListTile(
-      leading: Icon(Icons.ac_unit),
+      leading: Icon(Icons.map),
       title: Text(placeItem.title),
       trailText: Text(gz),
       trailing: Icon(Icons.arrow_right),
