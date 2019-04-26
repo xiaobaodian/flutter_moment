@@ -1,10 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_moment/models/auto_updates.dart';
 import 'package:flutter_moment/models/local_notifications.dart';
 import 'package:flutter_moment/models/shared_preferences.dart';
+import 'package:flutter_moment/task/task_categories.dart';
 import 'package:package_info/package_info.dart';
 import 'package:dio/dio.dart';
 import 'package:device_info/device_info.dart';
@@ -56,6 +56,8 @@ class GlobalStoreState extends State<GlobalStore> {
   BasicData<FocusEvent> focusEventSet;
   BasicData<DailyRecord> dailyRecordSet;
 
+  TaskCategories taskCategories;
+
 
   //Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
   //List<TaskItem> taskItemList;
@@ -67,6 +69,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
     initSystem();
 
+    taskCategories = TaskCategories();
     dataSource = DataSource(version: 1);
     Future.wait([
       dataSource.openDataBase().then((_){
@@ -89,7 +92,11 @@ class GlobalStoreState extends State<GlobalStore> {
       personSet.loadItemsFromDataSource();
       placeSet.loadItemsFromDataSource();
       tagSet.loadItemsFromDataSource();
-      taskSet.loadItemsFromDataSource();
+      taskSet.loadItemsFromDataSource().then((_){
+        taskSet.itemList.forEach((task){
+          taskCategories.allTasks.assigned(task);
+        });
+      });
       focusEventSet.loadItemsFromDataSource().then((_){
         focusEventSet.itemList.forEach((focusEvent){
           replaceExpandDataWithTasks(focusEvent);
@@ -101,6 +108,7 @@ class GlobalStoreState extends State<GlobalStore> {
           calendarMap.everyDayIndex[dayIndex].dailyRecord = record;
         });
       });
+
       personSet.sort();
       placeSet.sort();
       tagSet.sort();
