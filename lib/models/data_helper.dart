@@ -82,7 +82,6 @@ class BasicData<T extends BoxItem> {
 
     if (temp != item) {
       int position = itemList.indexOf(temp);
-
       debugPrint('itemList.indexOf(temp) = $position');
 
       assert(position != -1);

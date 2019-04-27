@@ -154,8 +154,14 @@ class GlobalStoreState extends State<GlobalStore> {
         if (task.boxId == 0) {
           debugPrint('批处理FocusEvent包含的任务，未入库Task：${task.title}');
           taskSet.addItem(task);
+          taskCategories.allTasks.assigned(task);
           s++;
         } else {
+          //修改过的task很可能是原来的副本，只有通过Id在taskSet中找到原来的实例进行处理
+          //所以taskSet.changeItem(task)也必须放到后面处理，不然找不到原来的实例了。
+          var oldTask = taskSet.getItemFromId(task.boxId);
+          taskCategories.allTasks.remove(oldTask);
+          taskCategories.allTasks.assigned(task);
           taskSet.changeItem(task);
           debugPrint('批处理FocusEvent包含的任务，修改了Task(${task.boxId})：${task.title}');
         }
@@ -164,6 +170,9 @@ class GlobalStoreState extends State<GlobalStore> {
           if (line.expandData is TaskItem) {
             TaskItem task = line.expandData;
             if (task.boxId > 0) {
+              //原理同上
+              var oldTask = taskSet.getItemFromId(task.boxId);
+              taskCategories.allTasks.remove(oldTask);
               taskSet.removeItem(task);
               debugPrint('批处理FocusEvent包含的任务，删除了Task：${task.title}');
             }
@@ -346,6 +355,7 @@ class GlobalStoreState extends State<GlobalStore> {
       if (line.expandData is TaskItem) {
         TaskItem task = line.expandData;
         taskSet.removeItem(task);
+        taskCategories.allTasks.remove(task);
       }
     });
 

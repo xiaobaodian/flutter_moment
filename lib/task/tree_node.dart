@@ -47,11 +47,11 @@ class TreeNode<I> {
         debugPrint('开始往下级Node分配Item...');
         bool isLost = true;
         subNodes.forEach((node){
-          debugPrint('节点<${node.title}>开始分配Item...');
+          debugPrint('SubNode <${node.title}> 开始分配Item...');
           if (node.assigned(item)) isLost = false;
         });
         if (isLost) {
-          debugPrint('节点<$title>获取了丢失的Item...');
+          debugPrint('Node<$title>捕获了丢失的Item...');
           children.add(item);
           if (onLostItem != null) onLostItem(item);
         }
@@ -63,8 +63,10 @@ class TreeNode<I> {
 
   void remove(I item) {
     if (subNodes.isEmpty) {
+      debugPrint('Node<$title>删除item...');
       children.remove(item);
     } else {
+      debugPrint('Node<$title>开始调用下级node，执行删除item...');
       subNodes.forEach((node){
         node.remove(item);
       });

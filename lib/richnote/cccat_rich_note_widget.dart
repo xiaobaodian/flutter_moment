@@ -229,6 +229,7 @@ class RichNoteState extends State<RichNote> {
                     isSelected ? TaskState.Complete : TaskState.StandBy;
                 if (widget.isNotEditable) {
                   widget.store.taskSet.changeItem(task);
+                  widget.store.taskCategories.allTasks.change(task);
                 }
               });
             });
