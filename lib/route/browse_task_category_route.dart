@@ -10,7 +10,9 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/task/task_item.dart';
+import 'package:flutter_moment/widgets/cccat_header_list_view.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 class BrowseTaskCategoryRoute extends StatefulWidget {
   @override
@@ -21,7 +23,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
     with SingleTickerProviderStateMixin {
   GlobalStoreState _store;
   TabController _controller;
-  final List<String> tabLabel = []; //'执行中', '已完成'
+  final List<String> tabLabel = [];
 
   @override
   void initState() {
@@ -35,7 +37,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
     _controller = TabController(
       initialIndex: 0,
       length: _store.taskCategories.allTasks.subNodes.length,
-      vsync: this
+      vsync: this,
     );
     _store.taskCategories.allTasks.subNodes.forEach((node){
       tabLabel.add(node.title);
@@ -117,18 +119,33 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
   // buildBody(context, _store)
 
   Widget buildBody(BuildContext context, GlobalStoreState store) {
-    //store.taskSet.itemList.sort((a, b) => b.createDate.compareTo(a.createDate));
+    store.taskCategories
+      ..actionTasks.children.sort((a, b) => a.dueDate.compareTo(b.dueDate))
+      ..lateTasks.children.sort((a, b) => b.dueDate.compareTo(a.dueDate))
+      ..completeTasks.children.sort((a, b) => b.dueDate.compareTo(a.dueDate));
     return TabBarView(
       controller: _controller,
       children: <Widget>[
+        CustomScrollView(
+          slivers: _buildSlivers(context),
+        ),
+//        ListView.separated(
+//          itemBuilder: (context, index) =>
+//              buildActionTaskItem(store, context, index),
+//          separatorBuilder: (context, index) => Divider(
+//                indent: 16,
+//                height: 8,
+//              ),
+//          itemCount: store.taskCategories.actionTasks.children.length,
+//        ),
         ListView.separated(
           itemBuilder: (context, index) =>
-              buildActionTaskItem(store, context, index),
+              buildLateTaskItem(store, context, index),
           separatorBuilder: (context, index) => Divider(
-                indent: 16,
-                height: 8,
-              ),
-          itemCount: store.taskCategories.actionTasks.children.length,
+            indent: 16,
+            height: 8,
+          ),
+          itemCount: store.taskCategories.lateTasks.children.length,
         ),
         ListView.separated(
           itemBuilder: (context, index) =>
@@ -143,14 +160,61 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
     );
   }
 
+  List<Widget> _buildSlivers(BuildContext context) {
+    List<Widget> slivers = List<Widget>();
+    for (int i = 0; i < _store.taskCategories.actionTasks.subNodes.length; i++) {
+      if (_store.taskCategories.actionTasks.subNodes[i].children.isNotEmpty) {
+        slivers.add(
+            SliverStickyHeader(
+              header: Container(
+                height: 26.0,
+                color: Color.fromARGB(254, 230, 230, 230),
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+                  child: Text(
+                    _store.taskCategories.actionTasks.subNodes[i].title,
+                    //style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (context, index) => buildActionTaskItem(context, i, index),
+                  childCount: _store.taskCategories.actionTasks.subNodes[i].children.length,
+                ),
+              ),
+            )
+        );
+      }
+    }
+
+    return slivers;
+  }
+
   Widget buildActionTaskItem(
-      GlobalStoreState store, BuildContext context, int index) {
-    TaskItem task = store.taskCategories.actionTasks.children[index];
+    BuildContext context,
+    int nodeIndex,
+    int index
+  ) {
+    TaskItem task = _store.taskCategories.actionTasks.subNodes[nodeIndex].children[index];
+    return buildTaskItem(_store, context, task);
+  }
+
+  Widget buildLateTaskItem(
+      GlobalStoreState store,
+      BuildContext context,
+      int index
+      ) {
+    TaskItem task = store.taskCategories.lateTasks.children[index];
     return buildTaskItem(store, context, task);
   }
 
   Widget buildCompleteTaskItem(
-      GlobalStoreState store, BuildContext context, int index) {
+    GlobalStoreState store,
+    BuildContext context,
+    int index
+  ) {
     TaskItem task = store.taskCategories.completeTasks.children[index];
     return buildTaskItem(store, context, task);
   }

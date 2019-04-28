@@ -69,7 +69,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
     initSystem();
 
-    taskCategories = TaskCategories();
+    taskCategories = TaskCategories(this);
     dataSource = DataSource(version: 1);
     Future.wait([
       dataSource.openDataBase().then((_){
@@ -139,6 +139,7 @@ class GlobalStoreState extends State<GlobalStore> {
     await notifications.setDailyReminderOneAtTime(date);
   }
 
+  int get todayIndex => calendarMap.currentDateIndexed;
   int get selectedDateIndex => calendarMap.selectedDateIndex;
 
   // FocusItem

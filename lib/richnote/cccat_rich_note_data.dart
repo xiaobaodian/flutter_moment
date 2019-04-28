@@ -244,7 +244,12 @@ class RichItem extends RichLine {
     if (newType == RichType.Task) {
       assert(source.richNote.store.selectedDateIndex != null);
       if (expandData is! TaskItem) {
-        expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemId);
+        expandData = TaskItem(
+            createDate: source.dayIndex,
+            startDate: source.dayIndex,
+            dueDate: source.dayIndex,
+            focusItemId: source.focusItemId
+        );
         debugPrint('新建了一个TaskItem记录, dayIndex：${source.dayIndex}');
       }
     }
