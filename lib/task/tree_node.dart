@@ -77,4 +77,20 @@ class TreeNode<I> {
     remove(item);
     assigned(item);
   }
+
+  int count() {
+    if (subNodes.isEmpty) {
+      return children.length;
+    }
+    int sum = 0;
+    subNodes.forEach((node){
+      sum += node.count();
+    });
+    return sum;
+  }
+
+  bool get subNodeIsEmpty => subNodes.isEmpty;
+  bool get subNodeIsNotEmpty => subNodes.isNotEmpty;
+  bool get childrenIsEmpty => count() == 0;
+  bool get childrenIsNotEmpty => count() > 0;
 }

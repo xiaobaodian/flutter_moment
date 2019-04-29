@@ -23,6 +23,14 @@ class AppPreferences {
   String get upgradeAppPath => getStringValue('UpgradeAppPath', 'https://share.heiluo.com/share/download?type=1&shareId=e6414385ca4a48b98899a7d51ca29af7&fileId=2445569');
   set upgradeAppPath(String value) => prefs.setString('UpgradeAppPath', value);
 
+  /// [priorityDisplayOverdueTasks]优先显示逾期任务页面
+  bool get priorityDisplayOverdueTasks => getBoolValue('PriorityDisplayOverdueTasks', true);
+  set priorityDisplayOverdueTasks(bool value) => prefs.setBool('PriorityDisplayOverdueTasks', value);
+
+  /// [saveCompleteTasks]优先显示逾期任务页面
+  bool get saveCompleteTasks => getBoolValue('SaveCompleteTasks', true);
+  set saveCompleteTasks(bool value) => prefs.setBool('SaveCompleteTasks', value);
+
   /// [detectFlags]自动提取人物位置标签
   bool get detectFlags => getBoolValue('DetectFlags', true);
   set detectFlags(bool value) => prefs.setBool('DetectFlags', value);

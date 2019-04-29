@@ -34,14 +34,22 @@ class TaskCategories {
         return task.startDate == store.todayIndex + 1;
       },
     );
+    afterTomorrowTasks = TreeNode<TaskItem>(
+      title: '后天',
+      isMember: (task) {
+        return task.startDate == store.todayIndex + 2;
+      },
+    );
+
     futureTasks = TreeNode<TaskItem>(
       title: '以后',
       isMember: (task) {
-        return task.startDate > store.todayIndex + 1;
+        return task.startDate > store.todayIndex + 2;
       },
     );
     actionTasks.addSubNode(todayTasks);
     actionTasks.addSubNode(tomorrowTasks);
+    actionTasks.addSubNode(afterTomorrowTasks);
     actionTasks.addSubNode(futureTasks);
 
     completeTasks = TreeNode<TaskItem>(
@@ -50,6 +58,7 @@ class TaskCategories {
         return task.state == TaskState.Complete;
       },
     );
+
     lateTasks = TreeNode<TaskItem>(
       title: '逾期',
       isMember: (task){
@@ -62,6 +71,47 @@ class TaskCategories {
         return task.state != TaskState.Complete && task.dueDate < store.todayIndex;
       },
     );
+    yesterdayTasks = TreeNode<TaskItem>(
+      title: '昨天',
+      isMember: (task){
+        // 测试时使用
+        if (task.dueDate == 0) {
+          task.dueDate = task.createDate;
+          task.startDate = task.createDate;
+          store.taskSet.changeItem(task);
+        }
+        return task.dueDate == store.todayIndex - 1;
+      },
+    );
+    beforeYesterdayTasks = TreeNode<TaskItem>(
+      title: '前天',
+      isMember: (task){
+        // 测试时使用
+        if (task.dueDate == 0) {
+          task.dueDate = task.createDate;
+          task.startDate = task.createDate;
+          store.taskSet.changeItem(task);
+        }
+        return task.dueDate == store.todayIndex - 2;
+      },
+    );
+    longTimeAgoTasks = TreeNode<TaskItem>(
+      title: '以前',
+      isMember: (task){
+        // 测试时使用
+        if (task.dueDate == 0) {
+          task.dueDate = task.createDate;
+          task.startDate = task.createDate;
+          store.taskSet.changeItem(task);
+        }
+        return task.dueDate < store.todayIndex - 2;
+      },
+    );
+    lateTasks.addSubNode(yesterdayTasks);
+    lateTasks.addSubNode(beforeYesterdayTasks);
+    lateTasks.addSubNode(longTimeAgoTasks);
+
+    /// 装配大类
     allTasks.addSubNode(actionTasks);
     allTasks.addSubNode(lateTasks);
     allTasks.addSubNode(completeTasks);
@@ -74,7 +124,14 @@ class TaskCategories {
   TreeNode<TaskItem> actionTasks;
   TreeNode<TaskItem> todayTasks;
   TreeNode<TaskItem> tomorrowTasks;
+  TreeNode<TaskItem> afterTomorrowTasks;
+  TreeNode<TaskItem> comingSoonTasks;
   TreeNode<TaskItem> futureTasks;
+
+  TreeNode<TaskItem> yesterdayTasks;
+  TreeNode<TaskItem> beforeYesterdayTasks;
+  TreeNode<TaskItem> lastWeekTasks;
+  TreeNode<TaskItem> longTimeAgoTasks;
 
   TreeNode<TaskItem> lateTasks;
 

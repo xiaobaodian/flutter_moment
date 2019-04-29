@@ -10,6 +10,7 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/task/task_item.dart';
+import 'package:flutter_moment/task/tree_node.dart';
 import 'package:flutter_moment/widgets/cccat_header_list_view.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
@@ -34,12 +35,17 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
+
+    bool priorityDisplayOverdueTasks =
+        _store.prefs.priorityDisplayOverdueTasks &&
+            _store.taskCategories.lateTasks.childrenIsNotEmpty;
+
     _controller = TabController(
-      initialIndex: 0,
+      initialIndex: priorityDisplayOverdueTasks ? 1 : 0,
       length: _store.taskCategories.allTasks.subNodes.length,
       vsync: this,
     );
-    _store.taskCategories.allTasks.subNodes.forEach((node){
+    _store.taskCategories.allTasks.subNodes.forEach((node) {
       tabLabel.add(node.title);
     });
 //    _store.taskSet.itemList.forEach((task){
@@ -57,7 +63,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('分类任务'),
+        title: Text('任务'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.description),
@@ -96,18 +102,21 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
       body: Column(
         children: <Widget>[
           SizedBox(
-            height: 48,
+            height: 36,
             width: double.infinity,
             child: TabBar(
               controller: _controller,
               isScrollable: true,
               indicatorSize: TabBarIndicatorSize.label,
               tabs: tabLabel
-                .map((label) => Text(label, style: TextStyle(fontSize: 17, color: Colors.black54)))
-                .toList(),
+                  .map((label) => Text(label,
+                      style: TextStyle(fontSize: 17, color: Colors.black54)))
+                  .toList(),
             ),
           ),
-          Divider(height: 1,),
+          Divider(
+            height: 1,
+          ),
           Expanded(
             child: buildBody(context, _store),
           ),
@@ -127,25 +136,10 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
       controller: _controller,
       children: <Widget>[
         CustomScrollView(
-          slivers: _buildSlivers(context),
+          slivers: _buildSlivers(context, _store.taskCategories.actionTasks),
         ),
-//        ListView.separated(
-//          itemBuilder: (context, index) =>
-//              buildActionTaskItem(store, context, index),
-//          separatorBuilder: (context, index) => Divider(
-//                indent: 16,
-//                height: 8,
-//              ),
-//          itemCount: store.taskCategories.actionTasks.children.length,
-//        ),
-        ListView.separated(
-          itemBuilder: (context, index) =>
-              buildLateTaskItem(store, context, index),
-          separatorBuilder: (context, index) => Divider(
-            indent: 16,
-            height: 8,
-          ),
-          itemCount: store.taskCategories.lateTasks.children.length,
+        CustomScrollView(
+          slivers: _buildSlivers(context, _store.taskCategories.lateTasks),
         ),
         ListView.separated(
           itemBuilder: (context, index) =>
@@ -160,61 +154,45 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
     );
   }
 
-  List<Widget> _buildSlivers(BuildContext context) {
+  List<Widget> _buildSlivers(BuildContext context, TreeNode<TaskItem> node) {
     List<Widget> slivers = List<Widget>();
-    for (int i = 0; i < _store.taskCategories.actionTasks.subNodes.length; i++) {
-      if (_store.taskCategories.actionTasks.subNodes[i].children.isNotEmpty) {
-        slivers.add(
-            SliverStickyHeader(
-              header: Container(
-                height: 26.0,
-                color: Color.fromARGB(254, 230, 230, 230),
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-                  child: Text(
-                    _store.taskCategories.actionTasks.subNodes[i].title,
-                    //style: const TextStyle(color: Colors.white),
-                  ),
-                ),
+    for (int i = 0;
+    i < node.subNodes.length;
+    i++) {
+      if (node.subNodes[i].children.isNotEmpty) {
+        slivers.add(SliverStickyHeader(
+          header: Container(
+            height: 32.0,
+            color: Color.fromARGB(254, 245, 245, 245),
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+              child: Text(
+                node.subNodes[i].title,
+                //style: const TextStyle(color: Colors.white),
               ),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                      (context, index) => buildActionTaskItem(context, i, index),
-                  childCount: _store.taskCategories.actionTasks.subNodes[i].children.length,
-                ),
-              ),
-            )
-        );
+            ),
+          ),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+                  (context, index) => getTaskItem(context, node, i, index),
+              childCount:
+              node.subNodes[i].children.length,
+            ),
+          ),
+        ));
       }
     }
-
     return slivers;
   }
 
-  Widget buildActionTaskItem(
-    BuildContext context,
-    int nodeIndex,
-    int index
-  ) {
-    TaskItem task = _store.taskCategories.actionTasks.subNodes[nodeIndex].children[index];
+  Widget getTaskItem(BuildContext context, TreeNode<TaskItem> node, int nodeIndex, int index) {
+    TaskItem task = node.subNodes[nodeIndex].children[index];
     return buildTaskItem(_store, context, task);
   }
 
-  Widget buildLateTaskItem(
-      GlobalStoreState store,
-      BuildContext context,
-      int index
-      ) {
-    TaskItem task = store.taskCategories.lateTasks.children[index];
-    return buildTaskItem(store, context, task);
-  }
-
   Widget buildCompleteTaskItem(
-    GlobalStoreState store,
-    BuildContext context,
-    int index
-  ) {
+      GlobalStoreState store, BuildContext context, int index) {
     TaskItem task = store.taskCategories.completeTasks.children[index];
     return buildTaskItem(store, context, task);
   }

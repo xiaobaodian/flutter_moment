@@ -137,7 +137,7 @@ class AppVersion {
             builder: (context, setDialogState) {
               FlutterDownloader.registerCallback((id, status, progress) {
                 if (status == DownloadTaskStatus.complete) {
-                  //OpenFile.open(_filePath);
+                  OpenFile.open(_filePath);
                   FlutterDownloader.registerCallback(null);
                   Navigator.of(context).pop(null);
                 } else if (status == DownloadTaskStatus.failed) {

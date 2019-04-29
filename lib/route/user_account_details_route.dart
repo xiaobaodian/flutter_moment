@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_moment/global_store.dart';
+import 'package:flutter_moment/route/user_setup_task_subItem.dart';
 import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -194,7 +195,11 @@ class UserAccountRouteState extends State<UserAccountRoute> {
           leading: Icon(Icons.assignment_turned_in),
           trailing: Icon(Icons.chevron_right),
           onTap: () {
-
+            var navigator = Navigator.of(context);
+            navigator
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return SetTaskSubItemRoute();
+            }));
           },
         ),
         DividerExt(height: dividerHeight, indent: dividerIndent),
@@ -271,9 +276,10 @@ class UserAccountRouteState extends State<UserAccountRoute> {
                   fontSize: 16.0
               );
               Future.delayed(Duration(seconds: 2), (){
-                setState(() {
-                  checkUpgrade();
-                });
+                checkUpgrade();
+//                setState(() {
+//                  checkUpgrade();
+//                });
               });
             }
           },
