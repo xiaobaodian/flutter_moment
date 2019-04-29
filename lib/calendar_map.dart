@@ -79,38 +79,44 @@ class CalendarMap {
     currentDateIndexed = getDateIndex(currentDate.date);
   }
 
-  /// 返回从startYear到endYear期间的周数
+  /// [weeksTotal]返回从startYear到endYear期间的周数
   int get weeksTotal => _weeksTotal;
 
-  /// 返回从startYear到endYear期间的天数
+  /// [daysTotal]返回从startYear到endYear期间的天数
   int get daysTotal => _daysTotal;
 
-  /// 给定日期所在月份的偏移量
+  /// [getMonthOffset]给定日期所在月份的偏移量
   double getMonthOffset(DateTime date) => everyMonthOffset['${date.year}${date.month}'];
 
-  /// today 所在月的偏移
+  /// [todayOffset]today所在月的偏移
   double get todayOffset => everyMonthOffset['${currentDate.year}${currentDate.month}'];
 
-  /// selectedDay 所在月的偏移
+  /// [selectedDayOffset]selectedDay所在月的偏移
   double get selectedDayOffset => everyMonthOffset['${selectedDate.year}${selectedDate.month}'];
 
-  /// 按照索引给出周的日期属性
+  /// [getWeekPropertyFromIndex]按照索引给出周的日期属性
   WeekProperty getWeekPropertyFromIndex(int index) => everyWeekIndex[index];
 
+  /// [isToday]判断给定日期是不是今天
   bool isToday(DateTime date) => date.year == currentDate.year &&
       date.month == currentDate.month &&
       date.day == currentDate.day;
 
+  /// [isSelectedDate]判断给定日期是当前界面选择的日期
   bool isSelectedDate(DateTime date) => date.year == selectedDate.year &&
       date.month == selectedDate.month &&
       date.day == selectedDate.day;
 
+  /// [isNotSelectedDate]判断给定日期不是当前界面选择的日期
   bool isNotSelectedDate(DateTime date) => !isSelectedDate(date);
 
+  /// [selectedDateIndex]返回当前界面选择的日期的index
   int get selectedDateIndex => getDateIndex(selectedDate);
 
+  /// [selectedDateWeekName]返回当前界面选择的日期的星期名称：周一、周二等
   String get selectedDateWeekName => DateTimeExt.chineseWeekName(selectedDate);
 
+  /// [getDateIndex]返回给定日期的index，如果不传日期参数，就返回今天的日期index
   int getDateIndex([DateTime date]) {
     DateTime d = date == null ? DateTime.now() : date;
     assert(d.year >= startYear && d.year <= endYear);
@@ -134,6 +140,7 @@ class CalendarMap {
     return days - 1;  // 天数累加是按实际进行的，在List中，下标从0开始，所以需要-1
   }
 
+  /// [getChineseTermOfRecentDay]返回给定日期index的近期称呼，不在[dayName]范围的则返回“X天以前”或“X天以后”
   String getChineseTermOfRecentDay(int dayIndex) {
     List<String> dayName = ['前天', '昨天', '今天', '明天', '后天'];
     int base = currentDateIndexed - 2;
@@ -149,14 +156,17 @@ class CalendarMap {
     return dayLeap;
   }
 
+  /// [getChineseTermOfDate]返回日期的中文叫法
   String getChineseTermOfDate(int dayIndex) {
     DateTime date = everyDayIndex[dayIndex].date();
     return '${date.year}年${date.month}月${date.day}日';
   }
 
+  /// [setSelectedDateFromIndex]根据日期index设置[selectedDate]的日期
   void setSelectedDateFromIndex(int index) {
     selectedDate = everyDayIndex[index].date();
   }
+
   DateTime getDateFromIndex(int index) => everyDayIndex[index].date();
 
   DailyRecord getDailyRecordFromIndex(int index) => everyDayIndex[index].dailyRecord;
@@ -178,21 +188,54 @@ class CalendarMap {
   void clearDailyRecordOfSelectedDay() =>  everyDayIndex[selectedDateIndex].dailyRecord = null;
   void clearDailyRecordOfDayIndex(int dayIndex) => everyDayIndex[dayIndex].dailyRecord = null;
 
+  /// [getWeekRange] 返回给定dayIndex所在周的dayIndex范围
+  DayIndexRange getWeekRange(int dayIndex){
+    int weekday = getDateFromIndex(dayIndex).weekday;
+    int bDays = weekday - 1; // 在这周中dayIndex前面还有几天
+    int eDays = 7 - weekday; // 在这周中dayIndex后面还有几天
+    return DayIndexRange(dayIndex - bDays, dayIndex + eDays);
+  }
+
+  DayIndexRange getCurrentWeekRange() {
+    return getWeekRange(currentDateIndexed);
+  }
+
+  /// [getMonthRange] 返回给定dayIndex所在月的dayIndex范围
+  DayIndexRange getMonthRange(int dayIndex){
+    DateProperty dayProperty = everyDayIndex[dayIndex];
+    int monthDays = DateTimeExt.monthDaysFrom(dayProperty.year, dayProperty.month);
+    int day = dayProperty.date().day;
+    int bDays = day - 1; // 在这月中dayIndex前面还有几天
+    int eDays = monthDays - day; // 在这月中dayIndex后面还有几天
+    return DayIndexRange(dayIndex - bDays, dayIndex + eDays);
+  }
+
+  DayIndexRange getCurrentMonthRange() {
+    return getMonthRange(currentDateIndexed);
+  }
+
+}
+
+class DayIndexRange {
+  DayIndexRange(this.begin, this.end);
+  int begin, end;
 }
 
 class WeekProperty {
-  int year, month, weeks;
   WeekProperty(this.year, this.month, this.weeks);
+
+  int year, month, weeks;
+  
   DateTime date() {
     return DateTime(year, month);
   }
 }
 
 class DateProperty {
+  DateProperty(this.year, this.month, this.day);
+
   int year, month, day;
   DailyRecord dailyRecord;
-
-  DateProperty(this.year, this.month, this.day);
 
   DateTime date() => DateTime(year, month, day);
 }

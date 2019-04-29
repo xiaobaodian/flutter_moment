@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 // 年份能被4整除【如年份是整百数的能被400整除】的为闰年.
 
 class DateTimeExt {
+    DateTimeExt(this.dateTime) {
+    firstDayOfMonth = DateTime(dateTime.year, dateTime.month, 1);
+  }
 
   static String chineseDateString(DateTime date) {
     return '${date.year}年${date.month}月${date.day}日';
@@ -54,23 +57,22 @@ class DateTimeExt {
   DateTime firstDayOfMonth;
   List<DateTime> _dayArray;
 
-  DateTimeExt(this.dateTime) {
-    firstDayOfMonth = DateTime(dateTime.year, dateTime.month, 1);
-  }
-
   int get year => dateTime.year;
   int get month => dateTime.month;
   int get day => dateTime.day;
   bool get isLeap => DateTimeExt.isLeapYear(year);
 
+  /// [weekday]返回当前日期是星期几
   int get weekday => dateTime.weekday;
 
+  /// [firstWeekDayOfMonth]返回本月第一天是星期几
   int get firstWeekDayOfMonth => firstDayOfMonth.weekday;
 
-  // 当月一共有几周
+  /// 当月一共有几周
   int get fewWeeks => ((firstWeekDayOfMonth + getMonthDays() - 1) / 7 + 0.99).toInt();
   DateTime get date => dateTime;
 
+  /// [getMonthDays]返回指定月的天数，如果不传参数，就默认当前月
   int getMonthDays({int month}) {
     int m = month == null ? dateTime.month : month;
     assert(m >= 1 && m <=12 );
@@ -85,6 +87,7 @@ class DateTimeExt {
     return days;
   }
 
+  /// 根据当前月份的周数跨度，构建day的列表，当第一周的前几天或最后一周的后几天不在本月时，填充null
   void _buildDayArray() {
     _dayArray = List<DateTime>();
     var d = 0;
@@ -97,6 +100,7 @@ class DateTimeExt {
     }
   }
 
+  /// 给定本月第几周的索引，返回这周的每天列表
   List<DateTime> getDaysOfWeek(int weekIndex) {
     if (_dayArray == null) {
       _buildDayArray();
