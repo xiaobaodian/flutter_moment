@@ -223,13 +223,23 @@ class GlobalStoreState extends State<GlobalStore> {
   // FocusEvent  replaceExpandDataWithTasks
 
   void replaceExpandDataWithTasks(FocusEvent event) {
+    // TODO 这里需要修改：当在任务模块删除任务时，这里的taskSet.getItemFromId(id)就会返回为null，所以返回怒来后就应该删除这个line
+    List<RichLine> lostList = List<RichLine>();
     for (var line in event.noteLines) {
       if (line.type == RichType.Task && line.expandData is int) {
         int id = line.expandData;
         debugPrint('将ID转换成任务数据，当前ID：$id');
         line.expandData = taskSet.getItemFromId(id);
-        assert(line.expandData != null);
+        if (line.expandData == null) {
+          debugPrint('没有找到任务：Id -> $id');
+          lostList.add(line);
+        }
       }
+    }
+    if (lostList.isNotEmpty) {
+      lostList.forEach((line){
+        event.noteLines.remove(line);
+      });
     }
   }
 

@@ -141,14 +141,8 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
         CustomScrollView(
           slivers: _buildSlivers(context, _store.taskCategories.lateTasks),
         ),
-        ListView.separated(
-          itemBuilder: (context, index) =>
-              buildCompleteTaskItem(store, context, index),
-          separatorBuilder: (context, index) => Divider(
-                indent: 70,
-                height: 8,
-              ),
-          itemCount: store.taskCategories.completeTasks.children.length,
+        CustomScrollView(
+          slivers: _buildSlivers(context, _store.taskCategories.completeTasks),
         ),
       ],
     );
@@ -189,12 +183,6 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
   Widget getTaskItem(BuildContext context, TreeNode<TaskItem> node, int nodeIndex, int index) {
     TaskItem task = node.subNodes[nodeIndex].children[index];
     return buildTaskItem(_store, context, task);
-  }
-
-  Widget buildCompleteTaskItem(
-      GlobalStoreState store, BuildContext context, int index) {
-    TaskItem task = store.taskCategories.completeTasks.children[index];
-    return buildTaskItem(store, context, task);
   }
 
   Widget buildTaskItem(

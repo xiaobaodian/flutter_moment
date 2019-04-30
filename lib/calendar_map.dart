@@ -200,6 +200,16 @@ class CalendarMap {
     return getWeekRange(currentDateIndexed);
   }
 
+  DayIndexRange getNextWeekRange() {
+    var thisWeek = getCurrentWeekRange();
+    return DayIndexRange(thisWeek.begin + 7, thisWeek.end + 7);
+  }
+
+  DayIndexRange getLastWeekRange() {
+    var thisWeek = getCurrentWeekRange();
+    return DayIndexRange(thisWeek.begin - 7, thisWeek.end - 7);
+  }
+
   /// [getMonthRange] 返回给定dayIndex所在月的dayIndex范围
   DayIndexRange getMonthRange(int dayIndex){
     DateProperty dayProperty = everyDayIndex[dayIndex];
@@ -214,6 +224,15 @@ class CalendarMap {
     return getMonthRange(currentDateIndexed);
   }
 
+  DayIndexRange getNextMonthRange() {
+    var thisMonth = getCurrentMonthRange();
+    return getMonthRange(thisMonth.end + 1);
+  }
+
+  DayIndexRange getLastMonthRange() {
+    var thisMonth = getCurrentMonthRange();
+    return getMonthRange(thisMonth.begin - 1);
+  }
 }
 
 class DayIndexRange {
