@@ -911,7 +911,7 @@ class RichNoteState extends State<RichNote> {
           },
         ),
         IconButton(
-          icon: Icon(Icons.note_add),
+          icon: Icon(Icons.description),
           onPressed: () {
 
           },
