@@ -30,6 +30,12 @@ class TaskCategories {
         int today = todayTasks.property['DateRange'];
         return task.startDate <= today && task.dueDate >= today;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          todayTasks.property.remove('DateRange');
+          todayTasks.children.clear();
+        }
+      },
     );
     tomorrowTasks = TreeNode<TaskItem>(
       title: '明天',
@@ -38,6 +44,12 @@ class TaskCategories {
         int tomorrow = tomorrowTasks.property['DateRange'];
         return task.startDate == tomorrow;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          tomorrowTasks.property.remove('DateRange');
+          tomorrowTasks.children.clear();
+        }
+      },
     );
     afterTomorrowTasks = TreeNode<TaskItem>(
       title: '后天',
@@ -45,6 +57,12 @@ class TaskCategories {
         afterTomorrowTasks.property['DateRange'] ??= store.todayIndex + 2;
         int afterTomorrow = afterTomorrowTasks.property['DateRange'];
         return task.startDate == afterTomorrow;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          afterTomorrowTasks.property.remove('DateRange');
+          afterTomorrowTasks.children.clear();
+        }
       },
     );
     thisWeekTasks = TreeNode<TaskItem>(
@@ -65,6 +83,12 @@ class TaskCategories {
         }
         return task.startDate >= range.begin && task.startDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          thisWeekTasks.property.remove('DateRange');
+          thisWeekTasks.children.clear();
+        }
+      },
     );
     nextWeekTasks = TreeNode<TaskItem>(
       title: '下周',
@@ -79,6 +103,12 @@ class TaskCategories {
         }
         DayIndexRange range = nextWeekTasks.property['DateRange'];
         return task.startDate >= range.begin && task.startDate <= range.end;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          nextWeekTasks.property.remove('DateRange');
+          nextWeekTasks.children.clear();
+        }
       },
     );
     thisMonthTasks = TreeNode<TaskItem>(
@@ -101,6 +131,12 @@ class TaskCategories {
         }
         return task.startDate >= range.begin && task.startDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          thisMonthTasks.property.remove('DateRange');
+          thisMonthTasks.children.clear();
+        }
+      },
     );
     nextMonthTasks = TreeNode<TaskItem>(
       title: '下月',
@@ -117,6 +153,12 @@ class TaskCategories {
         DayIndexRange range = nextMonthTasks.property['DateRange'];
         return task.startDate >= range.begin && task.startDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          nextMonthTasks.property.remove('DateRange');
+          nextMonthTasks.children.clear();
+        }
+      },
     );
 
     futureTasks = TreeNode<TaskItem>(
@@ -128,6 +170,12 @@ class TaskCategories {
         }
         int future = futureTasks.property['DateRange'];
         return task.startDate >= future;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          futureTasks.property.remove('DateRange');
+          futureTasks.children.clear();
+        }
       },
     );
     actionTasks.addSubNode(todayTasks);
@@ -158,6 +206,12 @@ class TaskCategories {
         int yesterday = yesterdayLateTasks.property['DateRange'];
         return task.dueDate == yesterday;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          yesterdayLateTasks.property.remove('DateRange');
+          yesterdayLateTasks.children.clear();
+        }
+      },
     );
     beforeYesterdayLateTasks = TreeNode<TaskItem>(
       title: '前天',
@@ -165,6 +219,12 @@ class TaskCategories {
         beforeYesterdayLateTasks.property['DateRange'] ??= store.todayIndex - 2;
         int beforeYesterday = beforeYesterdayLateTasks.property['DateRange'];
         return task.dueDate == beforeYesterday;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          beforeYesterdayLateTasks.property.remove('DateRange');
+          beforeYesterdayLateTasks.children.clear();
+        }
       },
     );
     thisWeekLateTasks = TreeNode<TaskItem>(
@@ -177,6 +237,12 @@ class TaskCategories {
         }
         return task.dueDate >= range.begin && task.dueDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          thisWeekLateTasks.property.remove('DateRange');
+          thisWeekLateTasks.children.clear();
+        }
+      },
     );
     lastWeekLateTasks = TreeNode<TaskItem>(
       title: '上周',
@@ -184,6 +250,12 @@ class TaskCategories {
         lastWeekCompleteTasks.property['DateRange'] ??= lastWeekLateRange();
         DayIndexRange range = lastWeekCompleteTasks.property['DateRange'];
         return task.dueDate >= range.begin && task.dueDate <= range.end;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          lastWeekLateTasks.property.remove('DateRange');
+          lastWeekLateTasks.children.clear();
+        }
       },
     );
     thisMonthLateTasks = TreeNode<TaskItem>(
@@ -196,6 +268,12 @@ class TaskCategories {
         }
         return task.dueDate >= range.begin && task.dueDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          thisMonthLateTasks.property.remove('DateRange');
+          thisMonthLateTasks.children.clear();
+        }
+      },
     );
     lastMonthLateTasks = TreeNode<TaskItem>(
       title: '上月',
@@ -204,6 +282,12 @@ class TaskCategories {
         DayIndexRange range = lastMonthCompleteTasks.property['DateRange'];
         return task.dueDate >= range.begin && task.dueDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          lastMonthLateTasks.property.remove('DateRange');
+          lastMonthLateTasks.children.clear();
+        }
+      },
     );
     longTimeAgoLateTasks = TreeNode<TaskItem>(
       title: '以前',
@@ -211,6 +295,12 @@ class TaskCategories {
         longTimeAgoCompleteTasks.property['DateRange'] ??= longTimeAgoPoint();
         int ago = longTimeAgoCompleteTasks.property['DateRange'];
         return task.dueDate <= ago;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          longTimeAgoLateTasks.property.remove('DateRange');
+          longTimeAgoLateTasks.children.clear();
+        }
       },
     );
 
@@ -241,6 +331,12 @@ class TaskCategories {
         int yesterday = yesterdayCompleteTasks.property['DateRange'];
         return task.dueDate == yesterday;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          yesterdayCompleteTasks.property.remove('DateRange');
+          yesterdayCompleteTasks.children.clear();
+        }
+      },
     );
     beforeYesterdayCompleteTasks = TreeNode<TaskItem>(
       title: '前天',
@@ -248,6 +344,12 @@ class TaskCategories {
         beforeYesterdayCompleteTasks.property['DateRange'] ??= store.todayIndex - 2;
         int beforeYesterday = beforeYesterdayCompleteTasks.property['DateRange'];
         return task.dueDate == beforeYesterday;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          beforeYesterdayCompleteTasks.property.remove('DateRange');
+          beforeYesterdayCompleteTasks.children.clear();
+        }
       },
     );
     thisWeekCompleteTasks = TreeNode<TaskItem>(
@@ -260,6 +362,12 @@ class TaskCategories {
         }
         return task.dueDate >= range.begin && task.dueDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          thisWeekCompleteTasks.property.remove('DateRange');
+          thisWeekCompleteTasks.children.clear();
+        }
+      },
     );
     lastWeekCompleteTasks = TreeNode<TaskItem>(
       title: '上周',
@@ -267,6 +375,12 @@ class TaskCategories {
         lastWeekCompleteTasks.property['DateRange'] ??= lastWeekLateRange();
         DayIndexRange range = lastWeekCompleteTasks.property['DateRange'];
         return task.dueDate >= range.begin && task.dueDate <= range.end;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          lastWeekCompleteTasks.property.remove('DateRange');
+          lastWeekCompleteTasks.children.clear();
+        }
       },
     );
     thisMonthCompleteTasks = TreeNode<TaskItem>(
@@ -279,6 +393,12 @@ class TaskCategories {
         }
         return task.dueDate >= range.begin && task.dueDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          thisMonthCompleteTasks.property.remove('DateRange');
+          thisMonthCompleteTasks.children.clear();
+        }
+      },
     );
     lastMonthCompleteTasks = TreeNode<TaskItem>(
       title: '上月',
@@ -287,6 +407,12 @@ class TaskCategories {
         DayIndexRange range = lastMonthCompleteTasks.property['DateRange'];
         return task.dueDate >= range.begin && task.dueDate <= range.end;
       },
+      behavior: (arg) {
+        if (arg == 1) {
+          lastMonthCompleteTasks.property.remove('DateRange');
+          lastMonthCompleteTasks.children.clear();
+        }
+      },
     );
     longTimeAgoCompleteTasks = TreeNode<TaskItem>(
       title: '以前',
@@ -294,6 +420,12 @@ class TaskCategories {
         longTimeAgoCompleteTasks.property['DateRange'] ??= longTimeAgoPoint();
         int ago = longTimeAgoCompleteTasks.property['DateRange'];
         return task.dueDate <= ago;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          longTimeAgoCompleteTasks.property.remove('DateRange');
+          longTimeAgoCompleteTasks.children.clear();
+        }
       },
     );
     completeTasks.addSubNode(yesterdayCompleteTasks);
@@ -311,6 +443,7 @@ class TaskCategories {
   }
 
   GlobalStoreState store;
+  int _currentDayIndex = 0;
 
   TreeNode<TaskItem> allTasks;
 
@@ -343,6 +476,17 @@ class TaskCategories {
   TreeNode<TaskItem> thisMonthCompleteTasks;
   TreeNode<TaskItem> lastMonthCompleteTasks;
   TreeNode<TaskItem> longTimeAgoCompleteTasks;
+
+  void checkDate() {
+    var newCurrentDateIndex = store.calendarMap.currentDateIndexed;
+    if (_currentDayIndex != newCurrentDateIndex) {
+      _currentDayIndex = newCurrentDateIndex;
+      allTasks.actionAll(1);
+      store.taskSet.itemList.forEach((task){
+        allTasks.assigned(task);
+      });
+    }
+  }
 
   dynamic firstHalfWeek() {
     DayIndexRange weekRange = store.calendarMap.getCurrentWeekRange();

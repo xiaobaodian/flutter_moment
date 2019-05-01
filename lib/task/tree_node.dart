@@ -6,6 +6,7 @@ class TreeNode<I> {
   TreeNode({
     this.title,
     this.isMember,
+    this.behavior,
     this.onLostItem,
   });
 
@@ -15,7 +16,22 @@ class TreeNode<I> {
   List<TreeNode<I>> subNodes = [];
 
   bool Function(I item) isMember;
+  void Function(dynamic arg) behavior;
   void Function(I tem) onLostItem;
+
+  void action(dynamic parameters) {
+    if (behavior == null) return;
+    behavior(parameters);
+  }
+
+  void actionAll(dynamic arg) {
+    if (behavior != null) {
+      behavior(arg);
+    }
+    subNodes.forEach((node){
+      node.actionAll(arg);
+    });
+  }
 
   void addSubNode(TreeNode node) {
     subNodes.add(node);

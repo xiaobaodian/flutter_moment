@@ -10,10 +10,13 @@ class CalendarMap {
   final int startYear, endYear;
   final double monthBoxTitleHeight, monthBoxCellHeight;
 
-  DateTimeExt currentDate = DateTimeExt(DateTime.now());
-  int currentDateIndexed = 0;
+  //DateTimeExt get currentDate => DateTimeExt(DateTime.now());
+  DateTime get currentDate => DateTime.now();
   DateTime selectedDate = DateTime.now();
 
+  int _currentMonth = 0;
+  int _currentDay = 0;
+  int _currentDateIndexed = 0;
   int _weeksTotal = 0;
   int _daysTotal = 0;
 
@@ -69,14 +72,18 @@ class CalendarMap {
         }
       }
     }
-    currentDateIndexed = getDateIndex(currentDate.date);
 
-    debugPrint('currentDateIndexed: $currentDateIndexed');
+    debugPrint('currentDateIndexed: $_currentDateIndexed');
   }
 
-  void initCurrentDate() {
-    currentDate = DateTimeExt(DateTime.now());
-    currentDateIndexed = getDateIndex(currentDate.date);
+  int get currentDateIndexed {
+    var currentTime = DateTime.now();
+    if (_currentMonth != currentTime.month ||_currentDay != currentTime.day) {
+      _currentDateIndexed = getDateIndex(currentTime);
+      _currentMonth = currentTime.month;
+      _currentDay = currentTime.day;
+    }
+    return _currentDateIndexed;
   }
 
   /// [weeksTotal]返回从startYear到endYear期间的周数

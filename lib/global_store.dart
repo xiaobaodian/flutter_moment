@@ -115,10 +115,6 @@ class GlobalStoreState extends State<GlobalStore> {
     });
   }
 
-  void updateCurrentDate() {
-    calendarMap.initCurrentDate();
-  }
-
   Future initSystem() async {
     prefs = AppPreferences();
     localDir = await getLocalPath();

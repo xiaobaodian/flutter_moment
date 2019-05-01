@@ -175,7 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _store.updateCurrentDate();
     return WillPopScope(
       onWillPop: () async {
         debugPrint('退出了主页');
