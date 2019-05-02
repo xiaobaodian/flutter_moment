@@ -62,9 +62,10 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
         title: TabBar(
           controller: _controller,
           isScrollable: true,
+          labelStyle: TextStyle(fontSize: 18),
           indicatorSize: TabBarIndicatorSize.label,
           tabs: tabLabel
-              .map((label) => Text(label, style: TextStyle(fontSize: 17)))
+              .map((label) => Tab(text: label))
               .toList(),
         ),
         actions: <Widget>[

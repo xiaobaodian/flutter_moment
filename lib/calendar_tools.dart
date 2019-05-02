@@ -124,3 +124,13 @@ class DateTimeExt {
   }
 
 }
+
+class DayTime {
+  DayTime(this.hour, this.min);
+  int hour = 0;
+  int min = 0;
+
+  String toString() {
+    return '${hour == 0 ? "00" : hour.toString()}:${min == 0 ? "00" : hour.toString()}';
+  }
+}

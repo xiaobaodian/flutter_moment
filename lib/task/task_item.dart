@@ -88,6 +88,8 @@ class TaskItem extends BoxItem {
   int createDate;
   int startDate;
   int dueDate;
+  // 数据库第二版新增
+  int complete;
   String time;
   int allDay;
   //CycleDate cycleDate;

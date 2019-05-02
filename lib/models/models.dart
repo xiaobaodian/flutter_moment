@@ -807,6 +807,12 @@ class FocusEvent extends BoxItem {
 //    tagKeys.fromExtracting(noteLines, tagList);
 //  }
 
+  void addTask(TaskItem task) {
+    var newRichLine = RichLine(type: RichType.Task)
+        ..expandData = task;
+    noteLines.add(newRichLine);
+  }
+
   void copyWith(FocusEvent other) {
     dayIndex = other.dayIndex;
     focusItemBoxId = other.focusItemBoxId;
