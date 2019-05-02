@@ -81,7 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
     _calendarMap = _store.calendarMap;
-    _pageController = PageController(initialPage: _calendarMap.getDateIndex());
+    _pageController = PageController(
+      initialPage: _calendarMap.getDateIndex(),
+      //viewportFraction: 0.8,
+    );
     _pageStorageBucket = PageStorageBucket();
     _store.notifications.init(context);
 

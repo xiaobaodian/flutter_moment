@@ -433,7 +433,7 @@ class TaskCategories {
     completeTasks.addSubNode(thisWeekCompleteTasks);
     completeTasks.addSubNode(lastWeekCompleteTasks);
     completeTasks.addSubNode(thisMonthCompleteTasks);
-    completeTasks.addSubNode(lastMonthLateTasks);
+    completeTasks.addSubNode(lastMonthCompleteTasks);
     completeTasks.addSubNode(longTimeAgoCompleteTasks);
 
     /// 装配大类

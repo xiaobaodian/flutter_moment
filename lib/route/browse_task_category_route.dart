@@ -57,6 +57,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
   @override
   void dispose() {
     super.dispose();
+    _controller?.dispose();
   }
 
   @override
@@ -64,6 +65,16 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
     return Scaffold(
       appBar: AppBar(
         title: Text('任务'),
+        bottom: TabBar(
+          controller: _controller,
+          //isScrollable: true,
+          labelColor: Colors.white,
+          //unselectedLabelColor: Colors.white30,
+          indicatorSize: TabBarIndicatorSize.label,
+          tabs: tabLabel
+              .map((label) => Tab(text: label))
+              .toList(),
+        ),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.description),
@@ -99,29 +110,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
           ),
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          SizedBox(
-            height: 36,
-            width: double.infinity,
-            child: TabBar(
-              controller: _controller,
-              isScrollable: true,
-              indicatorSize: TabBarIndicatorSize.label,
-              tabs: tabLabel
-                  .map((label) => Text(label,
-                      style: TextStyle(fontSize: 17, color: Colors.black54)))
-                  .toList(),
-            ),
-          ),
-          Divider(
-            height: 1,
-          ),
-          Expanded(
-            child: buildBody(context, _store),
-          ),
-        ],
-      ),
+      body: buildBody(context, _store),
     );
   }
 
