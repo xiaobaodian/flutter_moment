@@ -122,15 +122,33 @@ class DateTimeExt {
     }
     return days;
   }
-
 }
 
-class DayTime {
-  DayTime(this.hour, this.min);
+class TimePoint {
+  TimePoint(this.hour, this.min);
   int hour = 0;
   int min = 0;
 
+  factory TimePoint.fromString(String str) {
+    var time = str.split(':');
+    return TimePoint(int.parse(time[0]), int.parse(time[1]));
+  }
+
   String toString() {
     return '${hour == 0 ? "00" : hour.toString()}:${min == 0 ? "00" : hour.toString()}';
+  }
+}
+
+class TimeRange {
+  TimeRange({
+    this.start,
+    this.end
+  });
+
+  TimePoint start;
+  TimePoint end;
+
+  String toString() {
+    return '${start.toString()} - ${end.toString()}';
   }
 }
