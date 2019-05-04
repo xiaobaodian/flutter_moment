@@ -372,12 +372,12 @@ class PersonItem extends ReferencesBoxItem
     createdAt,
     updatedAt,
   }) : super(
-          boxId: boxId,
-          count: count,
+    boxId: boxId,
+    count: count,
     objectId: objectId,
     createdAt: createdAt,
     updatedAt: updatedAt,
-        ) {
+  ) {
     setMixinImageSource(photo);
     setMixinDarkSource('assets/image/defaultPersonPhoto1.png');
     setMixinLightSource('assets/image/defaultPersonPhoto2.png');
@@ -617,11 +617,11 @@ class DailyRecord extends BoxItem {
     createdAt,
     updatedAt,
   }) : super(
-          boxId: boxId,
-          objectId: objectId,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-        );
+    boxId: boxId,
+    objectId: objectId,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
 
   int dayIndex = -1;
   String weather = '';
@@ -668,10 +668,10 @@ class DailyRecord extends BoxItem {
           String text;
           for (int i = 0; i < event.personKeys.keyList.length; i++) {
             if (i == 0) {
-              text = store.getPersonItemFromId(event.personKeys.keyList[i]).name;
+              text = store.personSet.getItemFromId(event.personKeys.keyList[i]).name;
             } else {
               text = text +
-                  "、${store.getPersonItemFromId(event.personKeys.keyList[i]).name}";
+                  "、${store.personSet.getItemFromId(event.personKeys.keyList[i]).name}";
             }
           }
           richLines.add(RichLine(
@@ -687,11 +687,9 @@ class DailyRecord extends BoxItem {
           String text;
           for (int i = 0; i < event.placeKeys.keyList.length; i++) {
             if (i == 0) {
-              //text = store.getPlaceItemFromId(event.placeKeys[i]).title;
               text =
                   store.placeSet.getItemFromId(event.placeKeys.keyList[i]).title;
             } else {
-              //text = text + "、${store.getPlaceItemFromId(event.placeKeys[i]).title}";
               text = text +
                   "、${store.placeSet.getItemFromId(event.placeKeys.keyList[i]).title}";
             }
@@ -725,6 +723,15 @@ class DailyRecord extends BoxItem {
     });
   }
 
+  void addTask(TaskItem task, FocusEvent focusEvent) {
+    var objectEvent = focusEvents.firstWhere((event) => event.boxId == focusEvent.boxId,
+      orElse: (){
+        return FocusEvent(dayIndex: this.dayIndex, focusItemBoxId: focusEvent.focusItemBoxId);
+      },
+    );
+    objectEvent.addTask(task);
+  }
+
   void copyWith(DailyRecord other) {
     dayIndex = other.dayIndex;
     weather = other.weather;
@@ -747,12 +754,12 @@ class DailyRecord extends BoxItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'dayIndex': dayIndex,
-        'weather': weather,
-        'objectId': objectId,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-      };
+    'dayIndex': dayIndex,
+    'weather': weather,
+    'objectId': objectId,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+  };
 }
 
 class FocusEvent extends BoxItem {
@@ -854,16 +861,16 @@ class FocusEvent extends BoxItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'dayIndex': dayIndex,
-        'focusItemBoxId': focusItemBoxId,
-        'note': RichSource.getJsonFromRichLine(noteLines),
-        'personTags': personKeys.toString(),
-        'placeTags': placeKeys.toString(),
-        'tags': tagKeys.toString(),
-        'objectId': objectId,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-      };
+    'dayIndex': dayIndex,
+    'focusItemBoxId': focusItemBoxId,
+    'note': RichSource.getJsonFromRichLine(noteLines),
+    'personTags': personKeys.toString(),
+    'placeTags': placeKeys.toString(),
+    'tags': tagKeys.toString(),
+    'objectId': objectId,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+  };
 }
 
 mixin DetailsListMixin<T> {

@@ -181,10 +181,6 @@ class GlobalStoreState extends State<GlobalStore> {
     return s;
   }
 
-  // person
-
-  PersonItem getPersonItemFromId(int id) => personSet.getItemFromId(id);
-
   // DailyRecords
 
   DailyRecord get selectedDailyRecord =>
@@ -219,7 +215,7 @@ class GlobalStoreState extends State<GlobalStore> {
   // FocusEvent  replaceExpandDataWithTasks
 
   void replaceExpandDataWithTasks(FocusEvent event) {
-    List<RichLine> lostList = List<RichLine>();
+    var lostList = List<RichLine>();
     for (var line in event.noteLines) {
       if (line.type == RichType.Task && line.expandData is int) {
         int id = line.expandData;
@@ -235,6 +231,7 @@ class GlobalStoreState extends State<GlobalStore> {
       lostList.forEach((line){
         event.noteLines.remove(line);
       });
+      focusEventSet.changeItem(event);
     }
   }
 
@@ -312,9 +309,9 @@ class GlobalStoreState extends State<GlobalStore> {
 
       // 测试用
       result.newKeys
-          .forEach((id) => print('新增人物引用：${getPersonItemFromId(id).name}'));
+          .forEach((id) => print('新增人物引用：${personSet.getItemFromId(id).name}'));
       result.unusedKeys
-          .forEach((id) => print('减少人物引用：${getPersonItemFromId(id).name}'));
+          .forEach((id) => print('减少人物引用：${personSet.getItemFromId(id).name}'));
 
       result.newKeys.forEach((id) => personSet.addReferencesByBoxId(id));
       result.unusedKeys.forEach((id) => personSet.minusReferencesByBoxId(id));
@@ -454,7 +451,7 @@ class GlobalStoreState extends State<GlobalStore> {
     return getFocusEventFormDailyRecord(dailyRecord, task.focusItemId);
   }
 
-  // build & inherited
+  /// build & inherited
 
   @override
   Widget build(BuildContext context) {

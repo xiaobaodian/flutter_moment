@@ -194,6 +194,7 @@ class RichItem extends RichLine {
 
   String image;
   bool canChanged = true;
+  int moveToDayIndex = 0;
   RichSource source;
 
   Key textkey;
