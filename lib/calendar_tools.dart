@@ -125,13 +125,42 @@ class DateTimeExt {
 }
 
 class TimePoint {
-  TimePoint(this.hour, this.min);
-  int hour = 0;
-  int min = 0;
+  TimePoint() {
+    hour = -1;
+    min = -1;
+  }
+  TimePoint.build(this.hour, this.min);
+
+  int hour;
+  int min;
+
+  bool get isEmpty => hour == -1;
+
+  void clear() {
+    hour = -1;
+    min = -1;
+  }
+
+  int compareTo(TimePoint other) {
+    if (hour > other.hour) return 1;
+    if (hour < other.hour) return -1;
+    if (min > other.min) return 1;
+    if (min < other.min) return -1;
+    return 0;
+  }
+
+  int compareToDateTime(DateTime date) {
+    return compareTo(TimePoint.build(date.hour, date.minute));
+  }
+
+  void copyWith(TimePoint other) {
+    hour = other.hour;
+    min = other.min;
+  }
 
   factory TimePoint.fromString(String str) {
     var time = str.split(':');
-    return TimePoint(int.parse(time[0]), int.parse(time[1]));
+    return TimePoint.build(int.parse(time[0]), int.parse(time[1]));
   }
 
   String toString() {

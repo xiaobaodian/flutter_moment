@@ -18,14 +18,12 @@ class TableDefinition {
 }
 
 class DataSource {
-  DataSource({
-    this.version = 1,
-  }){
+  DataSource(){
     initTable();
   }
 
   String _path;
-  int version;
+  int version = 2;
   Map<String, TableDefinition> tables = Map<String, TableDefinition>();
   Database _database;
 
@@ -45,6 +43,7 @@ class DataSource {
     if (_path == null) {
       await init();
     }
+    debugPrint('当前数据库版本: $version');
     _database = await openDatabase(_path, version: version,
       onCreate: (Database db, int version) async {
         await db.execute(
@@ -61,6 +60,17 @@ class DataSource {
             'CREATE TABLE ${tables['FocusEvent'].name} (${tables['FocusEvent'].structure})');
         await db.execute(
             'CREATE TABLE ${tables['TaskItem'].name} (${tables['TaskItem'].structure})');
+      },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        debugPrint('database onUpgrade -> oldVersion: $oldVersion, newVersion: $newVersion');
+        if (newVersion == 3) {
+          await db.execute(
+              'ALTER TABLE ${tables['TaskItem'].name} ADD COLUMN completeDate integer');
+          await db.execute(
+              'ALTER TABLE ${tables['TaskItem'].name} ADD COLUMN startTimeStr text');
+          await db.execute(
+              'ALTER TABLE ${tables['TaskItem'].name} ADD COLUMN endTimeStr text');
+        }
       }
     );
   }
@@ -175,6 +185,9 @@ class DataSource {
         createDate integer,
         startDate integer,
         dueDate integer,
+        completeDate integer,
+        startTimeStr text,
+        endTimeStr text,
         time text,
         allDay integer,
         subTasks text,

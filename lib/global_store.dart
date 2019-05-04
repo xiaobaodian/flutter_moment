@@ -70,7 +70,7 @@ class GlobalStoreState extends State<GlobalStore> {
     initSystem();
 
     taskCategories = TaskCategories(this);
-    dataSource = DataSource(version: 1);
+    dataSource = DataSource();
     Future.wait([
       dataSource.openDataBase().then((_){
         debugPrint('已打开数据库');

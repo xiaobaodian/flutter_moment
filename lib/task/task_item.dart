@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/models/models.dart';
 
 enum TaskState {
@@ -42,6 +43,9 @@ class TaskItem extends BoxItem {
     this.createDate = 0,
     this.startDate = 0,
     this.dueDate = 0,
+    this.completeDate = 0,
+    String startTimeStr = '',
+    String endTimeStr = '',
     this.time = '',
     this.allDay = 1,
     //this.cycleDate,
@@ -54,29 +58,16 @@ class TaskItem extends BoxItem {
     this.delegate = 0,
   }): super(boxId: boxId) {
     checkBoxKey = GlobalKey();
-  }
-
-  TaskItem.copyWith(TaskItem other){
-    this.boxId = other.boxId;
-    this.focusItemId = other.focusItemId;
-    this.title = other.title;
-    this.comment = other.comment;
-    this.placeItemId = other.placeItemId;
-    this.priority = other.priority;
-    this.state = other.state;
-    this.createDate = other.createDate;
-    this.startDate = other.startDate;
-    this.dueDate = other.dueDate;
-    this.time = other.time;
-    this.allDay = other.allDay;
-    //this.cycleDate,
-    this.subTasks = other.subTasks;
-    this.context = other.context;
-    this.tags = other.tags;
-    this.remindPlan = other.remindPlan;
-    this.shareTo = other.shareTo;
-    this.author = other.author;
-    this.delegate = other.delegate;
+    if (startTimeStr == null) {
+      startTime = TimePoint();
+    } else {
+      startTime = TimePoint.fromString(startTimeStr);
+    }
+    if (endTimeStr == null) {
+      endTime = TimePoint();
+    } else {
+      endTime = TimePoint.fromString(endTimeStr);
+    }
   }
 
   int focusItemId;
@@ -89,7 +80,10 @@ class TaskItem extends BoxItem {
   int startDate;
   int dueDate;
   // 数据库第二版新增
-  int complete;
+  int completeDate;
+  TimePoint startTime;
+  TimePoint endTime;
+
   String time;
   int allDay;
   //CycleDate cycleDate;
@@ -107,6 +101,32 @@ class TaskItem extends BoxItem {
     return '8:30 - 11:15';
   }
 
+  TaskItem.copyWith(TaskItem other){
+    this.boxId = other.boxId;
+    this.focusItemId = other.focusItemId;
+    this.title = other.title;
+    this.comment = other.comment;
+    this.placeItemId = other.placeItemId;
+    this.priority = other.priority;
+    this.state = other.state;
+    this.createDate = other.createDate;
+    this.startDate = other.startDate;
+    this.dueDate = other.dueDate;
+    this.completeDate = other.completeDate;
+    this.startTime.copyWith(other.startTime);
+    this.endTime.copyWith(other.endTime);
+    this.time = other.time;
+    this.allDay = other.allDay;
+    //this.cycleDate,
+    this.subTasks = other.subTasks;
+    this.context = other.context;
+    this.tags = other.tags;
+    this.remindPlan = other.remindPlan;
+    this.shareTo = other.shareTo;
+    this.author = other.author;
+    this.delegate = other.delegate;
+  }
+
   factory TaskItem.fromJson(Map<String, dynamic> json) {
     return TaskItem(
       boxId: json['boxId'],
@@ -119,6 +139,9 @@ class TaskItem extends BoxItem {
       createDate: json['createDate'],
       startDate: json['startDate'],
       dueDate: json['dueDate'],
+      completeDate: json['completeDate'],
+      startTimeStr: json['startTimeStr'],
+      endTimeStr: json['endTimeStr'],
       time: json['time'],
       allDay: json['allDay'],
       //cycleDate: json['cycleDate'],
@@ -142,6 +165,9 @@ class TaskItem extends BoxItem {
     'createDate': createDate,
     'startDate': startDate,
     'dueDate': dueDate,
+    'completeDate': completeDate,
+    'startTimeStr': startTime.toString(),
+    'endTimeStr': endTime.toString(),
     'time': time,
     'allDay': allDay,
     //'cycleDate': cycleDate,

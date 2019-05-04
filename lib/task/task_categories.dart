@@ -321,6 +321,11 @@ class TaskCategories {
           task.startDate = task.createDate;
           store.taskSet.changeItem(task);
         }
+        // 测试时使用
+        if (task.completeDate == null || task.completeDate == 0) {
+          task.completeDate = task.createDate;
+          store.taskSet.changeItem(task);
+        }
         return task.state == TaskState.Complete;
       },
     );
@@ -329,7 +334,7 @@ class TaskCategories {
       isMember: (task){
         yesterdayCompleteTasks.property['DateRange'] ??= store.todayIndex - 1;
         int yesterday = yesterdayCompleteTasks.property['DateRange'];
-        return task.dueDate == yesterday;
+        return task.completeDate == yesterday;
       },
       behavior: (arg) {
         if (arg == 1) {
@@ -343,7 +348,7 @@ class TaskCategories {
       isMember: (task){
         beforeYesterdayCompleteTasks.property['DateRange'] ??= store.todayIndex - 2;
         int beforeYesterday = beforeYesterdayCompleteTasks.property['DateRange'];
-        return task.dueDate == beforeYesterday;
+        return task.completeDate == beforeYesterday;
       },
       behavior: (arg) {
         if (arg == 1) {
@@ -360,7 +365,7 @@ class TaskCategories {
         if (range == false) {
           return false;
         }
-        return task.dueDate >= range.begin && task.dueDate <= range.end;
+        return task.completeDate >= range.begin && task.completeDate <= range.end;
       },
       behavior: (arg) {
         if (arg == 1) {
@@ -374,7 +379,7 @@ class TaskCategories {
       isMember: (task){
         lastWeekCompleteTasks.property['DateRange'] ??= lastWeekLateRange();
         DayIndexRange range = lastWeekCompleteTasks.property['DateRange'];
-        return task.dueDate >= range.begin && task.dueDate <= range.end;
+        return task.completeDate >= range.begin && task.completeDate <= range.end;
       },
       behavior: (arg) {
         if (arg == 1) {
@@ -391,7 +396,7 @@ class TaskCategories {
         if (range == false) {
           return false;
         }
-        return task.dueDate >= range.begin && task.dueDate <= range.end;
+        return task.completeDate >= range.begin && task.completeDate <= range.end;
       },
       behavior: (arg) {
         if (arg == 1) {
@@ -405,7 +410,7 @@ class TaskCategories {
       isMember: (task){
         lastMonthCompleteTasks.property['DateRange'] ??= lastMonthLateRange();
         DayIndexRange range = lastMonthCompleteTasks.property['DateRange'];
-        return task.dueDate >= range.begin && task.dueDate <= range.end;
+        return task.completeDate >= range.begin && task.completeDate <= range.end;
       },
       behavior: (arg) {
         if (arg == 1) {
@@ -419,7 +424,7 @@ class TaskCategories {
       isMember: (task){
         longTimeAgoCompleteTasks.property['DateRange'] ??= longTimeAgoPoint();
         int ago = longTimeAgoCompleteTasks.property['DateRange'];
-        return task.dueDate <= ago;
+        return task.completeDate <= ago;
       },
       behavior: (arg) {
         if (arg == 1) {
