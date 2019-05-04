@@ -329,6 +329,20 @@ class TaskCategories {
         return task.state == TaskState.Complete;
       },
     );
+    todayCompleteTasks = TreeNode<TaskItem>(
+      title: '今天',
+      isMember: (task){
+        todayCompleteTasks.property['DateRange'] ??= store.todayIndex;
+        int today = todayCompleteTasks.property['DateRange'];
+        return task.completeDate == today;
+      },
+      behavior: (arg) {
+        if (arg == 1) {
+          todayCompleteTasks.property.remove('DateRange');
+          todayCompleteTasks.children.clear();
+        }
+      },
+    );
     yesterdayCompleteTasks = TreeNode<TaskItem>(
       title: '昨天',
       isMember: (task){
@@ -433,6 +447,7 @@ class TaskCategories {
         }
       },
     );
+    completeTasks.addSubNode(todayCompleteTasks);
     completeTasks.addSubNode(yesterdayCompleteTasks);
     completeTasks.addSubNode(beforeYesterdayCompleteTasks);
     completeTasks.addSubNode(thisWeekCompleteTasks);
@@ -474,6 +489,7 @@ class TaskCategories {
 
   TreeNode<TaskItem> completeTasks;
 
+  TreeNode<TaskItem> todayCompleteTasks;
   TreeNode<TaskItem> yesterdayCompleteTasks;
   TreeNode<TaskItem> beforeYesterdayCompleteTasks;
   TreeNode<TaskItem> thisWeekCompleteTasks;

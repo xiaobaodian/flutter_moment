@@ -71,9 +71,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
           labelColor: Colors.white,
           //unselectedLabelColor: Colors.white30,
           indicatorSize: TabBarIndicatorSize.label,
-          tabs: tabLabel
-              .map((label) => Tab(text: label))
-              .toList(),
+          tabs: tabLabel.map((label) => Tab(text: label)).toList(),
         ),
         actions: <Widget>[
           IconButton(
@@ -139,9 +137,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
 
   List<Widget> _buildSlivers(BuildContext context, TreeNode<TaskItem> node) {
     List<Widget> slivers = List<Widget>();
-    for (int i = 0;
-    i < node.subNodes.length;
-    i++) {
+    for (int i = 0; i < node.subNodes.length; i++) {
       if (node.subNodes[i].children.isNotEmpty) {
         slivers.add(SliverStickyHeader(
           header: Container(
@@ -158,9 +154,8 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
           ),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-                  (context, index) => getTaskItem(context, node, i, index),
-              childCount:
-              node.subNodes[i].children.length,
+              (context, index) => getTaskItem(context, node, i, index),
+              childCount: node.subNodes[i].children.length,
             ),
           ),
         ));
@@ -169,7 +164,8 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
     return slivers;
   }
 
-  Widget getTaskItem(BuildContext context, TreeNode<TaskItem> node, int nodeIndex, int index) {
+  Widget getTaskItem(
+      BuildContext context, TreeNode<TaskItem> node, int nodeIndex, int index) {
     TaskItem task = node.subNodes[nodeIndex].children[index];
     return buildTaskItem(_store, context, task);
   }
@@ -186,10 +182,18 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
             value: task.state == TaskState.Complete,
             onChanged: (isSelected) {
               setState(() {
-                task.state =
-                    isSelected ? TaskState.Complete : TaskState.StandBy;
-                store.taskSet.changeItem(task);
-                store.taskCategories.allTasks.change(task);
+                if (isSelected) {
+                  task
+                    ..state = TaskState.Complete
+                    ..completeDate = store.todayIndex;
+                } else {
+                  task
+                    ..state = TaskState.StandBy
+                    ..completeDate = 0;
+                }
+                store
+                  ..taskSet.changeItem(task)
+                  ..taskCategories.allTasks.change(task);
               });
             }),
       ),

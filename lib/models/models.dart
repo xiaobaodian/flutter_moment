@@ -768,11 +768,11 @@ class FocusEvent extends BoxItem {
     createdAt,
     updatedAt,
   }) : super(
-          boxId: boxId,
-          objectId: objectId,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-        ) {
+      boxId: boxId,
+      objectId: objectId,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    ) {
     noteLines = RichSource.getRichLinesFromJson(note);
     personKeys.fromString(personTags);
     placeKeys.fromString(placeTags);
@@ -808,9 +808,21 @@ class FocusEvent extends BoxItem {
 //  }
 
   void addTask(TaskItem task) {
-    var newRichLine = RichLine(type: RichType.Task)
-        ..expandData = task;
+    var newRichLine = RichLine(type: RichType.Task)..expandData = task;
     noteLines.add(newRichLine);
+  }
+
+  void removeTask(TaskItem task) {
+    noteLines.removeWhere((line) {
+      if (line.type != RichType.Task) {
+        return false;
+      }
+      if (line.expandData is int) {
+        return line.expandData == task.boxId;
+      } else if (line.expandData is TaskItem) {
+        return (line.expandData as TaskItem).boxId == task.boxId;
+      }
+    });
   }
 
   void copyWith(FocusEvent other) {

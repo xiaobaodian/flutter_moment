@@ -225,11 +225,20 @@ class RichNoteState extends State<RichNote> {
             value: task.state == TaskState.Complete,
             onChanged: (isSelected) {
               setState(() {
-                task.state =
-                    isSelected ? TaskState.Complete : TaskState.StandBy;
+//                task.state = isSelected ? TaskState.Complete : TaskState.StandBy;
+                if (isSelected) {
+                  task
+                    ..state = TaskState.Complete
+                    ..completeDate = widget.store.todayIndex;
+                } else {
+                  task
+                    ..state = TaskState.StandBy
+                    ..completeDate = 0;
+                }
                 if (widget.isNotEditable) {
-                  widget.store.taskSet.changeItem(task);
-                  widget.store.taskCategories.allTasks.change(task);
+                  widget.store
+                    ..taskSet.changeItem(task)
+                    ..taskCategories.allTasks.change(task);
                 }
               });
             });
