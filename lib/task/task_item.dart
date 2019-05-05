@@ -58,16 +58,8 @@ class TaskItem extends BoxItem {
     this.delegate = 0,
   }): super(boxId: boxId) {
     checkBoxKey = GlobalKey();
-    if (startTimeStr == null) {
-      startTime = TimePoint();
-    } else {
-      startTime = TimePoint.fromString(startTimeStr);
-    }
-    if (endTimeStr == null) {
-      endTime = TimePoint();
-    } else {
-      endTime = TimePoint.fromString(endTimeStr);
-    }
+    startTime.loadFromString(startTimeStr);
+    endTime.loadFromString(endTimeStr);
   }
 
   int focusItemId;
@@ -81,8 +73,8 @@ class TaskItem extends BoxItem {
   int dueDate;
   // 数据库第二版新增
   int completeDate;
-  TimePoint startTime;
-  TimePoint endTime;
+  TimePoint startTime = TimePoint();
+  TimePoint endTime = TimePoint();
 
   String time;
   int allDay;
@@ -102,6 +94,7 @@ class TaskItem extends BoxItem {
   }
 
   TaskItem.copyWith(TaskItem other){
+    assert(other != null);
     this.boxId = other.boxId;
     this.focusItemId = other.focusItemId;
     this.title = other.title;

@@ -15,7 +15,7 @@ class TaskCategories {
       title: '待执行',
       isMember: (task) {
         // 测试时使用
-        if (task.dueDate == 0) {
+        if (task.boxId > 0 && task.dueDate == 0) {
           task.dueDate = task.createDate;
           task.startDate = task.createDate;
           store.taskSet.changeItem(task);
@@ -191,7 +191,7 @@ class TaskCategories {
       title: '逾期',
       isMember: (task){
         // 测试时使用
-        if (task.dueDate == 0) {
+        if (task.boxId > 0 && task.dueDate == 0) {
           task.dueDate = task.createDate;
           task.startDate = task.createDate;
           store.taskSet.changeItem(task);
@@ -316,15 +316,17 @@ class TaskCategories {
       title: '已完成',
       isMember: (task) {
         // 测试时使用
-        if (task.dueDate == 0) {
+        if (task.boxId > 0 && task.dueDate == 0) {
           task.dueDate = task.createDate;
           task.startDate = task.createDate;
           store.taskSet.changeItem(task);
         }
         // 测试时使用
-        if (task.completeDate == null || task.completeDate == 0) {
-          task.completeDate = task.createDate;
-          store.taskSet.changeItem(task);
+        if (task.boxId > 0) {
+          if (task.completeDate == null || task.completeDate == 0) {
+            task.completeDate = task.createDate;
+            store.taskSet.changeItem(task);
+          }
         }
         return task.state == TaskState.Complete;
       },

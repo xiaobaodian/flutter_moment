@@ -163,6 +163,13 @@ class TimePoint {
     return TimePoint.build(int.parse(time[0]), int.parse(time[1]));
   }
 
+  void loadFromString(String str) {
+    if (str == null) return;
+    var time = str.split(':');
+    hour = int.parse(time[0]);
+    min = int.parse(time[1]);
+  }
+
   String toString() {
     return '${hour == 0 ? "00" : hour.toString()}:${min == 0 ? "00" : hour.toString()}';
   }
