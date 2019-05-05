@@ -50,7 +50,7 @@ class RichNote extends StatefulWidget {
     this.richNoteLayout,
     this.onTap,
     this.onLongTap,
-  })  : isEditable = true,
+  }): isEditable = true,
         isFixed = false,
         focusEvent = richSource.focusEvent {
     richSource.richNote = this;
@@ -106,8 +106,8 @@ class RichNote extends StatefulWidget {
   List<RichLine> exportingRichLists() {
     return richSource.exportingRichLists();
   }
-  void sendLineType(RichType type) {
-    _state.lineTypeByHasFocus(type);
+  void focusIsChanging() {
+    _state.onFocusChanging();
   }
 
   @override
@@ -122,6 +122,13 @@ class RichNoteState extends State<RichNote> {
   RichNoteLayout layout;
   BarType barType, oldBarType;
   bool InitialInto;
+
+  ///[currentRichItem]当前光标所在的编辑行
+  ///
+  ///[RichItem]的[focusNode]字段加入了监听，当获取焦点事件发生时调用[RichNote]的
+  ///[focusIsChanging]方法通报焦点发生了改变，[focusIsChanging]就立即
+  ///调用[onFocusChanging]方法获取[currentRichItem]。
+  RichItem currentRichItem;
 
   @override
   void initState() {
@@ -154,6 +161,7 @@ class RichNoteState extends State<RichNote> {
         }
       });
       widget.richSource.richLineList = null;
+      widget._state = null;
     }
   }
 
@@ -225,7 +233,6 @@ class RichNoteState extends State<RichNote> {
             value: task.state == TaskState.Complete,
             onChanged: (isSelected) {
               setState(() {
-//                task.state = isSelected ? TaskState.Complete : TaskState.StandBy;
                 if (isSelected) {
                   task
                     ..state = TaskState.Complete
@@ -445,23 +452,22 @@ class RichNoteState extends State<RichNote> {
     return SizedBox(height: layout.segmentSpacing);
   }
 
-  int _getCurrentLineIndex() {
-    int index = -1;
-    for (int i = 0; i < widget.richSource.richLineList.length; i++) {
-      RichItem item = (widget.richSource.richLineList[i]);
-      if (item.focusNode.hasFocus) {
-        index = i;
-        break;
-      }
-    }
-    return index;
-  }
+//  int _getCurrentLineIndex() {
+//    int index = -1;
+//    for (int i = 0; i < widget.richSource.richLineList.length; i++) {
+//      RichItem item = (widget.richSource.richLineList[i]);
+//      if (item.focusNode.hasFocus) {
+//        index = i;
+//        break;
+//      }
+//    }
+//    return index;
+//  }
 
-  void lineTypeByHasFocus(RichType type) {
-    debugPrint('LineTypeByHasFocus -> ${type.toString()}');
-    RichType currentType = getCurrentRichType();
-    debugPrint('currentType -> ${currentType.toString()}');
-    changeLineTypeIconsBar(currentType);
+  void onFocusChanging() {
+    currentRichItem = _getCurrentRichItem();
+    debugPrint('currentType -> ${currentRichItem.type.toString()}');
+    changeLineTypeIconsBar(currentRichItem.type);
   }
 
   void changeLineTypeIconsBar(RichType type) {
@@ -482,23 +488,14 @@ class RichNoteState extends State<RichNote> {
     }
   }
 
-  FocusNode _getCurrentFocusNode() {
-    FocusNode node;
-    for (int i = 0; i < widget.richSource.richLineList.length; i++) {
-      RichItem item = (widget.richSource.richLineList[i]);
-      if (item.focusNode.hasFocus) {
-        node = item.focusNode;
-        break;
-      }
-    }
-    return node;
-  }
-
   RichItem _getCurrentRichItem() {
     RichItem item;
     for (int i = 0; i < widget.richSource.richLineList.length; i++) {
       item = (widget.richSource.richLineList[i]);
-      if (item.focusNode.hasFocus) break;
+      if (item.focusNode.hasFocus) {
+        item.lineIndex = i;
+        break;
+      }
     }
     return item;
   }
@@ -510,80 +507,124 @@ class RichNoteState extends State<RichNote> {
 
   void removeCurrentLine() {
     if (widget.richSource.richLineList.length == 1) return;
-    int index = _getCurrentLineIndex();
-    if (index > -1) {
-      RichItem tempItem = widget.richSource.richLineList[index];
-      if (tempItem.type == RichType.Task) {
-        //widget.store.removeTaskItem(tempItem.expandData);
-        TaskItem task = tempItem.expandData;
-        widget.store.taskSet.removeItem(task);
-      }
-      setState(() {
-        widget.richSource.richLineList.removeAt(index);
-      });
-      Future.delayed(const Duration(milliseconds: 200), () {
-        tempItem.dispose();
-      });
-      Future.delayed(const Duration(milliseconds: 200), () {
-        RichItem item = widget.richSource.richLineList[index];
-        item.controller.selection = TextSelection.fromPosition(TextPosition(
-          affinity: TextAffinity.downstream,
-          offset: 1,
-        ));
-        _requestFocus(item?.focusNode);
-      });
-    }
-  }
 
-  RichType getCurrentRichType() {
-    RichType type;
-    int index = _getCurrentLineIndex();
-    if (index > -1) {
+    var temp = _getCurrentRichItem();
+    int index = temp.lineIndex;
+    if (temp.type == RichType.Task) {
+      TaskItem task = temp.expandData;
+      widget.store.taskSet.removeItem(task);
+    }
+    setState(() {
+      widget.richSource.richLineList.removeAt(index);
+    });
+    Future.delayed(const Duration(milliseconds: 200), () {
+      temp.dispose();
+    });
+    Future.delayed(const Duration(milliseconds: 200), () {
       RichItem item = widget.richSource.richLineList[index];
-      type = item.type;
-    }
-    return type;
+      item.controller.selection = TextSelection.fromPosition(TextPosition(
+        affinity: TextAffinity.downstream,
+        offset: 1,
+      ));
+      _requestFocus(item?.focusNode);
+    });
+
+
+
+//    int index = _getCurrentLineIndex();
+//    if (index > -1) {
+//      RichItem tempItem = widget.richSource.richLineList[index];
+//      if (tempItem.type == RichType.Task) {
+//        //widget.store.removeTaskItem(tempItem.expandData);
+//        TaskItem task = tempItem.expandData;
+//        widget.store.taskSet.removeItem(task);
+//      }
+//      setState(() {
+//        widget.richSource.richLineList.removeAt(index);
+//      });
+//      Future.delayed(const Duration(milliseconds: 200), () {
+//        tempItem.dispose();
+//      });
+//      Future.delayed(const Duration(milliseconds: 200), () {
+//        RichItem item = widget.richSource.richLineList[index];
+//        item.controller.selection = TextSelection.fromPosition(TextPosition(
+//          affinity: TextAffinity.downstream,
+//          offset: 1,
+//        ));
+//        _requestFocus(item?.focusNode);
+//      });
+//    }
   }
 
-  RichItem getCurrentRichItem() {
-    RichItem item;
-    int index = _getCurrentLineIndex();
-    if (index > -1) {
-      item = widget.richSource.richLineList[index];
-    }
-    return item;
-  }
+//  RichType getCurrentRichType() {
+//    RichType type;
+//    int index = _getCurrentLineIndex();
+//    if (index > -1) {
+//      RichItem item = widget.richSource.richLineList[index];
+//      type = item.type;
+//    }
+//    return type;
+//  }
+
+//  RichItem getCurrentRichItem() {
+//    RichItem item;
+//    int index = _getCurrentLineIndex();
+//    if (index > -1) {
+//      item = widget.richSource.richLineList[index];
+//    }
+//    return item;
+//  }
 
   void changeLineTypeTo(RichType type) {
-    int index = _getCurrentLineIndex();
-    if (index > -1) {
-      RichItem item = widget.richSource.richLineList[index];
-      setState(() {
-        item.changeTypeTo(type);
-      });
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _requestFocus(item?.focusNode);
-      });
-    }
+    setState(() {
+      currentRichItem?.changeTypeTo(type);
+    });
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _requestFocus(currentRichItem?.focusNode);
+    });
+
+//    int index = _getCurrentLineIndex();
+//    if (index > -1) {
+//      RichItem item = widget.richSource.richLineList[index];
+//      setState(() {
+//        item.changeTypeTo(type);
+//      });
+//      Future.delayed(const Duration(milliseconds: 100), () {
+//        _requestFocus(item?.focusNode);
+//      });
+//    }
   }
 
   void changeLineStyleTo(RichStyle style) {
-    int index = _getCurrentLineIndex();
-    if (index > -1) {
-      RichItem item = widget.richSource.richLineList[index];
-      setState(() {
-        if (item.style == style) {
-          item.style = RichStyle.Normal;
-          debugPrint('恢复为标准风格');
-        } else {
-          item.style = style;
-          debugPrint('设置为黑体风格');
-        }
-      });
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _requestFocus(item?.focusNode);
-      });
-    }
+    setState(() {
+      if (currentRichItem.style == style) {
+        currentRichItem.style = RichStyle.Normal;
+        debugPrint('恢复为标准风格');
+      } else {
+        currentRichItem.style = style;
+        debugPrint('设置为黑体风格');
+      }
+    });
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _requestFocus(currentRichItem?.focusNode);
+    });
+
+//    int index = _getCurrentLineIndex();
+//    if (index > -1) {
+//      RichItem item = widget.richSource.richLineList[index];
+//      setState(() {
+//        if (item.style == style) {
+//          item.style = RichStyle.Normal;
+//          debugPrint('恢复为标准风格');
+//        } else {
+//          item.style = style;
+//          debugPrint('设置为黑体风格');
+//        }
+//      });
+//      Future.delayed(const Duration(milliseconds: 100), () {
+//        _requestFocus(item?.focusNode);
+//      });
+//    }
   }
 
   void calculationOrderedList() {
@@ -815,8 +856,8 @@ class RichNoteState extends State<RichNote> {
           icon: Icon(Icons.format_list_numbered),
           color: Colors.black87,
           onPressed: () {
-            final item = getCurrentRichItem();
-            if (item.type == RichType.OrderedLists) {
+            //final item = getCurrentRichItem();
+            if (currentRichItem.type == RichType.OrderedLists) {
               changeLineTypeTo(RichType.Text);
             } else {
               changeLineTypeTo(RichType.OrderedLists);
@@ -827,8 +868,8 @@ class RichNoteState extends State<RichNote> {
           icon: Icon(Icons.format_list_bulleted),
           color: Colors.black87,
           onPressed: () {
-            final item = getCurrentRichItem();
-            if (item.type == RichType.UnorderedList) {
+            //final item = getCurrentRichItem();
+            if (currentRichItem.type == RichType.UnorderedList) {
               changeLineTypeTo(RichType.Text);
             } else {
               changeLineTypeTo(RichType.UnorderedList);
@@ -839,12 +880,12 @@ class RichNoteState extends State<RichNote> {
           icon: Icon(Icons.format_indent_increase),
           color: Colors.black87,
           onPressed: () {
-            var item = getCurrentRichItem();
-            if (item.type == RichType.OrderedLists ||
-                item.type == RichType.UnorderedList) {
-              if (item.indent < widget._maxIndent) {
+            //var item = getCurrentRichItem();
+            if (currentRichItem.type == RichType.OrderedLists ||
+                currentRichItem.type == RichType.UnorderedList) {
+              if (currentRichItem.indent < widget._maxIndent) {
                 setState(() {
-                  item.indent++;
+                  currentRichItem.indent++;
                 });
               }
             }
@@ -854,12 +895,12 @@ class RichNoteState extends State<RichNote> {
           icon: Icon(Icons.format_indent_decrease),
           color: Colors.black87,
           onPressed: () {
-            var item = getCurrentRichItem();
-            if (item.type == RichType.OrderedLists ||
-                item.type == RichType.UnorderedList) {
-              if (item.indent > 0) {
+            //var item = getCurrentRichItem();
+            if (currentRichItem.type == RichType.OrderedLists ||
+                currentRichItem.type == RichType.UnorderedList) {
+              if (currentRichItem.indent > 0) {
                 setState(() {
-                  item.indent--;
+                  currentRichItem.indent--;
                 });
               }
             }
@@ -869,8 +910,8 @@ class RichNoteState extends State<RichNote> {
           icon: Icon(Icons.aspect_ratio),
           color: Colors.black87,
           onPressed: () {
-            final item = getCurrentRichItem();
-            if (item.type == RichType.Comment) {
+            //final item = getCurrentRichItem();
+            if (currentRichItem.type == RichType.Comment) {
               changeLineTypeTo(RichType.Text);
             } else {
               changeLineTypeTo(RichType.Comment);
@@ -881,8 +922,8 @@ class RichNoteState extends State<RichNote> {
           icon: Icon(Icons.check_box),
           color: Colors.black87,
           onPressed: () {
-            final item = getCurrentRichItem();
-            if (item.type == RichType.Task) {
+            //final item = getCurrentRichItem();
+            if (currentRichItem.type == RichType.Task) {
               changeLineTypeTo(RichType.Text);
               changeLineTypeIconsBar(RichType.Text);
             } else {
@@ -928,7 +969,7 @@ class RichNoteState extends State<RichNote> {
         IconButton(
           icon: Icon(MdiIcons.tagMultiple),
           onPressed: () {
-
+            //ss
           },
         ),
       ],
@@ -988,223 +1029,223 @@ class RichNoteState extends State<RichNote> {
     String newLabel;
 
     showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) {
-          double width = MediaQuery.of(context).size.width * 0.9;
-          double height = MediaQuery.of(context).size.height * 0.5;
-          return AlertDialog(
-            contentPadding: EdgeInsets.all(0),
-            content: StatefulBuilder(builder: (context, setDialogState) {
-              return Column(
-                children: <Widget>[
-                  Container(
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: TextField(
-                              controller: controller,
-                              //autofocus: true,
-                              decoration: InputDecoration(
-                                  icon: Icon(Icons.search),
-                                  hintText: '点击此处搜索或加入新的$title',
-                                  border: InputBorder.none,
-                                  contentPadding:
-                                      EdgeInsets.fromLTRB(0, 3, 0, 3)),
-                              onChanged: (text) {
-                                if (text.isEmpty) {
-                                  setDialogState(() {
-                                    resultList.clear();
-                                    resultList.addAll(labels);
-                                    offstageAddButton = true;
-                                  });
-                                } else {
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        double width = MediaQuery.of(context).size.width * 0.9;
+        double height = MediaQuery.of(context).size.height * 0.5;
+        return AlertDialog(
+          contentPadding: EdgeInsets.all(0),
+          content: StatefulBuilder(builder: (context, setDialogState) {
+            return Column(
+              children: <Widget>[
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: TextField(
+                            controller: controller,
+                            //autofocus: true,
+                            decoration: InputDecoration(
+                                icon: Icon(Icons.search),
+                                hintText: '点击此处搜索或加入新的$title',
+                                border: InputBorder.none,
+                                contentPadding:
+                                    EdgeInsets.fromLTRB(0, 3, 0, 3)),
+                            onChanged: (text) {
+                              if (text.isEmpty) {
+                                setDialogState(() {
                                   resultList.clear();
-                                  labels.forEach((label) {
-                                    if (label
-                                        .getLabel()
-                                        .contains(controller.text)) {
-                                      resultList.add(label);
-                                    }
-                                  });
-                                  setDialogState(() {
-                                    if (resultList.isEmpty) {
-                                      offstageAddButton = false;
-                                      newLabel = text;
-                                    } else {
-                                      offstageAddButton = true;
-                                    }
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                        Offstage(
-                          offstage: offstageAddButton,
-                          child: IconButton(
-                            icon: Icon(Icons.clear),
-                            color: Theme.of(context).accentColor,
-                            onPressed: () {
-                              controller.clear();
-                              setDialogState(() {
+                                  resultList.addAll(labels);
+                                  offstageAddButton = true;
+                                });
+                              } else {
                                 resultList.clear();
-                                resultList.addAll(labels);
-                                offstageAddButton = true;
-                              });
+                                labels.forEach((label) {
+                                  if (label
+                                      .getLabel()
+                                      .contains(controller.text)) {
+                                    resultList.add(label);
+                                  }
+                                });
+                                setDialogState(() {
+                                  if (resultList.isEmpty) {
+                                    offstageAddButton = false;
+                                    newLabel = text;
+                                  } else {
+                                    offstageAddButton = true;
+                                  }
+                                });
+                              }
                             },
                           ),
                         ),
-                        Offstage(
-                          offstage: offstageAddButton,
-                          child: IconButton(
-                            icon: Icon(Icons.add),
-                            color: Theme.of(context).accentColor,
-                            onPressed: () {
-                              controller.clear();
+                      ),
+                      Offstage(
+                        offstage: offstageAddButton,
+                        child: IconButton(
+                          icon: Icon(Icons.clear),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () {
+                            controller.clear();
+                            setDialogState(() {
                               resultList.clear();
                               resultList.addAll(labels);
                               offstageAddButton = true;
-                              if (type == LabelType.Person) {
-                                PersonItem person = PersonItem(name: newLabel);
-                                widget.store.personSet
-                                    .addItem(person)
-                                    .then((id) {
-                                  titleMap[id] = person.name;
-                                  setDialogState(() {
-                                    resultList.add(person);
-                                    labelKeys.addOrRemove(person.boxId);
-                                    clipText = StringExt.listStringToString(
-                                        titleMap.values.toList());
-                                  });
-                                });
-                              } else if (type == LabelType.Place) {
-                                PlaceItem place = PlaceItem(title: newLabel);
-                                widget.store.placeSet.addItem(place).then((id) {
-                                  titleMap[id] = place.title;
-                                  setDialogState(() {
-                                    resultList.add(place);
-                                    labelKeys.addOrRemove(place.boxId);
-                                    clipText = StringExt.listStringToString(
-                                        titleMap.values.toList());
-                                  });
-                                });
-                              } else {
-                                TagItem tag = TagItem(title: newLabel);
-                                widget.store.tagSet.addItem(tag).then((id) {
-                                  setDialogState(() {
-                                    resultList.add(tag);
-                                    labelKeys.addOrRemove(tag.boxId);
-                                  });
-                                });
-                              }
-                            },
-                          ),
+                            });
+                          },
                         ),
-                      ],
-                    ),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(color: Colors.black12, blurRadius: 5.0),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: width,
-                      height: height,
-                      child: ListView.builder(
-                        itemCount: resultList.length,
-                        itemBuilder: (context, index) {
-                          var item = resultList[index];
-                          bool isDetectTag = false;
-                          bool isEnabled = true;
-                          bool isSelected = labelKeys.findKey(item.boxId);
-                          if (detectFlags) {
-                            isDetectTag = tempKeys.findKey(item.boxId);
-                            isEnabled = !isDetectTag;
-                            if (isDetectTag) isSelected = true;
-                          }
-                          debugPrint(
-                              '${item.getLabel()} isDetectTag: $isDetectTag, isEnabled: $isEnabled, isSelected: $isSelected');
-                          String labelText = item.getLabel();
-                          CatListTile catListTile = CatListTile(
-                            leading: SizedBox(
-                              height: 32,
-                              width: 32,
-                              child: Checkbox(
-                                value: isSelected,
-                                onChanged: isDetectTag
-                                    ? null
-                                    : (selected) {
-                                        if (titleMap.containsKey(item.boxId)) {
-                                          titleMap.remove(item.boxId);
-                                        } else {
-                                          titleMap[item.boxId] = labelText;
-                                        }
-                                        setDialogState(() {
-                                          labelKeys.addOrRemove(item.boxId);
-                                          clipText = StringExt.listIntToString(
-                                              labelKeys.keyList);
-                                        });
-                                      },
-                              ),
-                            ),
-                            title: Text(labelText),
-                            subtitle: isDetectTag
-                                ? Text(
-                                    '提取的标签',
-                                    style: TextStyle(fontSize: 12),
-                                  )
-                                : null,
-                            selected: isSelected,
-                            enabled: isEnabled,
-                            onTap: () {
-                              if (titleMap.containsKey(item.boxId)) {
-                                titleMap.remove(item.boxId);
-                              } else {
-                                titleMap[item.boxId] = labelText;
-                              }
-                              setDialogState(() {
-                                labelKeys.addOrRemove(item.boxId);
-                                clipText = StringExt.listIntToString(
-                                    labelKeys.keyList);
-                              });
-                            },
-                          );
-                          return catListTile;
-                        },
                       ),
+                      Offstage(
+                        offstage: offstageAddButton,
+                        child: IconButton(
+                          icon: Icon(Icons.add),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () {
+                            controller.clear();
+                            resultList.clear();
+                            resultList.addAll(labels);
+                            offstageAddButton = true;
+                            if (type == LabelType.Person) {
+                              PersonItem person = PersonItem(name: newLabel);
+                              widget.store.personSet
+                                  .addItem(person)
+                                  .then((id) {
+                                titleMap[id] = person.name;
+                                setDialogState(() {
+                                  resultList.add(person);
+                                  labelKeys.addOrRemove(person.boxId);
+                                  clipText = StringExt.listStringToString(
+                                      titleMap.values.toList());
+                                });
+                              });
+                            } else if (type == LabelType.Place) {
+                              PlaceItem place = PlaceItem(title: newLabel);
+                              widget.store.placeSet.addItem(place).then((id) {
+                                titleMap[id] = place.title;
+                                setDialogState(() {
+                                  resultList.add(place);
+                                  labelKeys.addOrRemove(place.boxId);
+                                  clipText = StringExt.listStringToString(
+                                      titleMap.values.toList());
+                                });
+                              });
+                            } else {
+                              TagItem tag = TagItem(title: newLabel);
+                              widget.store.tagSet.addItem(tag).then((id) {
+                                setDialogState(() {
+                                  resultList.add(tag);
+                                  labelKeys.addOrRemove(tag.boxId);
+                                });
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(color: Colors.black12, blurRadius: 5.0),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    width: width,
+                    height: height,
+                    child: ListView.builder(
+                      itemCount: resultList.length,
+                      itemBuilder: (context, index) {
+                        var item = resultList[index];
+                        bool isDetectTag = false;
+                        bool isEnabled = true;
+                        bool isSelected = labelKeys.findKey(item.boxId);
+                        if (detectFlags) {
+                          isDetectTag = tempKeys.findKey(item.boxId);
+                          isEnabled = !isDetectTag;
+                          if (isDetectTag) isSelected = true;
+                        }
+                        debugPrint(
+                            '${item.getLabel()} isDetectTag: $isDetectTag, isEnabled: $isEnabled, isSelected: $isSelected');
+                        String labelText = item.getLabel();
+                        CatListTile catListTile = CatListTile(
+                          leading: SizedBox(
+                            height: 32,
+                            width: 32,
+                            child: Checkbox(
+                              value: isSelected,
+                              onChanged: isDetectTag
+                                  ? null
+                                  : (selected) {
+                                      if (titleMap.containsKey(item.boxId)) {
+                                        titleMap.remove(item.boxId);
+                                      } else {
+                                        titleMap[item.boxId] = labelText;
+                                      }
+                                      setDialogState(() {
+                                        labelKeys.addOrRemove(item.boxId);
+                                        clipText = StringExt.listIntToString(
+                                            labelKeys.keyList);
+                                      });
+                                    },
+                            ),
+                          ),
+                          title: Text(labelText),
+                          subtitle: isDetectTag
+                              ? Text(
+                                  '提取的标签',
+                                  style: TextStyle(fontSize: 12),
+                                )
+                              : null,
+                          selected: isSelected,
+                          enabled: isEnabled,
+                          onTap: () {
+                            if (titleMap.containsKey(item.boxId)) {
+                              titleMap.remove(item.boxId);
+                            } else {
+                              titleMap[item.boxId] = labelText;
+                            }
+                            setDialogState(() {
+                              labelKeys.addOrRemove(item.boxId);
+                              clipText = StringExt.listIntToString(
+                                  labelKeys.keyList);
+                            });
+                          },
+                        );
+                        return catListTile;
+                      },
                     ),
                   ),
-                  Divider(
-                    height: 1,
-                  ),
-                ],
-              );
-            }),
-            actions: <Widget>[
+                ),
+                Divider(
+                  height: 1,
+                ),
+              ],
+            );
+          }),
+          actions: <Widget>[
 //            FlatButton(
 //              child: Text('字符串'),
 //              onPressed: () {
 //                Navigator.of(context).pop(clipText);
 //              },
 //            ),
-              FlatButton(
-                child: Text(
-                    '返回'), //type == LabelType.Tag ? Text('返回') : Text('插入'),
-                onPressed: () {
-                  //Navigator.of(context).pop(clipText);
-                  Navigator.of(context).pop(null);
-                },
-              ),
-            ],
-          );
-        }).then((result) {
+            FlatButton(
+              child: Text(
+                  '返回'), //type == LabelType.Tag ? Text('返回') : Text('插入'),
+              onPressed: () {
+                //Navigator.of(context).pop(clipText);
+                Navigator.of(context).pop(null);
+              },
+            ),
+          ],
+        );
+      }).then((result) {
       if (result != null) {
         if (type == LabelType.Tag) {
           debugPrint('确认了（${widget.focusEvent.tagKeys.keyList.length}）个标签');
@@ -1286,8 +1327,7 @@ class RichNoteState extends State<RichNote> {
             child: _buildFormatIconsBar(),
           ),
           Container(
-            decoration:
-                BoxDecoration(color: Colors.white, boxShadow: <BoxShadow>[
+            decoration: BoxDecoration(color: Colors.white, boxShadow: <BoxShadow>[
               BoxShadow(
                 offset: Offset(-8, 0),
                 color: Colors.black54,

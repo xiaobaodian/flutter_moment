@@ -138,7 +138,7 @@ class RichItem extends RichLine {
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         canChanged = true;
-        source.richNote.sendLineType(type);
+        source.richNote.focusIsChanging();
         String text = controller.text.replaceAll('\u0000', '');
         debugPrint('Line 详细数据: controller.text -> $text, type -> ${type.toString()}');
       }
@@ -161,7 +161,7 @@ class RichItem extends RichLine {
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         canChanged = true;
-        source.richNote.sendLineType(type);
+        source.richNote.focusIsChanging();
         String text = controller.text.replaceAll('\u0000', '');
         debugPrint('Line 详细数据: controller.text -> $text, type -> ${type.toString()}');
       }
@@ -195,6 +195,7 @@ class RichItem extends RichLine {
   String image;
   bool canChanged = true;
   int moveToDayIndex = 0;
+  int lineIndex = -1;
   RichSource source;
 
   Key textkey;
@@ -208,6 +209,7 @@ class RichItem extends RichLine {
     focusNode?.dispose();
   }
 
+  /// 修正光标位置
   void correctCursorPosition() {
     if (!canChanged || controller.text.isEmpty) return;
     var start = controller.selection.start;
