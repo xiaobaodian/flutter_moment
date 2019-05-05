@@ -31,19 +31,22 @@ enum LabelType { Person, Place, Tag }
 // ignore: must_be_immutable
 class RichNote extends StatefulWidget {
   RichNote({
+    Key key,
     @required this.store,
     @required this.richSource,
     this.richNoteLayout,
     this.onTap,
     this.onLongTap,
-  })  : isEditable = false,
-        isFixed = false,
-        focusEvent = null,
-        assert(richSource.richLineList != null) {
+  }): isEditable = false,
+      isFixed = false,
+      focusEvent = null,
+      assert(richSource.richLineList != null),
+      super(key: key) {
     richSource.richNote = this;
   }
 
   RichNote.editable({
+    Key key,
     @required this.store,
     @required this.richSource,
     //@required this.focusEvent,
@@ -51,8 +54,9 @@ class RichNote extends StatefulWidget {
     this.onTap,
     this.onLongTap,
   }): isEditable = true,
-        isFixed = false,
-        focusEvent = richSource.focusEvent {
+      isFixed = false,
+      focusEvent = richSource.focusEvent,
+      super(key: key) {
     richSource.richNote = this;
     if (store.prefs.detectFlags) {
       _personTempKeys.fromExtracting(
@@ -71,6 +75,7 @@ class RichNote extends StatefulWidget {
   }
 
   RichNote.fixed({
+    Key key,
     @required this.store,
     @required this.richSource,
     this.richNoteLayout,
@@ -78,11 +83,10 @@ class RichNote extends StatefulWidget {
     this.onLongTap,
   })  : isFixed = true,
         isEditable = false,
-        focusEvent = null {
+        focusEvent = null,
+        super(key: key) {
     richSource.richNote = this;
   }
-
-  RichNoteState _state;
 
   final bool isEditable;
   final bool isFixed;
@@ -107,13 +111,15 @@ class RichNote extends StatefulWidget {
     return richSource.exportingRichLists();
   }
   void focusIsChanging() {
-    _state.onFocusChanging();
+    if (key is GlobalKey<RichNoteState>) {
+      GlobalKey<RichNoteState> gKey = this.key;
+      gKey.currentState.onFocusChanging();
+    }
   }
 
   @override
   RichNoteState createState() {
-    _state = RichNoteState();
-    return _state;
+    return RichNoteState();
   }
 }
 
@@ -156,12 +162,9 @@ class RichNoteState extends State<RichNote> {
     super.dispose();
     if (widget.isEditable) {
       widget.richSource.richLineList.forEach((item) {
-        if (item is RichItem) {
-          item.dispose();
-        }
+        if (item is RichItem) item.dispose();
       });
       widget.richSource.richLineList = null;
-      widget._state = null;
     }
   }
 
@@ -269,12 +272,12 @@ class RichNoteState extends State<RichNote> {
               ));
         } else {
           lineWidget = layout.richLayoutTask(
-              checkBox,
-              Text(item.getContent(), style: effectiveSytle),
-              Text(
-                '全天',
-                style: textTheme.caption,
-              ));
+            checkBox,
+            Text(item.getContent(), style: effectiveSytle),
+            Text(
+              '全天',
+              style: textTheme.caption,
+            ));
         }
         break;
       case RichType.OrderedLists:
@@ -452,18 +455,6 @@ class RichNoteState extends State<RichNote> {
     return SizedBox(height: layout.segmentSpacing);
   }
 
-//  int _getCurrentLineIndex() {
-//    int index = -1;
-//    for (int i = 0; i < widget.richSource.richLineList.length; i++) {
-//      RichItem item = (widget.richSource.richLineList[i]);
-//      if (item.focusNode.hasFocus) {
-//        index = i;
-//        break;
-//      }
-//    }
-//    return index;
-//  }
-
   void onFocusChanging() {
     currentRichItem = _getCurrentRichItem();
     debugPrint('currentType -> ${currentRichItem.type.toString()}');
@@ -528,52 +519,7 @@ class RichNoteState extends State<RichNote> {
       ));
       _requestFocus(item?.focusNode);
     });
-
-
-
-//    int index = _getCurrentLineIndex();
-//    if (index > -1) {
-//      RichItem tempItem = widget.richSource.richLineList[index];
-//      if (tempItem.type == RichType.Task) {
-//        //widget.store.removeTaskItem(tempItem.expandData);
-//        TaskItem task = tempItem.expandData;
-//        widget.store.taskSet.removeItem(task);
-//      }
-//      setState(() {
-//        widget.richSource.richLineList.removeAt(index);
-//      });
-//      Future.delayed(const Duration(milliseconds: 200), () {
-//        tempItem.dispose();
-//      });
-//      Future.delayed(const Duration(milliseconds: 200), () {
-//        RichItem item = widget.richSource.richLineList[index];
-//        item.controller.selection = TextSelection.fromPosition(TextPosition(
-//          affinity: TextAffinity.downstream,
-//          offset: 1,
-//        ));
-//        _requestFocus(item?.focusNode);
-//      });
-//    }
   }
-
-//  RichType getCurrentRichType() {
-//    RichType type;
-//    int index = _getCurrentLineIndex();
-//    if (index > -1) {
-//      RichItem item = widget.richSource.richLineList[index];
-//      type = item.type;
-//    }
-//    return type;
-//  }
-
-//  RichItem getCurrentRichItem() {
-//    RichItem item;
-//    int index = _getCurrentLineIndex();
-//    if (index > -1) {
-//      item = widget.richSource.richLineList[index];
-//    }
-//    return item;
-//  }
 
   void changeLineTypeTo(RichType type) {
     setState(() {
@@ -582,17 +528,6 @@ class RichNoteState extends State<RichNote> {
     Future.delayed(const Duration(milliseconds: 100), () {
       _requestFocus(currentRichItem?.focusNode);
     });
-
-//    int index = _getCurrentLineIndex();
-//    if (index > -1) {
-//      RichItem item = widget.richSource.richLineList[index];
-//      setState(() {
-//        item.changeTypeTo(type);
-//      });
-//      Future.delayed(const Duration(milliseconds: 100), () {
-//        _requestFocus(item?.focusNode);
-//      });
-//    }
   }
 
   void changeLineStyleTo(RichStyle style) {
@@ -608,23 +543,6 @@ class RichNoteState extends State<RichNote> {
     Future.delayed(const Duration(milliseconds: 100), () {
       _requestFocus(currentRichItem?.focusNode);
     });
-
-//    int index = _getCurrentLineIndex();
-//    if (index > -1) {
-//      RichItem item = widget.richSource.richLineList[index];
-//      setState(() {
-//        if (item.style == style) {
-//          item.style = RichStyle.Normal;
-//          debugPrint('恢复为标准风格');
-//        } else {
-//          item.style = style;
-//          debugPrint('设置为黑体风格');
-//        }
-//      });
-//      Future.delayed(const Duration(milliseconds: 100), () {
-//        _requestFocus(item?.focusNode);
-//      });
-//    }
   }
 
   void calculationOrderedList() {
@@ -969,7 +887,8 @@ class RichNoteState extends State<RichNote> {
         IconButton(
           icon: Icon(MdiIcons.tagMultiple),
           onPressed: () {
-            //ss
+            var text = currentRichItem.getContent().replaceAll('\u0000', '');
+            debugPrint('在这里调整任务的日期：$text');
           },
         ),
       ],
