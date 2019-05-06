@@ -356,18 +356,19 @@ class RichSource {
         TaskItem task = item.expandData;
         task.title = item.controller.text.replaceAll('\u0000', '');
         if (item.objectDayIndex != 0) {
-          task.startDate = item.objectDayIndex;
-          task.dueDate = item.objectDayIndex + (task.dueDate - task.startDate);
+          var trueTask = richNote.store.taskSet.getItemFromId(task.boxId);
+          trueTask.startDate = item.objectDayIndex;
+          trueTask.dueDate = item.objectDayIndex + (task.dueDate - task.startDate);
           richNote.store
-            ..taskSet.changeItem(task)
-            ..taskCategories.allTasks.change(task);
+            ..taskSet.changeItem(trueTask)
+            ..taskCategories.allTasks.change(trueTask);
           var jumpLine = RichLine(
             type: item.type,
             style: item.style,
             indent: item.indent,
             note: item.note,
             //content: content,
-            expandData: item.expandData,
+            expandData: trueTask,
           );
           richNote.store.addTaskToFocusEventInDailyRecord(jumpLine,
               richNote.focusEvent.focusItemBoxId, item.objectDayIndex);
