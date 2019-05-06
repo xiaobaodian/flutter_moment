@@ -60,6 +60,21 @@ class RichNoteLayout {
     if (task is TextField) {
       p = 2.5;
     }
+    List<Widget> widgets = [];
+    widgets.add(
+        Padding(
+          padding: EdgeInsets.fromLTRB(0, p, 0, 0),
+          child: task,
+        )
+    );
+    if (time != null) {
+      widgets.add(
+        Padding (
+          padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+          child: time,
+        )
+      );
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,16 +91,7 @@ class RichNoteLayout {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, p, 0, 0),
-                child: task,
-              ),
-              //Padding(
-              //  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-              //  child: time,
-              //),
-            ],
+            children: widgets
           ),
         ),
       ],
@@ -111,7 +117,10 @@ class RichNoteLayout {
           child: Stack(
             alignment: AlignmentDirectional.center,
             children: <Widget>[
-              Text('猫', style: textStyle,),
+              Text(
+                '猫',
+                style: textStyle,
+              ),
               leading,
             ],
           ),
@@ -139,7 +148,7 @@ class RichNoteLayout {
       padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
         color: Color.fromARGB(255, 245, 245, 245),
-        border: Border(left: BorderSide(color: Colors. black26, width: 5.0)),
+        border: Border(left: BorderSide(color: Colors.black26, width: 5.0)),
       ),
       child: content,
     );
@@ -151,5 +160,4 @@ class RichNoteLayout {
       child: Placeholder(),
     );
   }
-
 }

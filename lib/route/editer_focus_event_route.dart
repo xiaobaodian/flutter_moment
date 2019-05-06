@@ -79,7 +79,6 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
 
   void saveFocusEventItem() {
     if (richSource.hasNote()) {
-      //_editerFocusEvent.noteLines = richSource.exportingRichLists();
       _editerFocusEvent.noteLines = richNote.exportingRichLists();
       if (_editerFocusEvent.boxId == 0) {
         _store.addFocusEventToSelectedDay(_editerFocusEvent);

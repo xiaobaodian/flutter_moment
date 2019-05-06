@@ -80,7 +80,9 @@ class TreeNode<I> {
   void remove(I item) {
     if (subNodes.isEmpty) {
       debugPrint('Node<$title>删除item...');
-      children.remove(item);
+      if (children.remove(item)) {
+        debugPrint('Node<$title>删除item成功');
+      }
     } else {
       debugPrint('Node<$title>开始调用下级node，执行删除item...');
       subNodes.forEach((node){

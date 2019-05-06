@@ -628,7 +628,7 @@ class DailyRecord extends BoxItem {
   List<FocusEvent> focusEvents;
   List<RichLine> richLines = [];
 
-  bool get focusEventIsNull {
+  bool get focusEventsIsNull {
     return focusEvents == null;
   }
 
@@ -723,15 +723,6 @@ class DailyRecord extends BoxItem {
     });
   }
 
-  void addTask(TaskItem task, FocusEvent focusEvent) {
-    var objectEvent = focusEvents.firstWhere((event) => event.boxId == focusEvent.boxId,
-      orElse: (){
-        return FocusEvent(dayIndex: this.dayIndex, focusItemBoxId: focusEvent.focusItemBoxId);
-      },
-    );
-    objectEvent.addTask(task);
-  }
-
   void copyWith(DailyRecord other) {
     dayIndex = other.dayIndex;
     weather = other.weather;
@@ -813,11 +804,6 @@ class FocusEvent extends BoxItem {
 //  void extractingTagList(List<TagItem> tagList) {
 //    tagKeys.fromExtracting(noteLines, tagList);
 //  }
-
-  void addTask(TaskItem task) {
-    var newRichLine = RichLine(type: RichType.Task)..expandData = task;
-    noteLines.add(newRichLine);
-  }
 
   void removeTask(TaskItem task) {
     noteLines.removeWhere((line) {

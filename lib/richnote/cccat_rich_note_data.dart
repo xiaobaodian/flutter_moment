@@ -7,18 +7,18 @@ import 'package:flutter_moment/task/task_item.dart';
 import 'package:meta/meta.dart';
 
 enum RichType {
-  FocusTitle,     // 焦点标题
-  Title,          // 标题
-  SubTitle,       // 子标题
-  Task,           // 任务
-  Text,           // 标准文本
-  Comment,        // 评论
-  Reference,      // 引用
-  UnorderedList,  // 无序列表
-  OrderedLists,   // 有序列表
-  Image,          // 图片
-  Food,           // 膳食
-  Related,        // 相关数据展示行
+  FocusTitle, // 焦点标题
+  Title, // 标题
+  SubTitle, // 子标题
+  Task, // 任务
+  Text, // 标准文本
+  Comment, // 评论
+  Reference, // 引用
+  UnorderedList, // 无序列表
+  OrderedLists, // 有序列表
+  Image, // 图片
+  Food, // 膳食
+  Related, // 相关数据展示行
 }
 
 enum RichStyle {
@@ -86,6 +86,8 @@ class RichLine {
     }
   }
 
+  String get cleanText => getContent().replaceAll('\u0000', '');
+
   void copyWith(RichLine other) {
     this.type = other.type;
     this.style = other.style;
@@ -128,10 +130,11 @@ class RichItem extends RichLine {
     @required this.source,
     String content = '',
   }) : super(
-    type: type,
-  ) {
+          type: type,
+        ) {
     if (type == RichType.Task) {
-      expandData = TaskItem(createDate: source.dayIndex, focusItemId: source.focusItemId);
+      expandData = TaskItem(
+          createDate: source.dayIndex, focusItemId: source.focusItemId);
     }
     textkey = GlobalKey();
     focusNode = FocusNode();
@@ -140,22 +143,22 @@ class RichItem extends RichLine {
         canChanged = true;
         source.richNote.focusIsChanging();
         String text = controller.text.replaceAll('\u0000', '');
-        debugPrint('Line 详细数据: controller.text -> $text, type -> ${type.toString()}');
+        debugPrint(
+            'Line 详细数据: controller.text -> $text, type -> ${type.toString()}');
       }
     });
 
     controller = TextEditingController();
-    controller.addListener((){
+    controller.addListener(() {
       correctCursorPosition();
     });
     controller.text = buildEditerText(content);
-
   }
 
   RichItem.from({
     @required RichLine richLine,
     @required this.source,
-  }): super(type: richLine.type){
+  }) : super(type: richLine.type) {
     textkey = GlobalKey();
     focusNode = FocusNode();
     focusNode.addListener(() {
@@ -163,12 +166,13 @@ class RichItem extends RichLine {
         canChanged = true;
         source.richNote.focusIsChanging();
         String text = controller.text.replaceAll('\u0000', '');
-        debugPrint('Line 详细数据: controller.text -> $text, type -> ${type.toString()}');
+        debugPrint(
+            'Line 详细数据: controller.text -> $text, type -> ${type.toString()}');
       }
     });
 
     controller = TextEditingController();
-    controller.addListener((){
+    controller.addListener(() {
       correctCursorPosition();
     });
 
@@ -194,7 +198,7 @@ class RichItem extends RichLine {
 
   String image;
   bool canChanged = true;
-  int moveToDayIndex = 0;
+  int objectDayIndex = 0;
   int lineIndex = -1;
   RichSource source;
 
@@ -215,26 +219,26 @@ class RichItem extends RichLine {
     var start = controller.selection.start;
     var end = controller.selection.end;
 
-    debugPrint('controller selection.start = $start  $end , controller.text.lenght = ${controller.text.length}');
+    debugPrint(
+        'controller selection.start = $start  $end , controller.text.lenght = ${controller.text.length}');
 
     if (start == 0) {
-      if (start == end) { // && controller.text.length >= 1
+      if (start == end) {
+        // && controller.text.length >= 1
         controller.selection = TextSelection.fromPosition(TextPosition(
           affinity: TextAffinity.downstream,
           offset: 1,
         ));
       } else {
         controller.selection = TextSelection(
-            baseOffset: 1,
-            extentOffset: controller.selection.extentOffset
-        );
+            baseOffset: 1, extentOffset: controller.selection.extentOffset);
       }
     }
   }
 
   String buildEditerText(String text) {
     String buildText;
-    if (text.length >=1 && text.substring(0, 1) == '\u0000') {
+    if (text.length >= 1 && text.substring(0, 1) == '\u0000') {
       buildText = text;
     } else {
       buildText = '\u0000' + text;
@@ -251,12 +255,17 @@ class RichItem extends RichLine {
             createDate: source.dayIndex,
             startDate: source.dayIndex,
             dueDate: source.dayIndex,
-            focusItemId: source.focusItemId
-        );
+            focusItemId: source.focusItemId);
         debugPrint('新建了一个TaskItem记录, dayIndex：${source.dayIndex}');
       }
     }
     type = newType;
+  }
+
+  TaskItem get taskItem {
+    if (type != RichType.Task) return null;
+    assert(expandData is TaskItem);
+    return expandData as TaskItem;
   }
 }
 
@@ -267,10 +276,10 @@ class RichSource {
 
   RichSource.fromFocusEvent(
     this.focusEvent,
-  ): assert(focusEvent != null),
-     this.richLineList = focusEvent.noteLines;
-     //this.focusItemBoxId = focusEvent.focusItemBoxId,
-     //this.dayIndex = focusEvent.dayIndex;
+  )   : assert(focusEvent != null),
+        this.richLineList = focusEvent.noteLines;
+  //this.focusItemBoxId = focusEvent.focusItemBoxId,
+  //this.dayIndex = focusEvent.dayIndex;
 
   RichSource.fromJson(
     String jsonString,
@@ -317,8 +326,8 @@ class RichSource {
     } else {
       richLineList.forEach((it) {
         tempList.add(RichItem.from(
-            richLine: it,
-            source: this,
+          richLine: it,
+          source: this,
         ));
       });
     }
@@ -328,7 +337,7 @@ class RichSource {
   List<RichLine> exportingRichLists() {
     /// [mergeRemoveTask]保存的是进入编辑器以后生成的复制数据，只有boxId是唯一的标识
     /// 所以删除合并后废弃的line数据附带的task，只能通过boxId来操作。
-    mergeRemoveTask.forEach((task){
+    mergeRemoveTask.forEach((task) {
       debugPrint('清理合并行后遗弃的数据：ID = ${task.boxId}');
       //richNote.store.removeTaskItemFromId(task.boxId);
       richNote.store.taskSet.removeItemByBoxId(task.boxId);
@@ -337,8 +346,8 @@ class RichSource {
   }
 
   List<RichLine> _getRichLines() {
-    List<RichLine> richLines = [];
     if (richNote.isNotEditable) return richLineList;
+    List<RichLine> richLines = [];
 
     richLineList.forEach((line) {
       RichItem item = line;
@@ -346,14 +355,32 @@ class RichSource {
       if (item.type == RichType.Task) {
         TaskItem task = item.expandData;
         task.title = item.controller.text.replaceAll('\u0000', '');
-        richLines.add(RichLine(
-          type: item.type,
-          style: item.style,
-          indent: item.indent,
-          note: item.note,
-          //content: content,
-          expandData: item.expandData,
-        ));
+        if (item.objectDayIndex != 0) {
+          task.startDate = item.objectDayIndex;
+          task.dueDate = item.objectDayIndex + (task.dueDate - task.startDate);
+          richNote.store
+            ..taskSet.changeItem(task)
+            ..taskCategories.allTasks.change(task);
+          var jumpLine = RichLine(
+            type: item.type,
+            style: item.style,
+            indent: item.indent,
+            note: item.note,
+            //content: content,
+            expandData: item.expandData,
+          );
+          richNote.store.addTaskToFocusEventInDailyRecord(jumpLine,
+              richNote.focusEvent.focusItemBoxId, item.objectDayIndex);
+        } else {
+          richLines.add(RichLine(
+            type: item.type,
+            style: item.style,
+            indent: item.indent,
+            note: item.note,
+            //content: content,
+            expandData: item.expandData,
+          ));
+        }
       } else {
         richLines.add(RichLine(
           type: item.type,
@@ -361,6 +388,7 @@ class RichSource {
           indent: item.indent,
           note: item.note,
           content: item.controller.text.replaceAll('\u0000', ''),
+
           /// 不是[RichType.Task]类型的line也可能是task转换过来的，必须携带expandData数据
           /// 让store的changeTaskItemFromFocusEvent处理
           expandData: item.expandData,

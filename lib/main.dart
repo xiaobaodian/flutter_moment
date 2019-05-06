@@ -346,9 +346,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: PageView.builder(
             controller: _pageController,
             itemBuilder: (context, index) {
-              var dailyRecord = _store.getDailyRecord(index);
+              var dailyRecord = _store.getDailyRecordOrNull(index);
               if (dailyRecord != null) {
-                if (dailyRecord.focusEventIsNull) {
+                if (dailyRecord.focusEventsIsNull) {
                   _store.setFocusEventsToDailyRecord(dailyRecord);
                   buildDailyEventNote(dailyRecord);
                 } else {
@@ -545,7 +545,8 @@ class SliverPanel extends SliverPersistentHeaderDelegate {
 /// 方法获取新的数据，不能直接赋值。如果被复制的话是没有意义的。
 Widget _getListView(BuildContext context, int dayIndex) {
   var store = GlobalStore.of(context);
-  var dailyRecord = store.calendarMap.getDailyRecordFromIndex(dayIndex);
+  //var dailyRecord = store.calendarMap.getDailyRecordOrNullFromDayIndex(dayIndex);
+  var dailyRecord = store.getDailyRecordOrNull(dayIndex);
 
   if (dailyRecord == null) {
     return Center(

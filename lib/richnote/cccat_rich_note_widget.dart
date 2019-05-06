@@ -111,10 +111,9 @@ class RichNote extends StatefulWidget {
     return richSource.exportingRichLists();
   }
   void focusIsChanging() {
-    if (key is GlobalKey<RichNoteState>) {
-      GlobalKey<RichNoteState> gKey = this.key;
-      gKey.currentState.onFocusChanging();
-    }
+    assert(key is GlobalKey<RichNoteState>);
+    GlobalKey<RichNoteState> gKey = this.key;
+    gKey.currentState.onFocusChanging();
   }
 
   @override
@@ -233,25 +232,26 @@ class RichNoteState extends State<RichNote> {
           break;
         }
         Widget checkBox = Checkbox(
-            value: task.state == TaskState.Complete,
-            onChanged: (isSelected) {
-              setState(() {
-                if (isSelected) {
-                  task
-                    ..state = TaskState.Complete
-                    ..completeDate = widget.store.todayIndex;
-                } else {
-                  task
-                    ..state = TaskState.StandBy
-                    ..completeDate = 0;
-                }
-                if (widget.isNotEditable) {
-                  widget.store
-                    ..taskSet.changeItem(task)
-                    ..taskCategories.allTasks.change(task);
-                }
-              });
+          value: task.state == TaskState.Complete,
+          onChanged: (isSelected) {
+            setState(() {
+              if (isSelected) {
+                task
+                  ..state = TaskState.Complete
+                  ..completeDate = widget.store.todayIndex;
+              } else {
+                task
+                  ..state = TaskState.StandBy
+                  ..completeDate = 0;
+              }
+              if (widget.isNotEditable) {
+                widget.store
+                  ..taskSet.changeItem(task)
+                  ..taskCategories.allTasks.change(task);
+              }
             });
+          }
+        );
         var effectiveSytle = layout.taskStyle == null
             ? textTheme.body1.merge(mergeRichStyle(item.style))
             : layout.taskStyle;
@@ -262,23 +262,25 @@ class RichNoteState extends State<RichNote> {
             decorationStyle: TextDecorationStyle.solid,
           ));
         }
+        String subtitle;
         if (widget.isEditable) {
-          lineWidget = layout.richLayoutTask(
-              checkBox,
-              _buildTextField(index, effectiveSytle),
-              Text(
-                '全天',
-                style: textTheme.caption,
-              ));
-        } else {
-          lineWidget = layout.richLayoutTask(
-            checkBox,
-            Text(item.getContent(), style: effectiveSytle),
-            Text(
-              '全天',
-              style: textTheme.caption,
-            ));
+          var richItem = item as RichItem;
+          if (richItem.objectDayIndex > 0) {
+            subtitle = '推迟到';
+          }
         }
+        lineWidget = layout.richLayoutTask(
+          checkBox,
+          widget.isEditable
+            ? _buildTextField(index, effectiveSytle)
+            : Text(item.getContent(), style: effectiveSytle),
+          subtitle == null
+            ? null
+            : Text(
+                subtitle,
+                style: textTheme.caption,
+              )
+        );
         break;
       case RichType.OrderedLists:
         var effectiveSytle = layout.orderedListsStyle == null
@@ -887,8 +889,10 @@ class RichNoteState extends State<RichNote> {
         IconButton(
           icon: Icon(MdiIcons.tagMultiple),
           onPressed: () {
-            var text = currentRichItem.getContent().replaceAll('\u0000', '');
-            debugPrint('在这里调整任务的日期：$text');
+            debugPrint('在这里调整任务的日期：${currentRichItem.cleanText}');
+            setState(() {
+              currentRichItem.objectDayIndex = currentRichItem.taskItem.startDate + 3;
+            });
           },
         ),
       ],

@@ -176,21 +176,26 @@ class CalendarMap {
 
   DateTime getDateFromIndex(int index) => everyDayIndex[index].date();
 
-  DailyRecord getDailyRecordFromIndex(int index) => everyDayIndex[index].dailyRecord;
+  DailyRecord getDailyRecordOrNullFromDayIndex(int index) => everyDayIndex[index].dailyRecord;
+
+  DailyRecord getDailyRecordFromDayIndex(int index) {
+    var day = everyDayIndex[index];
+    if (day.dailyRecord == null) {
+      day.dailyRecord = DailyRecord(index);
+    }
+    return day.dailyRecord;
+  }
 
   DailyRecord getDailyRecordFromSelectedDay() {
-    if (everyDayIndex[selectedDateIndex].dailyRecord == null) {
-      everyDayIndex[selectedDateIndex].dailyRecord = DailyRecord(selectedDateIndex);
-    }
-    return everyDayIndex[selectedDateIndex].dailyRecord;
+    return getDailyRecordFromDayIndex(selectedDateIndex);
   }
 
   bool hasDailyRecord(DateTime date) {
     int index = getDateIndex(date);
-    return getDailyRecordFromIndex(index) != null;
+    return getDailyRecordOrNullFromDayIndex(index) != null;
   }
 
-  List<FocusEvent> getFocusEventsFromDayIndex(int dayIndex) => getDailyRecordFromIndex(dayIndex).focusEvents;
+  List<FocusEvent> getFocusEventsFromDayIndex(int dayIndex) => getDailyRecordOrNullFromDayIndex(dayIndex).focusEvents;
 
   void clearDailyRecordOfSelectedDay() =>  everyDayIndex[selectedDateIndex].dailyRecord = null;
   void clearDailyRecordOfDayIndex(int dayIndex) => everyDayIndex[dayIndex].dailyRecord = null;
