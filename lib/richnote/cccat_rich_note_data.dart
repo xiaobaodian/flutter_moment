@@ -357,22 +357,21 @@ class RichSource {
         TaskItem task = item.expandData;
         task.title = item.controller.text.replaceAll('\u0000', '');
         if (item.objectDayIndex != 0) {
-          var trueTask = richNote.store.taskSet.getItemFromId(task.boxId);
+          var trueTask = task.boxId != 0
+            ? richNote.store.taskSet.getItemFromId(task.boxId) : task;
           trueTask
             ..startDate = item.objectDayIndex
             ..dueDate = item.objectDayIndex + (task.dueDate - task.startDate)
             ..title = task.title;
-          richNote.store
-            ..taskSet.changeItem(trueTask)
-            ..taskCategories.allTasks.change(trueTask);
-//          var jumpLine = RichLine(
-//            type: item.type,
-//            style: item.style,
-//            indent: item.indent,
-//            note: item.note,
-//            //content: content,
-//            expandData: trueTask,
-//          );
+          if (trueTask.boxId == 0) {
+            richNote.store
+              ..taskSet.addItem(trueTask)
+              ..taskCategories.allTasks.assigned(trueTask);
+          } else {
+            richNote.store
+              ..taskSet.changeItem(trueTask)
+              ..taskCategories.allTasks.change(trueTask);
+          }
           richNote.store.addTaskToFocusEventInDailyRecord(trueTask,
               richNote.focusEvent.focusItemBoxId, item.objectDayIndex);
         } else {

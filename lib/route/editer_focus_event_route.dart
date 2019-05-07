@@ -78,8 +78,11 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   }
 
   void saveFocusEventItem() {
+    //首先判断编辑器里面有没有内容
     if (richSource.hasNote()) {
       _editerFocusEvent.noteLines = richNote.exportingRichLists();
+      //如果编辑器里面只有一个准备转移其他日期的任务，导出到noteLines后，noteLines
+      //就为空，这是就应该删除该focusEvent
       if (_editerFocusEvent.noteLines.isNotEmpty) {
         if (_editerFocusEvent.boxId == 0) {
           _store.addFocusEventToSelectedDay(_editerFocusEvent);

@@ -14,6 +14,7 @@ import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 import 'package:flutter_moment/widgets/gender_label_choice_dialog.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 class RichNoteTapObject {
   RichNoteTapObject(
@@ -887,12 +888,21 @@ class RichNoteState extends State<RichNote> {
           },
         ),
         IconButton(
-          icon: Icon(MdiIcons.tagMultiple),
+          icon: Icon(MdiIcons.calendar),
           onPressed: () {
-            debugPrint('在这里调整任务的日期：${currentRichItem.cleanText}');
-            setState(() {
-              currentRichItem.objectDayIndex = currentRichItem.taskItem.startDate + 3;
-            });
+            DatePicker.showDatePicker(context,
+              showTitleActions: true,
+              minTime: DateTime(widget.store.calendarMap.startYear, 1, 1),
+              maxTime: DateTime(widget.store.calendarMap.endYear, 12, 31),
+              currentTime: DateTime.now(),
+              locale: LocaleType.zh,
+              onConfirm: (date){
+                var dayIndex = widget.store.calendarMap.getDateIndex(date);
+                setState(() {
+                  currentRichItem.objectDayIndex = dayIndex;
+                });
+              }
+            );
           },
         ),
       ],
