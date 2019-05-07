@@ -888,7 +888,7 @@ class RichNoteState extends State<RichNote> {
           },
         ),
         IconButton(
-          icon: Icon(MdiIcons.calendar),
+          icon: Icon(MdiIcons.shareOutline),
           onPressed: () {
             DatePicker.showDatePicker(context,
               showTitleActions: true,
