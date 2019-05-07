@@ -34,7 +34,7 @@ class CycleDate {
 class TaskItem extends BoxItem {
   TaskItem({
     boxId = 0,
-    this.focusItemId = 0,
+    @required this.focusItemId,
     this.title = '',
     this.comment = '',
     this.placeItemId = 0,

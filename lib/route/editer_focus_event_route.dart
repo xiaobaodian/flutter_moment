@@ -80,23 +80,25 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   void saveFocusEventItem() {
     if (richSource.hasNote()) {
       _editerFocusEvent.noteLines = richNote.exportingRichLists();
-      if (_editerFocusEvent.boxId == 0) {
-        _store.addFocusEventToSelectedDay(_editerFocusEvent);
-      } else {
-        PassingObject<FocusEvent> passingObject = PassingObject(
-          oldObject: widget._focusEvent,
-          newObject: _editerFocusEvent,
-        );
-        _store.changeFocusEventAndTasks(passingObject);
-        widget._focusEvent.copyWith(_editerFocusEvent);
+      if (_editerFocusEvent.noteLines.isNotEmpty) {
+        if (_editerFocusEvent.boxId == 0) {
+          _store.addFocusEventToSelectedDay(_editerFocusEvent);
+        } else {
+          PassingObject<FocusEvent> passingObject = PassingObject(
+            oldObject: widget._focusEvent,
+            newObject: _editerFocusEvent,
+          );
+          _store.changeFocusEventAndTasks(passingObject);
+          widget._focusEvent.copyWith(_editerFocusEvent);
+        }
+        return ;
       }
-    } else {
-      /// [widget._focusEvent.boxId] > 0 是原来存在的focusEvent，当用户删除所有内
-      /// 容后执行保存动作，说明用户需要删除。[widget._focusEvent.boxId] = 0 时，说
-      /// 明是刚刚新建的focusEvent，没有内容就退出就是放弃的新建，不需要执行删除。
-      if (widget._focusEvent.boxId > 0) {
-        _store.removeFocusEventAndTasks(widget._focusEvent);
-      }
+    }
+    /// [widget._focusEvent.boxId] > 0 是原来存在的focusEvent，当用户删除所有内
+    /// 容后执行保存动作，说明用户需要删除。[widget._focusEvent.boxId] = 0 时，说
+    /// 明是刚刚新建的focusEvent，没有内容就退出就是放弃的新建，不需要执行删除。
+    if (widget._focusEvent.boxId > 0) {
+      _store.removeFocusEventAndTasks(widget._focusEvent);
     }
   }
 

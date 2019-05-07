@@ -241,8 +241,43 @@ class GlobalStoreState extends State<GlobalStore> {
     }
   }
 
-  void addTaskToFocusEventInDailyRecord(RichLine richLine, int focusItemBoxId, int dayIndex) {
+  void addRichLineToFocusEventInDailyRecord(RichLine richLine, int focusItemBoxId, int dayIndex) {
     var dailyRecord = getDailyRecord(dayIndex);
+    if (dailyRecord.focusEventsIsNull) {
+      dailyRecord.focusEvents = [];
+      dailyRecord.richLines.clear();
+      var event = FocusEvent(dayIndex: dayIndex, focusItemBoxId: focusItemBoxId);
+      event.noteLines.add(richLine);
+      addFocusEventToDayIndex(event, dayIndex);
+    } else {
+      var event = dailyRecord.focusEvents.firstWhere((event) => event.focusItemBoxId == focusItemBoxId,
+        orElse: (){
+          return FocusEvent(dayIndex: dayIndex, focusItemBoxId: focusItemBoxId);
+        },
+      );
+      if (event.boxId == 0) {
+        event.noteLines.add(richLine);
+        addFocusEventToDayIndex(event, dayIndex);
+      } else {
+        var newEvent = FocusEvent();
+        newEvent.copyWith(event);
+        newEvent.noteLines.add(richLine);
+        PassingObject<FocusEvent> passingObject = PassingObject(
+          oldObject: event,
+          newObject: newEvent,
+        );
+        changeFocusEventAndTasks(passingObject);
+      }
+    }
+  }
+
+  void addTaskToFocusEventInDailyRecord(TaskItem task, int focusItemBoxId, int dayIndex) {
+    var dailyRecord = getDailyRecord(dayIndex);
+    var richLine = RichLine(
+      type: RichType.Task,
+      note: focusItemBoxId,
+      expandData: task,
+    );
     if (dailyRecord.focusEventsIsNull) {
       dailyRecord.focusEvents = [];
       dailyRecord.richLines.clear();
