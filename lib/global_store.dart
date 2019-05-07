@@ -137,6 +137,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
   int get todayIndex => calendarMap.currentDateIndexed;
   int get selectedDateIndex => calendarMap.selectedDateIndex;
+  DateTime get selectedDate => calendarMap.selectedDate;
 
   // FocusItem
 

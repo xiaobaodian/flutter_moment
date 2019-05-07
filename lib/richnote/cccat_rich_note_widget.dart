@@ -894,10 +894,11 @@ class RichNoteState extends State<RichNote> {
               showTitleActions: true,
               minTime: DateTime(widget.store.calendarMap.startYear, 1, 1),
               maxTime: DateTime(widget.store.calendarMap.endYear, 12, 31),
-              currentTime: DateTime.now(),
+              currentTime: widget.store.selectedDate,
               locale: LocaleType.zh,
               onConfirm: (date){
                 var dayIndex = widget.store.calendarMap.getDateIndex(date);
+                if (dayIndex == widget.store.selectedDateIndex) dayIndex = 0;
                 setState(() {
                   currentRichItem.objectDayIndex = dayIndex;
                 });
