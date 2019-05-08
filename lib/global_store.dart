@@ -430,11 +430,11 @@ class GlobalStoreState extends State<GlobalStore> {
     focusEvent.tagKeys.keyList.forEach((id) => tagSet.minusReferencesByBoxId(id));
 
     focusEventSet.removeItem(focusEvent);
-    var dailyRecord = getDailyRecordOrNull(focusEvent.dayIndex);
+    var dailyRecord = getDailyRecord(focusEvent.dayIndex);
     dailyRecord.richLines.clear();
     dailyRecord.focusEvents.remove(focusEvent);
 
-    if (dailyRecord.focusEventsIsNull) {
+    if (dailyRecord.focusEvents.isEmpty) {
       dailyRecordSet.removeItem(dailyRecord);
       clearDailyRecordOfDayIndex(focusEvent.dayIndex);
     }
