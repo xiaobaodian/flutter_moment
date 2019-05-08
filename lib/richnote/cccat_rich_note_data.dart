@@ -340,7 +340,6 @@ class RichSource {
     /// 所以删除合并后废弃的line数据附带的task，只能通过boxId来操作。
     mergeRemoveTask.forEach((task) {
       debugPrint('清理合并行后遗弃的数据：ID = ${task.boxId}');
-      //richNote.store.removeTaskItemFromId(task.boxId);
       richNote.store.taskSet.removeItemByBoxId(task.boxId);
     });
     return _getRichLines();
@@ -350,28 +349,23 @@ class RichSource {
     if (richNote.isNotEditable) return richLineList;
     List<RichLine> richLines = [];
 
-    richLineList.forEach((line) {
+    richLineList.forEach((line) async {
       RichItem item = line;
       var content = '';
       if (item.type == RichType.Task) {
         TaskItem task = item.expandData;
         task.title = item.controller.text.replaceAll('\u0000', '');
         if (item.objectDayIndex != 0) {
-          var trueTask = task.boxId != 0
-            ? richNote.store.taskSet.getItemFromId(task.boxId) : task;
+          /// 当[task.boxId == 0]表明[task]是刚刚转换过来的[TaskItem]数据，没有保
+          /// 存过，所以[trueTask]就可以指向[task], 反之，说明[task]是原来的数据
+          /// 这里是一个副本，所以需要通过[task.boxId]找到真实的实例
+          var trueTask = task.boxId == 0
+            ? task
+            : richNote.store.taskSet.getItemFromId(task.boxId);
           trueTask
             ..startDate = item.objectDayIndex
             ..dueDate = item.objectDayIndex + (task.dueDate - task.startDate)
             ..title = task.title;
-          if (trueTask.boxId == 0) {
-            richNote.store
-              ..taskSet.addItem(trueTask)
-              ..taskCategories.allTasks.assigned(trueTask);
-          } else {
-            richNote.store
-              ..taskSet.changeItem(trueTask)
-              ..taskCategories.allTasks.change(trueTask);
-          }
           richNote.store.addTaskToFocusEventInDailyRecord(trueTask,
               richNote.focusEvent.focusItemBoxId, item.objectDayIndex);
         } else {
@@ -392,8 +386,8 @@ class RichSource {
           note: item.note,
           content: item.controller.text.replaceAll('\u0000', ''),
 
-          /// 不是[RichType.Task]类型的line也可能是task转换过来的，必须携带expandData数据
-          /// 让store的changeTaskItemFromFocusEvent处理
+          /// 不是[RichType.Task]类型的line也可能是task转换过来的，那样肯定携带
+          /// expandData数据，让store的changeTaskItemFromFocusEvent处理
           expandData: item.expandData,
         ));
       }

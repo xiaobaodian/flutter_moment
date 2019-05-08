@@ -221,24 +221,15 @@ class GlobalStoreState extends State<GlobalStore> {
 
   // FocusEvent  replaceExpandDataWithTasks
 
+  /// 将[RichLine]的[expandData]替换为[TaskItem]对象
   void replaceExpandDataWithTasks(FocusEvent event) {
-    var lostList = List<RichLine>();
     for (var line in event.noteLines) {
       if (line.type == RichType.Task && line.expandData is int) {
         int id = line.expandData;
         debugPrint('将ID转换成任务数据，当前ID：$id');
         line.expandData = taskSet.getItemFromId(id);
-        if (line.expandData == null) {
-          debugPrint('没有找到任务：Id -> $id');
-          lostList.add(line);
-        }
+        assert(line.expandData != null);
       }
-    }
-    if (lostList.isNotEmpty) {
-      lostList.forEach((line){
-        event.noteLines.remove(line);
-      });
-      focusEventSet.changeItem(event);
     }
   }
 
@@ -279,31 +270,24 @@ class GlobalStoreState extends State<GlobalStore> {
       note: focusItemBoxId,
       expandData: task,
     );
-    if (dailyRecord.focusEventsIsNull) {
-      dailyRecord.focusEvents = [];
-      dailyRecord.richLines.clear();
-      var event = FocusEvent(dayIndex: dayIndex, focusItemBoxId: focusItemBoxId);
+    if (dailyRecord.focusEventsIsNull) dailyRecord.focusEvents = [];
+    var event = dailyRecord.focusEvents.firstWhere((event) => event.focusItemBoxId == focusItemBoxId,
+      orElse: (){
+        return FocusEvent(dayIndex: dayIndex, focusItemBoxId: focusItemBoxId);
+      },
+    );
+    if (event.boxId == 0) {
       event.noteLines.add(richLine);
       addFocusEventToDayIndex(event, dayIndex);
     } else {
-      var event = dailyRecord.focusEvents.firstWhere((event) => event.focusItemBoxId == focusItemBoxId,
-        orElse: (){
-          return FocusEvent(dayIndex: dayIndex, focusItemBoxId: focusItemBoxId);
-        },
+      var newEvent = FocusEvent();
+      newEvent.copyWith(event);
+      newEvent.noteLines.add(richLine);
+      PassingObject<FocusEvent> passingObject = PassingObject(
+        oldObject: event,
+        newObject: newEvent,
       );
-      if (event.boxId == 0) {
-        event.noteLines.add(richLine);
-        addFocusEventToDayIndex(event, dayIndex);
-      } else {
-        var newEvent = FocusEvent();
-        newEvent.copyWith(event);
-        newEvent.noteLines.add(richLine);
-        PassingObject<FocusEvent> passingObject = PassingObject(
-          oldObject: event,
-          newObject: newEvent,
-        );
-        changeFocusEventAndTasks(passingObject);
-      }
+      changeFocusEventAndTasks(passingObject);
     }
   }
 
@@ -370,7 +354,8 @@ class GlobalStoreState extends State<GlobalStore> {
 
     debugPrint('newFocus boxId: ${newFocus.boxId}');
 
-    DailyRecord dailyRecord = getDailyRecordOrNull(newFocus.dayIndex);
+    DailyRecord dailyRecord = getDailyRecord(newFocus.dayIndex);
+    assert(dailyRecord != null);
     dailyRecord.richLines.clear();
 
     int r = changeTaskItemFromFocusEvent(newFocus) * 100;
