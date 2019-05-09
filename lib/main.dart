@@ -493,7 +493,7 @@ Widget _buildFocusModelSheet(
                 Navigator.of(context).pop();
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return EditerFocusEventRoute(FocusEvent(
+                  return EditerFocusEventRoute(store, FocusEvent(
                     dayIndex: store.selectedDateIndex,
                     focusItemBoxId: usableList[index].boxId,
                   ));
@@ -566,7 +566,7 @@ Widget _getListView(BuildContext context, int dayIndex) {
 
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (BuildContext context) {
-        return EditerFocusEventRoute(focusEvent);
+        return EditerFocusEventRoute(store, focusEvent);
       })).then((resultItem) async {
         debugPrint(
             'resultItem is null: ${resultItem == null} , resultItem is int: ${resultItem is int}');

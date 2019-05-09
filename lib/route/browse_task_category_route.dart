@@ -216,7 +216,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
         assert(focusEvent != null);
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
-          return EditerFocusEventRoute(focusEvent);
+          return EditerFocusEventRoute(store, focusEvent);
         })).then((resultItem) {
           if (resultItem is PassingObject<FocusEvent>) {
             dailyRecord.richLines.clear();

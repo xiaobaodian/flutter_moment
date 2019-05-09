@@ -135,7 +135,7 @@ class TagItemDetailsRouteState extends State<TagItemDetailsRoute> {
             //DailyRecord dailyRecord = _store.getDailyRecord(event.dayIndex);
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
-              return EditerFocusEventRoute(event);
+              return EditerFocusEventRoute(_store, event);
             }));
           },
         );

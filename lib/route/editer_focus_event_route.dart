@@ -9,9 +9,10 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class EditerFocusEventRoute extends StatefulWidget {
-  EditerFocusEventRoute(this._focusEvent);
+  EditerFocusEventRoute(this.store, this._focusEvent);
 
   final FocusEvent _focusEvent;
+  final GlobalStoreState store;
 
   @override
   EditerFocusEventRouteState createState() => EditerFocusEventRouteState();
@@ -21,7 +22,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   //final focusEventController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<RichNoteState> _richNoteKey = GlobalKey<RichNoteState>();
-  GlobalStoreState _store;
+  //GlobalStoreState _store;
   FocusEvent _editerFocusEvent = FocusEvent();
   String _routeTitle;
   String _dateTitle;
@@ -33,21 +34,28 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     super.initState();
     _editerFocusEvent.copyWith(widget._focusEvent);
     richSource = RichSource.fromFocusEvent(_editerFocusEvent);
+    richNote = RichNote.editable(
+      key: _richNoteKey,
+      richSource: richSource,
+      store: widget.store,
+    );
+    _routeTitle = widget.store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
+    _dateTitle = widget.store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _store = GlobalStore.of(context);
-    _routeTitle = _store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
-    _dateTitle = _store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
+//    _store = GlobalStore.of(context);
+//    _routeTitle = _store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
+//    _dateTitle = _store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
     //_editerFocusEvent.copyWith(widget._focusEvent);
     //richSource = RichSource.fromFocusEvent(_editerFocusEvent);
-    richNote = RichNote.editable(
-      key: _richNoteKey,
-      richSource: richSource,
-      store: _store,
-    );
+//    richNote = RichNote.editable(
+//      key: _richNoteKey,
+//      richSource: richSource,
+//      store: _store,
+//    );
   }
 
   @override
@@ -85,13 +93,13 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
       /// 就为空，这是就应该删除该focusEvent
       if (_editerFocusEvent.noteLines.isNotEmpty) {
         if (_editerFocusEvent.boxId == 0) {
-          _store.addFocusEventToSelectedDay(_editerFocusEvent);
+          widget.store.addFocusEventToSelectedDay(_editerFocusEvent);
         } else {
           PassingObject<FocusEvent> passingObject = PassingObject(
             oldObject: widget._focusEvent,
             newObject: _editerFocusEvent,
           );
-          _store.changeFocusEventAndTasks(passingObject);
+          widget.store.changeFocusEventAndTasks(passingObject);
           widget._focusEvent.copyWith(_editerFocusEvent);
         }
         return ;
@@ -103,7 +111,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
     /// 容后执行保存动作，说明用户需要删除。[widget._focusEvent.boxId] = 0 时，说
     /// 明是刚刚新建的focusEvent，没有内容就退出就是放弃的新建，不需要执行删除。
     if (widget._focusEvent.boxId > 0) {
-      await _store.removeFocusEventAndTasks(widget._focusEvent);
+      await widget.store.removeFocusEventAndTasks(widget._focusEvent);
     }
   }
 
@@ -125,7 +133,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
             FlatButton(
               child: Text('确认'),
               onPressed: () {
-                _store.removeFocusEventAndTasks(widget._focusEvent);
+                widget.store.removeFocusEventAndTasks(widget._focusEvent);
                 Navigator.of(context).pop(1);
               },
             ),
@@ -147,10 +155,10 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
 
     return WillPopScope(
       onWillPop: () async {
-        if (_store.prefs.autoSave) {
+        if (widget.store.prefs.autoSave) {
           saveFocusEventItem();
         } else {
-          _store.checkDailyRecord();
+          widget.store.checkDailyRecord();
         }
         return true;
       },
@@ -172,11 +180,11 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
           ),
           actions: <Widget>[
             IconButton(
-              icon: _store.prefs.autoSave ? Icon(Icons.cancel) : Icon(Icons.save),
+              icon: widget.store.prefs.autoSave ? Icon(Icons.cancel) : Icon(Icons.save),
               onPressed: () {
-                if (_store.prefs.autoSave) {
+                if (widget.store.prefs.autoSave) {
                   Navigator.of(context).pop(-1);
-                  _store.checkDailyRecord();
+                  widget.store.checkDailyRecord();
                 } else {
                   saveFocusEventItem();
                   Navigator.of(context).pop();
