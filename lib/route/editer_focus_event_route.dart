@@ -9,9 +9,9 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 
 class EditerFocusEventRoute extends StatefulWidget {
-  EditerFocusEventRoute(this.store, this._focusEvent);
+  EditerFocusEventRoute(this.store, this.focusEvent);
 
-  final FocusEvent _focusEvent;
+  final FocusEvent focusEvent;
   final GlobalStoreState store;
 
   @override
@@ -32,15 +32,15 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   @override
   void initState() {
     super.initState();
-    _editerFocusEvent.copyWith(widget._focusEvent);
+    _editerFocusEvent.copyWith(widget.focusEvent);
     richSource = RichSource.fromFocusEvent(_editerFocusEvent);
     richNote = RichNote.editable(
       key: _richNoteKey,
       richSource: richSource,
       store: widget.store,
     );
-    _routeTitle = widget.store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
-    _dateTitle = widget.store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
+    _routeTitle = widget.store.getFocusTitleBy(widget.focusEvent.focusItemBoxId);
+    _dateTitle = widget.store.calendarMap.getChineseTermOfDate(widget.focusEvent.dayIndex);
   }
 
   @override
@@ -96,22 +96,22 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
           widget.store.addFocusEventToSelectedDay(_editerFocusEvent);
         } else {
           PassingObject<FocusEvent> passingObject = PassingObject(
-            oldObject: widget._focusEvent,
+            oldObject: widget.focusEvent,
             newObject: _editerFocusEvent,
           );
           widget.store.changeFocusEventAndTasks(passingObject);
-          widget._focusEvent.copyWith(_editerFocusEvent);
+          widget.focusEvent.copyWith(_editerFocusEvent);
         }
         return ;
       }
-      widget._focusEvent.copyWith(_editerFocusEvent);
+      widget.focusEvent.copyWith(_editerFocusEvent);
     }
     /// [richSource.hasNote()]为false时，表明内容为空，执行下面部分。
     /// [widget._focusEvent.boxId] > 0 是原来存在的focusEvent，当用户删除所有内
     /// 容后执行保存动作，说明用户需要删除。[widget._focusEvent.boxId] = 0 时，说
     /// 明是刚刚新建的focusEvent，没有内容就退出就是放弃的新建，不需要执行删除。
-    if (widget._focusEvent.boxId > 0) {
-      await widget.store.removeFocusEventAndTasks(widget._focusEvent);
+    if (widget.focusEvent.boxId > 0) {
+      await widget.store.removeFocusEventAndTasks(widget.focusEvent);
     }
   }
 
@@ -133,7 +133,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
             FlatButton(
               child: Text('确认'),
               onPressed: () {
-                widget.store.removeFocusEventAndTasks(widget._focusEvent);
+                widget.store.removeFocusEventAndTasks(widget.focusEvent);
                 Navigator.of(context).pop(1);
               },
             ),
