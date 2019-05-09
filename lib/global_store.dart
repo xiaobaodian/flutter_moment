@@ -198,7 +198,7 @@ class GlobalStoreState extends State<GlobalStore> {
   }
 
   DailyRecord getDailyRecordFormTask(TaskItem task) {
-    return calendarMap.getDailyRecordOrNullFromDayIndex(task.createDate);
+    return calendarMap.getDailyRecordOrNullFromDayIndex(task.startDate);
   }
 
   void checkDailyRecord({int dayIndex}) {
@@ -280,6 +280,8 @@ class GlobalStoreState extends State<GlobalStore> {
       event.noteLines.add(richLine);
       addFocusEventToDayIndex(event, dayIndex);
     } else {
+      /// 新建一个[FocusEvent]实例，copy了原来的数据后再加入richLine，这样处理
+      /// 可以正确执行标签引用的对比和计数
       var newEvent = FocusEvent();
       newEvent.copyWith(event);
       newEvent.noteLines.add(richLine);
@@ -510,7 +512,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
   FocusEvent getFocusEventFormTask(TaskItem task) {
     DailyRecord dailyRecord =
-        calendarMap.getDailyRecordOrNullFromDayIndex(task.createDate);
+        calendarMap.getDailyRecordFromDayIndex(task.startDate);
     return getFocusEventFormDailyRecord(dailyRecord, task.focusItemId);
   }
 

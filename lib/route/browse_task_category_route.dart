@@ -16,38 +16,44 @@ import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 class BrowseTaskCategoryRoute extends StatefulWidget {
+  BrowseTaskCategoryRoute(this.store);
+
+  final GlobalStoreState store;
+
   @override
   BrowseTaskCategoryRouteState createState() => BrowseTaskCategoryRouteState();
 }
 
 class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
     with SingleTickerProviderStateMixin {
-  GlobalStoreState _store;
+  //GlobalStoreState _store;
   TabController _controller;
   final List<String> tabLabel = [];
 
   @override
   void initState() {
     super.initState();
+    bool priorityDisplayOverdueTasks =
+        widget.store.prefs.priorityDisplayOverdueTasks &&
+            widget.store.taskCategories.lateTasks.childrenIsNotEmpty;
+    _controller = TabController(
+      initialIndex: priorityDisplayOverdueTasks ? 1 : 0,
+      length: widget.store.taskCategories.allTasks.subNodes.length,
+      vsync: this,
+    );
+    widget.store.taskCategories.allTasks.subNodes.forEach((node) {
+      tabLabel.add(node.title);
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _store = GlobalStore.of(context);
+    //_store = GlobalStore.of(context);
 
-    bool priorityDisplayOverdueTasks =
-        _store.prefs.priorityDisplayOverdueTasks &&
-            _store.taskCategories.lateTasks.childrenIsNotEmpty;
 
-    _controller = TabController(
-      initialIndex: priorityDisplayOverdueTasks ? 1 : 0,
-      length: _store.taskCategories.allTasks.subNodes.length,
-      vsync: this,
-    );
-    _store.taskCategories.allTasks.subNodes.forEach((node) {
-      tabLabel.add(node.title);
-    });
+
+
 //    _store.taskSet.itemList.forEach((task){
 //      debugPrint('开始分配任务');
 //      _store.taskCategories.allTasks.assigned(task);
@@ -108,7 +114,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
           ),
         ],
       ),
-      body: buildBody(context, _store),
+      body: buildBody(context, widget.store),
     );
   }
 
@@ -123,13 +129,13 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
       controller: _controller,
       children: <Widget>[
         CustomScrollView(
-          slivers: _buildSlivers(context, _store.taskCategories.actionTasks),
+          slivers: _buildSlivers(context, store.taskCategories.actionTasks),
         ),
         CustomScrollView(
-          slivers: _buildSlivers(context, _store.taskCategories.lateTasks),
+          slivers: _buildSlivers(context, store.taskCategories.lateTasks),
         ),
         CustomScrollView(
-          slivers: _buildSlivers(context, _store.taskCategories.completeTasks),
+          slivers: _buildSlivers(context, store.taskCategories.completeTasks),
         ),
       ],
     );
@@ -167,7 +173,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
   Widget getTaskItem(
       BuildContext context, TreeNode<TaskItem> node, int nodeIndex, int index) {
     TaskItem task = node.subNodes[nodeIndex].children[index];
-    return buildTaskItem(_store, context, task);
+    return buildTaskItem(widget.store, context, task);
   }
 
   Widget buildTaskItem(
@@ -200,6 +206,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
       title: Text(task.title),
       subtitle: Text(str),
       onTap: () {
+        // TODO: 以后应将任务打开的方式改为任务的编辑窗口。目前打开rich编辑器的方法只用用于开发和调试
         DailyRecord dailyRecord = store.getDailyRecordFormTask(task);
         FocusEvent focusEvent = store.getFocusEventFormTask(task);
         print('task focusitem id : ${task.focusItemId}');

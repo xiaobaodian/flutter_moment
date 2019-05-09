@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   navigator.pop(context);
                   navigator
                       .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return BrowseTaskCategoryRoute();
+                    return BrowseTaskCategoryRoute(_store);
                     //return BrowseTaskRoute();
                   }));
                 },
