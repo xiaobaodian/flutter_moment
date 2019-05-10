@@ -290,7 +290,8 @@ class GlobalStoreState extends State<GlobalStore> {
         newObject: newEvent,
       );
       changeFocusEventAndTasks(passingObject);
-      dailyRecord.buildRichList(this, true);
+      dailyRecord.richLines.clear();
+      //dailyRecord.buildRichList(this, true);
     }
   }
 
