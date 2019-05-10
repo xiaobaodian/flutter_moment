@@ -254,7 +254,7 @@ class GlobalStoreState extends State<GlobalStore> {
         var newEvent = FocusEvent();
         newEvent.copyWith(event);
         newEvent.noteLines.add(richLine);
-        PassingObject<FocusEvent> passingObject = PassingObject(
+        DiffObject<FocusEvent> passingObject = DiffObject(
           oldObject: event,
           newObject: newEvent,
         );
@@ -285,11 +285,12 @@ class GlobalStoreState extends State<GlobalStore> {
       var newEvent = FocusEvent();
       newEvent.copyWith(event);
       newEvent.noteLines.add(richLine);
-      PassingObject<FocusEvent> passingObject = PassingObject(
+      DiffObject<FocusEvent> passingObject = DiffObject(
         oldObject: event,
         newObject: newEvent,
       );
       changeFocusEventAndTasks(passingObject);
+      dailyRecord.buildRichList(this, true);
     }
   }
 
@@ -350,7 +351,7 @@ class GlobalStoreState extends State<GlobalStore> {
     debugPrint('change SelectedDay Events: ${json.encode(dayEvents)}');
   }
 
-  void changeFocusEventAndTasks(PassingObject<FocusEvent> passingObject) {
+  void changeFocusEventAndTasks(DiffObject<FocusEvent> passingObject) {
     FocusEvent newFocus = passingObject.newObject;
     FocusEvent oldFocus = passingObject.oldObject;
 
@@ -412,20 +413,22 @@ class GlobalStoreState extends State<GlobalStore> {
 //    focusEventSet.changeItem(newFocus);
   }
 
-  Future removeFocusEventAndTasks(FocusEvent focusEvent) async {
+  Future removeFocusEventAndTasks(FocusEvent focusEvent, {bool removeTask = true}) async {
     debugPrint('开始执行: removeFocusEventAndTasks');
 
     /// 获取FocusItem，引用减少一次
     focusItemSet.minusReferencesByBoxId(focusEvent.focusItemBoxId);
 
     /// 删除index位置focusEvent记录里面的TaskItem
-    focusEvent.noteLines.forEach((line) {
-      if (line.expandData is TaskItem) {
-        TaskItem task = line.expandData;
-        taskSet.removeItem(task);
-        taskCategories.allTasks.remove(task);
-      }
-    });
+    if (removeTask) {
+      focusEvent.noteLines.forEach((line) {
+        if (line.expandData is TaskItem) {
+          TaskItem task = line.expandData;
+          taskSet.removeItem(task);
+          taskCategories.allTasks.remove(task);
+        }
+      });
+    }
 
     focusEvent.personKeys.keyList.forEach((id) => personSet.minusReferencesByBoxId(id));
     focusEvent.placeKeys.keyList.forEach((id) => placeSet.minusReferencesByBoxId(id));

@@ -117,7 +117,7 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
                         String dec = line.getContent().replaceAll(oldName, newName);
                         line.setContent(dec);
                       }
-                      _store.changeFocusEventAndTasks(PassingObject(newObject: event));
+                      _store.changeFocusEventAndTasks(DiffObject(newObject: event));
                     }
                   }
                   widget._personItem.copyWith(resultItem);

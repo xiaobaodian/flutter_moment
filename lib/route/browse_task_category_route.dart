@@ -218,7 +218,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
             .push(MaterialPageRoute(builder: (BuildContext context) {
           return EditerFocusEventRoute(store, focusEvent);
         })).then((resultItem) {
-          if (resultItem is PassingObject<FocusEvent>) {
+          if (resultItem is DiffObject<FocusEvent>) {
             dailyRecord.richLines.clear();
             focusEvent = resultItem.newObject;
             store.changeFocusEventAndTasks(resultItem);

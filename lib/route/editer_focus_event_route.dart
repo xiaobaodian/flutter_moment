@@ -46,16 +46,6 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-//    _store = GlobalStore.of(context);
-//    _routeTitle = _store.getFocusTitleBy(widget._focusEvent.focusItemBoxId);
-//    _dateTitle = _store.calendarMap.getChineseTermOfDate(widget._focusEvent.dayIndex);
-    //_editerFocusEvent.copyWith(widget._focusEvent);
-    //richSource = RichSource.fromFocusEvent(_editerFocusEvent);
-//    richNote = RichNote.editable(
-//      key: _richNoteKey,
-//      richSource: richSource,
-//      store: _store,
-//    );
   }
 
   @override
@@ -95,23 +85,23 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
         if (_editerFocusEvent.boxId == 0) {
           widget.store.addFocusEventToSelectedDay(_editerFocusEvent);
         } else {
-          PassingObject<FocusEvent> passingObject = PassingObject(
+          DiffObject<FocusEvent> diffObject = DiffObject(
             oldObject: widget._focusEvent,
             newObject: _editerFocusEvent,
           );
-          widget.store.changeFocusEventAndTasks(passingObject);
+          widget.store.changeFocusEventAndTasks(diffObject);
           widget._focusEvent.copyWith(_editerFocusEvent);
         }
-        return ;
+        return;
       }
-      widget._focusEvent.copyWith(_editerFocusEvent);
+      //widget._focusEvent.copyWith(_editerFocusEvent);
     }
     /// [richSource.hasNote()]为false时，表明内容为空，执行下面部分。
     /// [widget._focusEvent.boxId] > 0 是原来存在的focusEvent，当用户删除所有内
     /// 容后执行保存动作，说明用户需要删除。[widget._focusEvent.boxId] = 0 时，说
     /// 明是刚刚新建的focusEvent，没有内容就退出就是放弃的新建，不需要执行删除。
     if (widget._focusEvent.boxId > 0) {
-      await widget.store.removeFocusEventAndTasks(widget._focusEvent);
+      await widget.store.removeFocusEventAndTasks(widget._focusEvent, removeTask: false);
     }
   }
 

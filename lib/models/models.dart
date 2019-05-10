@@ -13,8 +13,8 @@ import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 import 'package:flutter_moment/task/task_item.dart';
 
-class PassingObject<T> {
-  PassingObject({this.oldObject, this.newObject});
+class DiffObject<T> {
+  DiffObject({this.oldObject, this.newObject});
   T oldObject;
   T newObject;
 }

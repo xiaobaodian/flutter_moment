@@ -117,7 +117,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
                             line.getContent().replaceAll(oldTitle, newTitle);
                         line.setContent(dec);
                       }
-                      _store.changeFocusEventAndTasks(PassingObject(newObject: event));
+                      _store.changeFocusEventAndTasks(DiffObject(newObject: event));
                     }
                   }
                   widget._placeItem.copyWith(resultItem);
@@ -144,6 +144,10 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
   Widget buildBody(BuildContext context) {
     final detailsList = widget._placeItem.detailsList;
     if (detailsList.isEmpty) {
+      if (widget._placeItem.count > 0) {
+        widget._placeItem.count = 0;
+        _store.placeSet.changeItem(widget._placeItem);
+      }
       return Center(child: Text('还没有记录'));
     }
     return ListView.separated(
