@@ -12,9 +12,9 @@ import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
 import 'package:flutter_moment/task/task_item.dart';
 import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
-import 'package:flutter_moment/widgets/gender_label_choice_dialog.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:shimmer/shimmer.dart';
 
 class RichNoteTapObject {
   RichNoteTapObject(
@@ -127,7 +127,7 @@ class RichNoteState extends State<RichNote> {
   TextTheme textTheme;
   RichNoteLayout layout;
   BarType barType, oldBarType;
-  bool InitialInto;
+  bool initialInto;
 
   ///[currentRichItem]当前光标所在的编辑行
   ///
@@ -140,7 +140,7 @@ class RichNoteState extends State<RichNote> {
   void initState() {
     super.initState();
     barType = BarType.FormatBar;
-    InitialInto = true;
+    initialInto = true;
   }
 
   @override
@@ -263,11 +263,19 @@ class RichNoteState extends State<RichNote> {
             decorationStyle: TextDecorationStyle.solid,
           ));
         }
-        String subtitle;
+        Widget subtitle;
         if (widget.isEditable) {
           var richItem = item as RichItem;
           if (richItem.objectDayIndex > 0) {
-            subtitle = '推迟到';
+            var date = widget.store.calendarMap.getChineseTermOfDate(richItem.objectDayIndex);
+            subtitle = Shimmer.fromColors(
+                baseColor: Theme.of(context).accentColor,
+                highlightColor: Colors.white,
+                child: Text('将转移到：$date', style: textTheme.caption),
+            );
+            //subtitle = '将转移到：$date';
+          } else {
+            // 这里以后扩充需要处理子标题的代码
           }
         }
         lineWidget = layout.richLayoutTask(
@@ -275,12 +283,7 @@ class RichNoteState extends State<RichNote> {
           widget.isEditable
             ? _buildTextField(index, effectiveSytle)
             : Text(item.getContent(), style: effectiveSytle),
-          subtitle == null
-            ? null
-            : Text(
-                subtitle,
-                style: textTheme.caption,
-              )
+          subtitle,
         );
         break;
       case RichType.OrderedLists:
@@ -865,6 +868,14 @@ class RichNoteState extends State<RichNote> {
   }
 
   Widget _buildTaskIconsBar() {
+    int tagCount = widget.focusEvent.tagKeys.keyList.length;
+    String tagLabel = tagCount == 0 ? '' : '$tagCount';
+
+    int personCount = widget.focusEvent.personKeys.keyList.length;
+    String personLabel = personCount == 0 ? '' : '$personCount';
+
+    int placeCount = widget.focusEvent.placeKeys.keyList.length;
+    String placeLabel = placeCount == 0 ? '' : '$placeCount';
     return ListView(
       scrollDirection: Axis.horizontal,
       children: <Widget>[
@@ -873,18 +884,6 @@ class RichNoteState extends State<RichNote> {
           onPressed: () {
             changeLineTypeTo(RichType.Text);
             changeLineTypeIconsBar(RichType.Text);
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.alarm),
-          onPressed: () {
-
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.description),
-          onPressed: () {
-
           },
         ),
         IconButton(
@@ -905,6 +904,36 @@ class RichNoteState extends State<RichNote> {
               }
             );
           },
+        ),
+        IconButton(
+          icon: Icon(MdiIcons.accountMultiple),
+          color: personCount == 0 ? null : Theme.of(context).accentColor,
+          onPressed: () {
+            editLabels(LabelType.Person);
+          },
+        ),
+        Center(
+          child: Text(personLabel),
+        ),
+        IconButton(
+          icon: Icon(MdiIcons.mapMarkerMultiple),
+          color: placeCount == 0 ? null : Theme.of(context).accentColor,
+          onPressed: () {
+            editLabels(LabelType.Place);
+          },
+        ),
+        Center(
+          child: Text(placeLabel),
+        ),
+        IconButton(
+          icon: Icon(MdiIcons.tagMultiple),
+          color: tagCount == 0 ? null : Theme.of(context).accentColor,
+          onPressed: () {
+            editLabels(LabelType.Tag);
+          },
+        ),
+        Center(
+          child: Text(tagLabel),
         ),
       ],
     );
@@ -1356,10 +1385,10 @@ class RichNoteState extends State<RichNote> {
         ),
       );
     }
-    if (widget.isEditable && InitialInto) {
+    if (widget.isEditable && initialInto) {
       var lastLine = widget.richSource.richLineList.last as RichItem;
       _requestFocus(lastLine.focusNode);
-      InitialInto = false;
+      initialInto = false;
     }
     return bodyItems;
   }

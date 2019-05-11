@@ -271,8 +271,9 @@ class GlobalStoreState extends State<GlobalStore> {
       expandData: task,
     );
     if (dailyRecord.focusEventsIsNull) dailyRecord.focusEvents = [];
-    var event = dailyRecord.focusEvents.firstWhere((event) => event.focusItemBoxId == focusItemBoxId,
-      orElse: (){
+    var event = dailyRecord.focusEvents
+        .firstWhere((event) => event.focusItemBoxId == focusItemBoxId
+      , orElse: (){
         return FocusEvent(dayIndex: dayIndex, focusItemBoxId: focusItemBoxId);
       },
     );
@@ -282,16 +283,15 @@ class GlobalStoreState extends State<GlobalStore> {
     } else {
       /// 新建一个[FocusEvent]实例，copy了原来的数据后再加入richLine，这样处理
       /// 可以正确执行标签引用的对比和计数
-      var newEvent = FocusEvent();
-      newEvent.copyWith(event);
-      newEvent.noteLines.add(richLine);
-      DiffObject<FocusEvent> passingObject = DiffObject(
+      var newEvent = FocusEvent()
+        ..copyWith(event)
+        ..noteLines.add(richLine);
+      DiffObject<FocusEvent> diffObject = DiffObject(
         oldObject: event,
         newObject: newEvent,
       );
-      changeFocusEventAndTasks(passingObject);
-      dailyRecord.richLines.clear();
-      //dailyRecord.buildRichList(this, true);
+      changeFocusEventAndTasks(diffObject);
+      event.copyWith(newEvent);
     }
   }
 
