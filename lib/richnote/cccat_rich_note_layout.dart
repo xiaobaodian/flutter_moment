@@ -55,26 +55,33 @@ class RichNoteLayout {
 //    );
   }
 
-  Widget richLayoutTask(Widget checkbox, Widget task, Widget time) {
-    double p = 5.5;
-    if (task is TextField) {
-      p = 2.5;
-    }
-    List<Widget> widgets = [];
-    widgets.add(
-        Padding(
-          padding: EdgeInsets.fromLTRB(0, p, 0, 0),
-          child: task,
-        )
-    );
-    if (time != null) {
-      widgets.add(
-        Padding (
-          padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-          child: time,
-        )
-      );
-    }
+  Widget richLayoutTask(Widget checkbox, Widget task, Widget label) {
+    double p = task is TextField ? 2.5 : 5.5;
+    List<Widget> widgets = [
+      Padding(
+        padding: EdgeInsets.fromLTRB(0, p, 0, 0),
+        child: task,
+      ),
+      if (label != null) Padding (
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        child: label,
+      ),
+    ];
+//    List<Widget> widgets = [];
+//    widgets.add(
+//        Padding(
+//          padding: EdgeInsets.fromLTRB(0, p, 0, 0),
+//          child: task,
+//        )
+//    );
+//    if (label != null) {
+//      widgets.add(
+//        Padding (
+//          padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+//          child: label,
+//        )
+//      );
+//    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,10 +124,7 @@ class RichNoteLayout {
           child: Stack(
             alignment: AlignmentDirectional.center,
             children: <Widget>[
-              Text(
-                '猫',
-                style: textStyle,
-              ),
+              Text('猫', style: textStyle),
               leading,
             ],
           ),
