@@ -198,10 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.assignment_turned_in),
-                title: Text(
-                  '任务',
-                  style: TextStyle(fontSize: 18),
-                ),
+                title: Text('任务', style: TextStyle(fontSize: 18)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   var navigator = Navigator.of(context);
@@ -218,10 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.filter_center_focus),
-                title: Text(
-                  '焦点',
-                  style: TextStyle(fontSize: 18),
-                ),
+                title: Text('焦点', style: TextStyle(fontSize: 18)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   var navigator = Navigator.of(context);
@@ -234,10 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.people),
-                title: Text(
-                  '人物',
-                  style: TextStyle(fontSize: 18),
-                ),
+                title: Text('人物', style: TextStyle(fontSize: 18)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   var navigator = Navigator.of(context);
@@ -250,10 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.photo),
-                title: Text(
-                  '相片',
-                  style: TextStyle(fontSize: 18),
-                ),
+                title: Text('相片', style: TextStyle(fontSize: 18)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   var navigator = Navigator.of(context);
@@ -266,10 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(MdiIcons.mapMarkerMultiple),
-                title: Text(
-                  '位置',
-                  style: TextStyle(fontSize: 18),
-                ),
+                title: Text('位置', style: TextStyle(fontSize: 18)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   var navigator = Navigator.of(context);
@@ -282,10 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(MdiIcons.tagMultiple),
-                title: Text(
-                  '标签',
-                  style: TextStyle(fontSize: 18),
-                ),
+                title: Text('标签', style: TextStyle(fontSize: 18)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   var navigator = Navigator.of(context);
@@ -301,10 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.child_care),
-                title: Text(
-                  '消息',
-                  style: TextStyle(fontSize: 18),
-                ),
+                title: Text('消息', style: TextStyle(fontSize: 18)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   //TrimPicture
@@ -452,14 +431,12 @@ Widget _getDateHeader(BuildContext context, int index, DateTime date) {
 //            alignment: AlignmentDirectional.topStart,
 //          ),
 //        ),
-        Text(
-          '${date.year}年${date.month}月${date.day}日 - ${DateTimeExt.chineseWeekName(date, longName: true)}',
+        Text('${date.year}年${date.month}月${date.day}日 - ${DateTimeExt.chineseWeekName(date, longName: true)}',
           style: TextStyle(
             fontSize: 14.0,
           ),
         ),
-        Text(
-          '$dayLeap',
+        Text('$dayLeap',
           style: TextStyle(
             fontSize: 14.0,
           ),
@@ -480,9 +457,7 @@ Widget _buildFocusModelSheet(
         padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
         child: Text('准备记录的关注点'),
       ),
-      Divider(
-        height: 12,
-      ),
+      Divider( height: 12),
       Expanded(
         child: ListView.builder(
           itemBuilder: (context, index) {
@@ -545,7 +520,6 @@ class SliverPanel extends SliverPersistentHeaderDelegate {
 /// 方法获取新的数据，不能直接赋值。如果被复制的话是没有意义的。
 Widget _getListView(BuildContext context, int dayIndex) {
   var store = GlobalStore.of(context);
-  //var dailyRecord = store.calendarMap.getDailyRecordOrNullFromDayIndex(dayIndex);
   var dailyRecord = store.getDailyRecordOrNull(dayIndex);
 
   if (dailyRecord == null) {

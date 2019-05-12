@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_moment/models/auto_updates.dart';
 import 'package:flutter_moment/models/local_notifications.dart';
 import 'package:flutter_moment/models/shared_preferences.dart';
 import 'package:flutter_moment/task/task_categories.dart';
 import 'package:package_info/package_info.dart';
-import 'package:dio/dio.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter_moment/calendar_map.dart';
 import 'package:flutter_moment/models/data_services.dart';
@@ -57,10 +55,6 @@ class GlobalStoreState extends State<GlobalStore> {
   BasicData<DailyRecord> dailyRecordSet;
 
   TaskCategories taskCategories;
-
-
-  //Map<int, TaskItem> _taskItemMap = Map<int, TaskItem>();
-  //List<TaskItem> taskItemList;
 
   @override
   void initState() {
