@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_moment/calendar_map.dart';
-import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
 
 class EditerFocusItemRoute extends StatefulWidget {

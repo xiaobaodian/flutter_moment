@@ -182,12 +182,10 @@ class GlobalStoreState extends State<GlobalStore> {
       calendarMap.getDailyRecordFromSelectedDay();
 
   DailyRecord getDailyRecordOrNull(int dayIndex) {
-    //return calendarMap.everyDayIndex[dayIndex].dailyRecord;
     return calendarMap.getDailyRecordOrNullFromDayIndex(dayIndex);
   }
 
   DailyRecord getDailyRecord(int dayIndex) {
-    //return calendarMap.everyDayIndex[dayIndex].dailyRecord;
     return calendarMap.getDailyRecordFromDayIndex(dayIndex);
   }
 
@@ -210,7 +208,7 @@ class GlobalStoreState extends State<GlobalStore> {
     calendarMap.clearDailyRecordOfSelectedDay();
   }
 
-  void clearDailyRecordOfDayIndex(int dayIndex) =>
+  void clearDailyRecordForDayIndex(int dayIndex) =>
       calendarMap.clearDailyRecordOfDayIndex(dayIndex);
 
   // FocusEvent  replaceExpandDataWithTasks
@@ -436,7 +434,7 @@ class GlobalStoreState extends State<GlobalStore> {
 
     if (dailyRecord.focusEvents.isEmpty) {
       dailyRecordSet.removeItem(dailyRecord);
-      clearDailyRecordOfDayIndex(focusEvent.dayIndex);
+      clearDailyRecordForDayIndex(focusEvent.dayIndex);
     }
     //debugPrint('remove SelectedDay Events: ${json.encode(selectedDailyRecord.focusEvents)}');
   }

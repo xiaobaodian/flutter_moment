@@ -1,17 +1,11 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
-import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
-import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
-import 'package:flutter_moment/route/editer_focus_item_route.dart';
 import 'package:flutter_moment/task/task_item.dart';
 import 'package:flutter_moment/task/tree_node.dart';
-import 'package:flutter_moment/widgets/cccat_header_list_view.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 

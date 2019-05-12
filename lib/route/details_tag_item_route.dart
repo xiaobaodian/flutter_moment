@@ -1,19 +1,11 @@
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_moment/calendar_tools.dart';
 import 'package:flutter_moment/global_store.dart';
-import 'package:flutter_moment/models/enums.dart';
-import 'package:flutter_moment/models/helper_file.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_widget.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
-import 'package:flutter_moment/route/editer_focus_item_route.dart';
-import 'package:flutter_moment/route/editer_person_item_route.dart';
-import 'package:flutter_moment/route/editer_place_item_route.dart';
 import 'package:flutter_moment/route/editer_tage_item_route.dart';
 
 class TagItemDetailsRoute extends StatefulWidget {

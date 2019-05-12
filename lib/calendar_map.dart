@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_moment/calendar_tools.dart';
-import 'package:flutter_moment/models/data_services.dart';
 import 'package:flutter_moment/models/models.dart';
 
 class CalendarMap {
@@ -72,7 +71,6 @@ class CalendarMap {
         }
       }
     }
-
     debugPrint('currentDateIndexed: $_currentDateIndexed');
   }
 

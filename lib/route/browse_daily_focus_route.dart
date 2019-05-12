@@ -1,10 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_moment/global_store.dart';
-import 'package:flutter_moment/models/helper_file.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/route/details_focus_item_route.dart';
 import 'package:flutter_moment/route/details_person_item_route.dart';

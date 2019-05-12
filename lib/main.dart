@@ -1,6 +1,4 @@
-import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_moment/launch_page.dart';
@@ -16,9 +14,7 @@ import 'package:flutter_moment/route/details_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/browse_daily_focus_route.dart';
 import 'package:flutter_moment/route/user_account_details_route.dart';
-import 'package:flutter_moment/widgets/trim_picture_dialog.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
 
 void main() => runApp(GlobalStore(child: MyApp()));
 

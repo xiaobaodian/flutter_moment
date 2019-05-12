@@ -1,17 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_moment/global_store.dart';
-import 'package:flutter_moment/models/helper_file.dart';
-import 'package:flutter_moment/models/helper_file_image.dart';
 import 'package:flutter_moment/models/models.dart';
-import 'package:flutter_moment/route/trim_photo_route.dart';
 import 'package:flutter_moment/widgets/trim_picture_dialog.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 class EditerPersonItemRoute extends StatefulWidget {
   final PersonItem _personItem;
