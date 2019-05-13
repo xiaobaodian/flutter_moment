@@ -9,6 +9,7 @@ import 'package:flutter_moment/models/data_helper.dart';
 import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_layout.dart';
+import 'package:flutter_moment/route/editer_task_item_route.dart';
 import 'package:flutter_moment/task/task_item.dart';
 import 'package:flutter_moment/widgets/cccat_divider_ext.dart';
 import 'package:flutter_moment/widgets/cccat_list_tile.dart';
@@ -903,6 +904,16 @@ class RichNoteState extends State<RichNote> {
                 });
               }
             );
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.description),
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) {
+                return EditerTaskItemRoute(widget.store, currentRichItem.taskItem);
+              }
+            ));
           },
         ),
         IconButton(

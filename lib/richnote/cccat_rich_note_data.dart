@@ -184,7 +184,7 @@ class RichItem extends RichLine {
     this.source = source;
     if (type == RichType.Task) {
       TaskItem oldTask = richLine.expandData;
-      TaskItem newTask = TaskItem.copyWith(oldTask);
+      TaskItem newTask = TaskItem.from(oldTask);
       newTask.title = buildEditerText(oldTask.title);
       this.expandData = newTask;
       controller.text = newTask.title;
