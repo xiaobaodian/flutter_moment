@@ -17,15 +17,20 @@ class DiffObject<T> {
 abstract class BoxItem {
   BoxItem({
     this.boxId = 0,
+    this.timeId = 0,
     this.objectId,
     this.createdAt,
     this.updatedAt,
   });
 
   int boxId;
+  int timeId;
   String objectId;
   String createdAt;
   String updatedAt;
+
+  bool get isNew => timeId == 0;
+  bool get isOld => timeId > 0;
 
   factory BoxItem.itemFromJson(Type type, Map<String, dynamic> json) {
     if (type == FocusItem) {
@@ -75,15 +80,17 @@ abstract class BoxItem {
 abstract class ReferencesBoxItem extends BoxItem {
   ReferencesBoxItem({
     boxId = 0,
+    timeId = 0,
     this.count = 0,
     objectId,
     createdAt,
     updatedAt,
   }) : super(
-            boxId: boxId,
-            objectId: objectId,
-            createdAt: createdAt,
-            updatedAt: updatedAt);
+        boxId: boxId,
+        timeId: timeId,
+        objectId: objectId,
+        createdAt: createdAt,
+        updatedAt: updatedAt);
 
   int count;
   bool get isReferences => count == 0;
@@ -104,6 +111,7 @@ abstract class ReferencesBoxItem extends BoxItem {
 abstract class SystemBaseItem extends ReferencesBoxItem {
   SystemBaseItem({
     boxId = 0,
+    timeId = 0,
     count = 0,
     this.presets = false,
     this.internal = false,
@@ -112,6 +120,7 @@ abstract class SystemBaseItem extends ReferencesBoxItem {
     updatedAt,
   }) : super(
             boxId: boxId,
+            timeId: timeId,
             count: count,
       objectId: objectId,
       createdAt: createdAt,
@@ -143,6 +152,7 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     this.title,
     this.comment,
     int boxId = 0,
+    int timeId = 0,
     int count = 0,
     bool presets = false,
     bool internal = false,
@@ -151,6 +161,7 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     updatedAt,
   }) : super(
           boxId: boxId,
+          timeId: timeId,
           count: count,
           presets: presets,
           internal: internal,
@@ -173,6 +184,7 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
     internal = other.internal;
 
     boxId = other.boxId;
+    timeId = other.timeId;
     count = other.count;
     objectId = other.objectId;
     createdAt = other.createdAt;
@@ -187,6 +199,7 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
       presets: json['presets'] == 1, // 系统预设
       internal: json['internal'] == 1, // 内部使用
       boxId: json['boxId'],
+      timeId: json['timeId'],
       objectId: json['objectId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
@@ -199,6 +212,7 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
         'count': count,
         'presets': presets ? 1 : 0,
         'internal': internal ? 1 : 0,
+        'timeId': timeId,
         'objectId': objectId,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
@@ -217,12 +231,14 @@ class PlaceItem extends ReferencesBoxItem
     this.address = '',
     this.coverPicture,
     boxId = 0,
+    timeId = 0,
     count = 0,
     objectId,
     createdAt,
     updatedAt,
   }) : super(
           boxId: boxId,
+          timeId: timeId,
           count: count,
     objectId: objectId,
     createdAt: createdAt,
@@ -261,6 +277,7 @@ class PlaceItem extends ReferencesBoxItem
       setMixinImageSource(coverPicture);
     }
     boxId = other.boxId;
+    timeId = other.timeId;
     count = other.count;
     objectId = other.objectId;
     createdAt = other.createdAt;
@@ -274,6 +291,7 @@ class PlaceItem extends ReferencesBoxItem
       coverPicture: json['coverPicture'],
       boxId: json['boxId'],
       count: json['count'],
+      timeId: json['timeId'],
       objectId: json['objectId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
@@ -285,6 +303,7 @@ class PlaceItem extends ReferencesBoxItem
         'address': address,
         'coverPicture': coverPicture,
         'count': count,
+        'timeId': timeId,
         'objectId': objectId,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
@@ -300,12 +319,14 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
   TagItem({
     this.title = '',
     boxId = 0,
+    timeId = 0,
     count = 0,
     objectId,
     createdAt,
     updatedAt,
   }) : super(
           boxId: boxId,
+          timeId: timeId,
           count: count,
     objectId: objectId,
     createdAt: createdAt,
@@ -318,6 +339,7 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
   void copyWith(TagItem other) {
     title = other.title;
     boxId = other.boxId;
+    timeId = other.timeId;
     count = other.count;
     objectId = other.objectId;
     createdAt = other.createdAt;
@@ -328,6 +350,7 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
     return TagItem(
       title: json['title'],
       boxId: json['boxId'],
+      timeId: json['timeId'],
       count: json['count'],
       objectId: json['objectId'],
       createdAt: json['createdAt'],
@@ -338,6 +361,7 @@ class TagItem extends ReferencesBoxItem with DetailsListMixin<FocusEvent> {
   Map<String, dynamic> toJson() => {
         'title': title,
         'count': count,
+        'timeId': timeId,
         'objectId': objectId,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
@@ -361,6 +385,7 @@ class PersonItem extends ReferencesBoxItem
     this.birthday,
     photo = '',
     boxId = 0,
+    timeId = 0,
     count = 0,
     this.username = '',
     objectId,
@@ -368,6 +393,7 @@ class PersonItem extends ReferencesBoxItem
     updatedAt,
   }) : super(
     boxId: boxId,
+    timeId: timeId,
     count: count,
     objectId: objectId,
     createdAt: createdAt,
@@ -419,6 +445,7 @@ class PersonItem extends ReferencesBoxItem
       setMixinImageSource(other.mixinImage);
     }
     boxId = other.boxId;
+    timeId = other.timeId;
     count = other.count;
     username = other.username;
     objectId = other.objectId;
@@ -435,6 +462,7 @@ class PersonItem extends ReferencesBoxItem
       gender: json['gender'],
       birthday: _birthday == '' ? null : DateTime.parse(_birthday),
       boxId: json['boxId'],
+      timeId: json['timeId'],
       count: json['count'],
       username: json['username'],
       objectId: json['objectId'],
@@ -452,6 +480,7 @@ class PersonItem extends ReferencesBoxItem
         'birthday': hasBirthday() ? birthday.toIso8601String() : '',
         'count': count,
         'username': username,
+        'timeId': timeId,
         'objectId': objectId,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
@@ -473,6 +502,7 @@ class UserItem extends ReferencesBoxItem
     this.birthday,
     photo = '',
     boxId = 0,
+    timeId = 0,
     count = 0,
     this.username = '',
     this.password = '',
@@ -485,6 +515,7 @@ class UserItem extends ReferencesBoxItem
     updatedAt,
   }) : super(
     boxId: boxId,
+    timeId: timeId,
     count: count,
     objectId: objectId,
     createdAt: createdAt,
@@ -542,6 +573,7 @@ class UserItem extends ReferencesBoxItem
       setMixinImageSource(other.mixinImage);
     }
     boxId = other.boxId;
+    timeId = other.timeId;
     count = other.count;
     username = other.username;
     password = other.password;
@@ -563,6 +595,7 @@ class UserItem extends ReferencesBoxItem
       gender: json['gender'],
       birthday: _birthday == '' ? null : DateTime.parse(_birthday),
       boxId: json['boxId'],
+      timeId: json['timeId'],
       count: json['count'],
       username: json['username'],
       password: json['password'],
@@ -590,6 +623,7 @@ class UserItem extends ReferencesBoxItem
     'emailVerified': emailVerified ? 1 : 0,
     'mobilePhoneNumber': mobilePhoneNumber,
     'mobilePhoneNumberVerified': mobilePhoneNumberVerified ? 1 : 0,
+    'timeId': timeId,
     'objectId': objectId,
     'createdAt': createdAt,
     'updatedAt': updatedAt,
@@ -606,6 +640,7 @@ class DailyRecord extends BoxItem {
 
   DailyRecord.build({
     int boxId,
+    int timeId,
     this.dayIndex,
     this.weather = '',
     objectId,
@@ -613,6 +648,7 @@ class DailyRecord extends BoxItem {
     updatedAt,
   }) : super(
     boxId: boxId,
+    timeId: timeId,
     objectId: objectId,
     createdAt: createdAt,
     updatedAt: updatedAt,
@@ -723,6 +759,7 @@ class DailyRecord extends BoxItem {
     weather = other.weather;
     focusEvents = other.focusEvents;
     boxId = other.boxId;
+    timeId = other.timeId;
     objectId = other.objectId;
     createdAt = other.createdAt;
     updatedAt = other.updatedAt;
@@ -733,6 +770,7 @@ class DailyRecord extends BoxItem {
       dayIndex: json['dayIndex'],
       weather: json['weather'],
       boxId: json['boxId'],
+      timeId: json['timeId'],
       objectId: json['objectId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
@@ -742,6 +780,7 @@ class DailyRecord extends BoxItem {
   Map<String, dynamic> toJson() => {
     'dayIndex': dayIndex,
     'weather': weather,
+    'timeId': timeId,
     'objectId': objectId,
     'createdAt': createdAt,
     'updatedAt': updatedAt,
@@ -751,6 +790,7 @@ class DailyRecord extends BoxItem {
 class FocusEvent extends BoxItem {
   FocusEvent({
     int boxId = 0,
+    int timeId = 0,
     this.dayIndex = -1,
     this.focusItemBoxId = -1,
     String note = '',
@@ -762,6 +802,7 @@ class FocusEvent extends BoxItem {
     updatedAt,
   }) : super(
       boxId: boxId,
+      timeId: timeId,
       objectId: objectId,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -806,9 +847,9 @@ class FocusEvent extends BoxItem {
         return false;
       }
       if (line.expandData is int) {
-        return line.expandData == task.boxId;
+        return line.expandData == task.timeId;
       } else if (line.expandData is TaskItem) {
-        return (line.expandData as TaskItem).boxId == task.boxId;
+        return (line.expandData as TaskItem).timeId == task.timeId;
       }
     });
   }
@@ -821,6 +862,7 @@ class FocusEvent extends BoxItem {
     placeKeys.copyWith(other.placeKeys);
     tagKeys.copyWith(other.tagKeys);
     boxId = other.boxId;
+    timeId = other.timeId;
     objectId = other.objectId;
     createdAt = other.createdAt;
     updatedAt = other.updatedAt;
@@ -835,6 +877,7 @@ class FocusEvent extends BoxItem {
       placeTags: json['placeTags'],
       tags: json['tags'],
       boxId: json['boxId'],
+      timeId: json['timeId'],
       objectId: json['objectId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
@@ -848,6 +891,7 @@ class FocusEvent extends BoxItem {
     'personTags': personKeys.toString(),
     'placeTags': placeKeys.toString(),
     'tags': tagKeys.toString(),
+    'timeId': timeId,
     'objectId': objectId,
     'createdAt': createdAt,
     'updatedAt': updatedAt,

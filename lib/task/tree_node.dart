@@ -53,7 +53,7 @@ class TreeNode<I> {
   /// 所有的子节点接收，属于丢失了，这种情况下将[item]加入到[children]中，便于跟踪丢
   /// 失的[item]以及后续的处理。
   bool assigned(I item) {
-    debugPrint('开始分配item, ${item.toString()}');
+    debugPrint('${item.runtimeType.toString()} 开始分配item: ${item.toString()}');
     //bool member = isMember == null ? true : isMember(item);
     if (isMember == null ? true : isMember(item)) {
       if (subNodes.isEmpty) {

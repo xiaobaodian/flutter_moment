@@ -173,7 +173,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
   Widget buildTaskItem(
       GlobalStoreState store, BuildContext context, TaskItem task) {
     final date = store.calendarMap.getDateFromIndex(task.startDate);
-    final str = DateTimeExt.chineseDateString(date);
+    final str = '${DateTimeExt.chineseDateString(date)} boxId: ${task.boxId} timeId: ${task.timeId}';
     return CatListTile(
       leading: SizedBox(
         width: 32,
@@ -223,9 +223,11 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
           }
         });
       },
-//          onLongPress: (){
-//            store.taskSet.removeItem(task);
-//          },
+      onLongPress: (){
+        setState(() {
+          store.removeTask(task);
+        });
+      },
     );
   }
 }

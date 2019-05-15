@@ -118,7 +118,7 @@ class RichLine {
         'sy': style.index,
         'ent': indent,
         'txt': content,
-        'tk': type == RichType.Task ? (expandData as TaskItem).boxId : 0,
+        'tk': type == RichType.Task ? (expandData as TaskItem).timeId : 0,
         'vl': visibleLevel,
       };
 }
@@ -296,8 +296,8 @@ class RichSource {
     return source;
   }
 
-  static String getJsonFromRichLine(List<RichLine> paragraphList) {
-    return json.encode(paragraphList);
+  static String getJsonFromRichLine(List<RichLine> lineList) {
+    return json.encode(lineList);
   }
 
   List<RichLine> richLineList;
@@ -339,8 +339,8 @@ class RichSource {
     /// [mergeRemoveTask]保存的是进入编辑器以后生成的复制数据，只有boxId是唯一的标识
     /// 所以删除合并后废弃的line数据附带的task，只能通过boxId来操作。
     mergeRemoveTask.forEach((task) {
-      debugPrint('清理合并行后遗弃的数据：ID = ${task.boxId}');
-      richNote.store.taskSet.removeItemByBoxId(task.boxId);
+      debugPrint('清理合并行后遗弃的数据：ID = ${task.timeId}');
+      richNote.store.taskSet.removeItemByBoxId(task.timeId);
     });
     return _getRichLines();
   }
@@ -357,16 +357,17 @@ class RichSource {
         task.title = item.controller.text.replaceAll('\u0000', '');
         if (item.objectDayIndex != 0) {
           /// 当[task.boxId == 0]表明[task]是刚刚转换过来的[TaskItem]数据，没有保
-          /// 存过，所以[trueTask]就可以指向[task], 反之，说明[task]是原来的数据
-          /// 这里是一个副本，所以需要通过[task.boxId]找到真实的实例
-          var trueTask = task.boxId == 0
+          /// 存过，所以[trueTask]就可以指向[task]。
+          /// 反之，说明[task]是原来保存过的数据在编辑器里的一个副本，所以需要通过
+          /// [task.boxId]找到真实的实例。
+          var trueTask = task.isNew
             ? task
-            : richNote.store.taskSet.getItemFromId(task.boxId);
+            : richNote.store.taskSet.getItemFromId(task.timeId);
           trueTask
             ..startDate = item.objectDayIndex
             ..dueDate = item.objectDayIndex + (task.dueDate - task.startDate)
             ..title = task.title;
-          richNote.store.addTaskToFocusEventInDailyRecord(trueTask,
+          richNote.store.addTaskToFocusEventOfDayIndex(trueTask,
               richNote.focusEvent.focusItemBoxId, item.objectDayIndex);
         } else {
           richLines.add(RichLine(

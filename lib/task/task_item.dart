@@ -33,6 +33,7 @@ class CycleDate {
 class TaskItem extends BoxItem {
   TaskItem({
     boxId = 0,
+    timeId = 0,
     @required this.focusItemId,
     this.title = '',
     this.comment = '',
@@ -55,7 +56,10 @@ class TaskItem extends BoxItem {
     this.shareTo = '',
     this.author = 0,
     this.delegate = 0,
-  }): super(boxId: boxId) {
+  }): super(
+    boxId: boxId,
+    timeId: timeId
+  ) {
     checkBoxKey = GlobalKey();
     startTime.loadFromString(startTimeStr);
     endTime.loadFromString(endTimeStr);
@@ -88,8 +92,6 @@ class TaskItem extends BoxItem {
 
   Key checkBoxKey;
 
-  bool get isNew => boxId == 0;
-
   String getTimeString() {
     return '8:30 - 11:15';
   }
@@ -97,6 +99,7 @@ class TaskItem extends BoxItem {
   void copyWith(TaskItem other){
     assert(other != null);
     this.boxId = other.boxId;
+    this.timeId = other.timeId;
     this.focusItemId = other.focusItemId;
     this.title = other.title;
     this.comment = other.comment;
@@ -124,6 +127,7 @@ class TaskItem extends BoxItem {
   TaskItem.from(TaskItem other) {
     assert(other != null);
     this.boxId = other.boxId;
+    this.timeId = other.timeId;
     this.focusItemId = other.focusItemId;
     this.title = other.title;
     this.comment = other.comment;
@@ -151,6 +155,7 @@ class TaskItem extends BoxItem {
   factory TaskItem.fromJson(Map<String, dynamic> json) {
     return TaskItem(
       boxId: json['boxId'],
+      timeId: json['timeId'],
       focusItemId: json['focusItemId'],
       title: json['title'],
       comment: json['comment'],
@@ -177,6 +182,7 @@ class TaskItem extends BoxItem {
   }
 
   Map<String, dynamic> toJson() => {
+    'timeId': timeId,
     'focusItemId': focusItemId,
     'title': title,
     'comment': comment,

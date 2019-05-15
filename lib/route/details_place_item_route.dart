@@ -33,7 +33,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
     widget._placeItem.detailsList =
-        _store.getFocusEventsFromPlaceItemId(widget._placeItem.boxId);
+        _store.getFocusEventsFromPlaceItemId(widget._placeItem.timeId);
   }
 
   @override
@@ -42,7 +42,7 @@ class PlaceItemDetailsRouteState extends State<PlaceItemDetailsRoute> {
   }
 
   void removePlaceItem(BuildContext context) {
-    debugPrint('PlaceItem BoxId: ${widget._placeItem.boxId}');
+    debugPrint('PlaceItem timeId: ${widget._placeItem.timeId}');
     showDialog(
         context: context,
         barrierDismissible: false,

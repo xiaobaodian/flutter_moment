@@ -361,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
             } else {
               _store.focusItemSet.itemList.forEach((focus) {
                 if (!events
-                    .any((event) => event.focusItemBoxId == focus.boxId)) {
+                    .any((event) => event.focusItemBoxId == focus.timeId)) {
                   list.add(focus);
                 }
               });
@@ -466,7 +466,7 @@ Widget _buildFocusModelSheet(
                     .push(MaterialPageRoute(builder: (BuildContext context) {
                   return EditerFocusEventRoute(store, FocusEvent(
                     dayIndex: store.selectedDateIndex,
-                    focusItemBoxId: usableList[index].boxId,
+                    focusItemBoxId: usableList[index].timeId,
                   ));
                 })).then((resultItem) {
                   debugPrint(
@@ -532,7 +532,7 @@ Widget _getListView(BuildContext context, int dayIndex) {
       var richLine = tapObject.richLine;
       FocusEvent focusEvent = richLine.note;
 
-      debugPrint('edit focusEvent id: ${focusEvent.boxId}');
+      debugPrint('edit focusEvent timeId: ${focusEvent.timeId}');
 
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (BuildContext context) {

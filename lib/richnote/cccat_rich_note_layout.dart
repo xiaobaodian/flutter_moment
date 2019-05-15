@@ -55,7 +55,7 @@ class RichNoteLayout {
   }
 
   Widget richLayoutTask(Widget checkbox, Widget task, Widget label) {
-    double p = task is TextField ? 2.5 : 5.5;
+    double p = task is TextField ? 5.0 : 5.0;
     List<Widget> widgets = [
       Padding(
         padding: EdgeInsets.fromLTRB(0, p, 0, 0),

@@ -37,7 +37,7 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
-    widget._focusItem.detailsList = _store.getFocusEventsFromFocusItemId(widget._focusItem.boxId);
+    widget._focusItem.detailsList = _store.getFocusEventsFromFocusItemId(widget._focusItem.timeId);
   }
 
   @override
@@ -62,7 +62,7 @@ class FocusItemDetailsRouteState extends State<FocusItemDetailsRoute> {
   }
 
   void removeFocusItem(BuildContext context) {
-    debugPrint('focus item boxId: ${widget._focusItem.boxId}');
+    debugPrint('focus item timeId: ${widget._focusItem.timeId}');
     showDialog(
       context: context,
       barrierDismissible: false,

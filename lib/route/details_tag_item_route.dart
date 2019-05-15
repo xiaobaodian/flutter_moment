@@ -32,7 +32,7 @@ class TagItemDetailsRouteState extends State<TagItemDetailsRoute> {
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
     widget._tagItem.detailsList =
-        _store.getFocusEventsFromTagItemId(widget._tagItem.boxId);
+        _store.getFocusEventsFromTagItemId(widget._tagItem.timeId);
   }
 
   @override
@@ -41,7 +41,7 @@ class TagItemDetailsRouteState extends State<TagItemDetailsRoute> {
   }
 
   void removeTagItem(BuildContext context) {
-    debugPrint('TagItem BoxId: ${widget._tagItem.boxId}');
+    debugPrint('TagItem timeId: ${widget._tagItem.timeId}');
     showDialog(
         context: context,
         barrierDismissible: false,

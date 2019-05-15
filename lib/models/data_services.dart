@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_moment/global_store.dart';
 import 'package:flutter_moment/models/models.dart';
+import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
+import 'package:flutter_moment/task/task_item.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+
+import 'data_helper.dart';
 
 class TableDefinition {
   TableDefinition({
@@ -22,12 +26,16 @@ class DataSource {
   }
 
   String _path;
-  int version = 2;
+  int version = 3;
+  int oldVersion = 0;
+  int newVersion = 0;
   Map<String, TableDefinition> tables = Map<String, TableDefinition>();
   Database _database;
 
   String get path => _path;
   Database get database => _database;
+  bool get isUpdate => newVersion > oldVersion;
+  bool get isNotUpdate => newVersion == oldVersion;
 
   Future init() async {
     var p = await getDatabasesPath();
@@ -61,14 +69,48 @@ class DataSource {
             'CREATE TABLE ${tables['TaskItem'].name} (${tables['TaskItem'].structure})');
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        this.oldVersion = oldVersion;
+        this.newVersion = newVersion;
         debugPrint('database onUpgrade -> oldVersion: $oldVersion, newVersion: $newVersion');
-        if (newVersion == 3) {
+
+        if (oldVersion == 1) {
           await db.execute(
               'ALTER TABLE ${tables['TaskItem'].name} ADD COLUMN completeDate integer');
           await db.execute(
               'ALTER TABLE ${tables['TaskItem'].name} ADD COLUMN startTimeStr text');
           await db.execute(
               'ALTER TABLE ${tables['TaskItem'].name} ADD COLUMN endTimeStr text');
+
+          await db.execute(
+              'ALTER TABLE ${tables['FocusItem'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['PersonItem'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['PlaceItem'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['TagItem'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['DailyRecord'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['FocusEvent'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['TaskItem'].name} ADD COLUMN timeId integer');
+        }
+        if (oldVersion == 3) {
+          await db.execute(
+              'ALTER TABLE ${tables['FocusItem'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['PersonItem'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['PlaceItem'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['TagItem'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['DailyRecord'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['FocusEvent'].name} ADD COLUMN timeId integer');
+          await db.execute(
+              'ALTER TABLE ${tables['TaskItem'].name} ADD COLUMN timeId integer');
         }
       }
     );
@@ -85,6 +127,7 @@ class DataSource {
   void initTable() {
     tables['FocusItem'] = TableDefinition(name: 'FocusItemTable', structure: '''
         boxId integer primary key autoincrement,
+        timeId integer,
         title text,
         comment text,
         count integer,
@@ -98,6 +141,7 @@ class DataSource {
 
     tables['PersonItem'] = TableDefinition(name: 'PersonTable', structure: '''
         boxId integer primary key autoincrement,
+        timeId integer,
         name text, 
         nickname text,
         photo text,
@@ -116,7 +160,8 @@ class DataSource {
     tables['PlaceItem'] = TableDefinition(
       name: 'PlaceTable',
       structure: '''
-        boxId integer primary key autoincrement, 
+        boxId integer primary key autoincrement,
+        timeId integer,
         title text not null,
         address text,
         coverPicture text,
@@ -131,7 +176,8 @@ class DataSource {
     tables['TagItem'] = TableDefinition(
       name: 'TagTable',
       structure: '''
-        boxId integer primary key autoincrement, 
+        boxId integer primary key autoincrement,
+        timeId integer,
         title text not null,
         count integer,
         tags text,
@@ -145,6 +191,7 @@ class DataSource {
       name: 'DailyRecordTable',
       structure: '''
         boxId integer primary key autoincrement, 
+        timeId integer,
         dayIndex integer,
         weather text,
         coverPicture text,
@@ -159,6 +206,7 @@ class DataSource {
       name: 'FocusEventTable',
       structure: '''
         boxId integer primary key autoincrement, 
+        timeId integer,
         dayIndex integer,
         focusItemBoxId integer,
         note text,
@@ -175,6 +223,7 @@ class DataSource {
       name: 'taskTable',
       structure: '''
         boxId integer primary key autoincrement,
+        timeId integer,
         focusItemId integer,
         title text,
         comment text,
@@ -220,6 +269,110 @@ class DataSource {
 
     items.forEach((item){
       store.focusItemSet.addItem(item);
+    });
+  }
+
+  Future upgradeDataBase() async {
+    if (isNotUpdate) return;
+
+    ReferencesData<FocusItem> focusItemSet;
+    ReferencesData<PersonItem> personSet;
+    ReferencesData<PlaceItem> placeSet;
+    ReferencesData<TagItem> tagSet;
+    BasicData<TaskItem> taskSet;
+    BasicData<FocusEvent> focusEventSet;
+    BasicData<DailyRecord> dailyRecordSet;
+
+    focusItemSet = ReferencesData(dataSource: this);
+    personSet = ReferencesData(dataSource: this);
+    placeSet = ReferencesData(dataSource: this);
+    tagSet = ReferencesData(dataSource: this);
+    taskSet = BasicData(dataSource: this);
+    dailyRecordSet = BasicData(dataSource: this);
+    focusEventSet = BasicData(dataSource: this);
+
+    await focusItemSet.loadItemsFromDataSource();
+    await personSet.loadItemsFromDataSource();
+    await placeSet.loadItemsFromDataSource();
+    await tagSet.loadItemsFromDataSource();
+    await taskSet.loadItemsFromDataSource();
+    await dailyRecordSet.loadItemsFromDataSource();
+    await focusEventSet.loadItemsFromDataSource();
+
+    focusItemSet.itemList.forEach((item) async {
+      if (item.timeId == 0) {
+        debugPrint('${item.title} 生成timeId: ${item.timeId}');
+        item.timeId = DateTime.now().millisecondsSinceEpoch;
+        await focusItemSet.rawChangeItem(item);
+      }
+    });
+
+    personSet.itemList.forEach((item) async {
+      if (item.timeId == 0) {
+        debugPrint('${item.name} 生成timeId: ${item.timeId}');
+        item.timeId = DateTime.now().millisecondsSinceEpoch;
+        await personSet.rawChangeItem(item);
+      }
+    });
+
+    placeSet.itemList.forEach((item) async {
+      if (item.timeId == 0) {
+        debugPrint('${item.title} 生成timeId: ${item.timeId}');
+        item.timeId = DateTime.now().millisecondsSinceEpoch;
+        await placeSet.rawChangeItem(item);
+      }
+    });
+
+    tagSet.itemList.forEach((item) async {
+      if (item.timeId == 0) {
+        debugPrint('${item.title} 生成timeId: ${item.timeId}');
+        item.timeId = DateTime.now().millisecondsSinceEpoch;
+        await tagSet.rawChangeItem(item);
+      }
+    });
+
+    taskSet.itemList.forEach((item) async {
+      if (item.timeId == 0) {
+        debugPrint('${item.title} 生成timeId: ${item.timeId}');
+        item.timeId = DateTime.now().millisecondsSinceEpoch;
+        await taskSet.rawChangeItem(item);
+      }
+    });
+
+    dailyRecordSet.itemList.forEach((item) async {
+      if (item.timeId == 0) {
+        debugPrint('${item.dayIndex} 生成timeId: ${item.timeId}');
+        item.timeId = DateTime.now().millisecondsSinceEpoch;
+        await dailyRecordSet.rawChangeItem(item);
+      }
+    });
+
+    focusEventSet.itemList.forEach((item) async {
+      bool update = false;
+      if (item.timeId == 0) {
+        debugPrint('${item.focusItemBoxId} 生成timeId: ${item.timeId}');
+        item.timeId = DateTime.now().millisecondsSinceEpoch;
+        update = true;
+      }
+      if (item.focusItemBoxId != null) {
+        if (item.focusItemBoxId < 5000) {
+          var focusItem = focusItemSet.itemList.firstWhere((focusItem){return item.focusItemBoxId == focusItem.boxId;});
+          item.focusItemBoxId = focusItem.timeId;
+          update = true;
+        }
+      }
+      for (var line in item.noteLines) {
+        if (line.type == RichType.Task && line.expandData is int) {
+          int id = line.expandData;
+          var taskItem = taskSet.itemList.firstWhere((task){return id == task.boxId;});
+          line.expandData = taskItem.timeId;
+          debugPrint('替换line.expandData：$id -> ${taskItem.timeId}');
+          update = true;
+        }
+      }
+      if (update) {
+        await focusEventSet.rawChangeItem(item);
+      }
     });
   }
 }

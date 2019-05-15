@@ -80,7 +80,7 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
       /// 如果编辑器里面只有一个准备转移其他日期的任务，导出到noteLines后，noteLines
       /// 就为空，这是就应该删除该focusEvent
       if (_editerFocusEvent.noteLines.isNotEmpty) {
-        if (_editerFocusEvent.boxId == 0) {
+        if (_editerFocusEvent.isNew) {
           widget.store.addFocusEventToSelectedDay(_editerFocusEvent);
         } else {
           DiffObject<FocusEvent> diffObject = DiffObject(
@@ -92,13 +92,14 @@ class EditerFocusEventRouteState extends State<EditerFocusEventRoute> {
         }
         return;
       }
-      //widget._focusEvent.copyWith(_editerFocusEvent);
     }
     /// [richSource.hasNote()]为false时，表明内容为空，执行下面部分。
+    ///
     /// [widget._focusEvent.boxId] > 0 是原来存在的focusEvent，当用户删除所有内
-    /// 容后执行保存动作，说明用户需要删除。[widget._focusEvent.boxId] = 0 时，说
-    /// 明是刚刚新建的focusEvent，没有内容就退出就是放弃的新建，不需要执行删除。
-    if (widget._focusEvent.boxId > 0) {
+    /// 容后执行保存动作，说明用户需要删除。
+    /// [widget._focusEvent.boxId] = 0 时，是刚刚新建的focusEvent，没有内容就退
+    /// 出就是放弃新建的数据，不需要执行删除。
+    if (widget._focusEvent.isOld) {
       await widget.store.removeFocusEventAndTasks(widget._focusEvent, removeTask: false);
     }
   }

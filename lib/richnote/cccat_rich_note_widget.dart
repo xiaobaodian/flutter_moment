@@ -592,7 +592,7 @@ class RichNoteState extends State<RichNote> {
         _requestFocus(upLine.focusNode);
         if (tempLine.type == RichType.Task) {
           TaskItem task = tempLine.expandData;
-          if (task.boxId > 0) {
+          if (task.timeId > 0) {
             widget.richSource.mergeRemoveTask.add(task);
           }
         }
@@ -950,14 +950,17 @@ class RichNoteState extends State<RichNote> {
     );
   }
 
+  /// [labels]对应的[type]的标签列表指针
+  /// [tempKeys]存放编辑器正文中已包含的标签，用于标签列表选择时排除出来
+  /// [resultList]实际出现在标签选择列表中的内容，是一个筛选后的集合
   void editLabels(LabelType type) {
     bool detectFlags = widget.store.prefs.detectFlags;
     String title;
     List<ReferencesBoxItem> labels;
     LabelKeys labelKeys;
-    Map<int, String> titleMap = Map<int, String>();
-    String clipText = '';
     LabelKeys tempKeys = LabelKeys();
+    //Map<int, String> titleMap = Map<int, String>();
+    //String clipText = '';
 
     RichItem item = _getCurrentRichItem();
     var currentFocusNode = item.focusNode;
@@ -1086,32 +1089,32 @@ class RichNoteState extends State<RichNote> {
                               PersonItem person = PersonItem(name: newLabel);
                               widget.store.personSet
                                   .addItem(person)
-                                  .then((id) {
-                                titleMap[id] = person.name;
+                                  .then((timeId) {
+//                                titleMap[id] = person.name;
                                 setDialogState(() {
                                   resultList.add(person);
-                                  labelKeys.addOrRemove(person.boxId);
-                                  clipText = StringExt.listStringToString(
-                                      titleMap.values.toList());
+                                  labelKeys.addOrRemove(person.timeId);
+//                                  clipText = StringExt.listStringToString(
+//                                      titleMap.values.toList());
                                 });
                               });
                             } else if (type == LabelType.Place) {
                               PlaceItem place = PlaceItem(title: newLabel);
-                              widget.store.placeSet.addItem(place).then((id) {
-                                titleMap[id] = place.title;
+                              widget.store.placeSet.addItem(place).then((timeId) {
+//                                titleMap[id] = place.title;
                                 setDialogState(() {
                                   resultList.add(place);
-                                  labelKeys.addOrRemove(place.boxId);
-                                  clipText = StringExt.listStringToString(
-                                      titleMap.values.toList());
+                                  labelKeys.addOrRemove(place.timeId);
+//                                  clipText = StringExt.listStringToString(
+//                                      titleMap.values.toList());
                                 });
                               });
                             } else {
                               TagItem tag = TagItem(title: newLabel);
-                              widget.store.tagSet.addItem(tag).then((id) {
+                              widget.store.tagSet.addItem(tag).then((timeId) {
                                 setDialogState(() {
                                   resultList.add(tag);
-                                  labelKeys.addOrRemove(tag.boxId);
+                                  labelKeys.addOrRemove(tag.timeId);
                                 });
                               });
                             }
@@ -1138,9 +1141,9 @@ class RichNoteState extends State<RichNote> {
                         var item = resultList[index];
                         bool isDetectTag = false;
                         bool isEnabled = true;
-                        bool isSelected = labelKeys.findKey(item.boxId);
+                        bool isSelected = labelKeys.findKey(item.timeId);
                         if (detectFlags) {
-                          isDetectTag = tempKeys.findKey(item.boxId);
+                          isDetectTag = tempKeys.findKey(item.timeId);
                           isEnabled = !isDetectTag;
                           if (isDetectTag) isSelected = true;
                         }
@@ -1156,38 +1159,37 @@ class RichNoteState extends State<RichNote> {
                               onChanged: isDetectTag
                                   ? null
                                   : (selected) {
-                                      if (titleMap.containsKey(item.boxId)) {
-                                        titleMap.remove(item.boxId);
-                                      } else {
-                                        titleMap[item.boxId] = labelText;
-                                      }
+//                                      if (titleMap.containsKey(item.timeId)) {
+//                                        titleMap.remove(item.timeId);
+//                                      } else {
+//                                        titleMap[item.timeId] = labelText;
+//                                      }
                                       setDialogState(() {
-                                        labelKeys.addOrRemove(item.boxId);
-                                        clipText = StringExt.listIntToString(
-                                            labelKeys.keyList);
+                                        labelKeys.addOrRemove(item.timeId);
+//                                        clipText = StringExt.listIntToString(
+//                                            labelKeys.keyList);
                                       });
                                     },
                             ),
                           ),
                           title: Text(labelText),
                           subtitle: isDetectTag
-                              ? Text(
-                                  '提取的标签',
+                              ? Text('提取的标签',
                                   style: TextStyle(fontSize: 12),
                                 )
                               : null,
                           selected: isSelected,
                           enabled: isEnabled,
                           onTap: () {
-                            if (titleMap.containsKey(item.boxId)) {
-                              titleMap.remove(item.boxId);
-                            } else {
-                              titleMap[item.boxId] = labelText;
-                            }
+//                            if (titleMap.containsKey(item.timeId)) {
+//                              titleMap.remove(item.timeId);
+//                            } else {
+//                              titleMap[item.timeId] = labelText;
+//                            }
                             setDialogState(() {
-                              labelKeys.addOrRemove(item.boxId);
-                              clipText = StringExt.listIntToString(
-                                  labelKeys.keyList);
+                              labelKeys.addOrRemove(item.timeId);
+//                              clipText = StringExt.listIntToString(
+//                                  labelKeys.keyList);
                             });
                           },
                         );
@@ -1210,8 +1212,7 @@ class RichNoteState extends State<RichNote> {
 //              },
 //            ),
             FlatButton(
-              child: Text(
-                  '返回'), //type == LabelType.Tag ? Text('返回') : Text('插入'),
+              child: Text('返回'), //type == LabelType.Tag ? Text('返回') : Text('插入'),
               onPressed: () {
                 //Navigator.of(context).pop(clipText);
                 Navigator.of(context).pop(null);

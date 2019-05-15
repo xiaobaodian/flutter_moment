@@ -15,7 +15,20 @@ class BasicData<T extends BoxItem> {
   Map<int, T> _itemMap = Map();
   List<T> itemList = [];
 
+  int _timeIdStep = 0;
+  int get getTimeId => DateTime.now().millisecondsSinceEpoch + _timeIdStep++;
+
   T getItemFromId(int id) => _itemMap[id];
+
+  Future<List<T>> rawLoadItemsFromDataSource() async {
+    await dataSource.openDataBase();
+    return await dataSource.database
+        .rawQuery(
+        'SELECT * FROM ${dataSource.tables[BoxItem.typeName(T)].name}')
+        .then((resultJson) {
+      itemList = resultJson.map((jsonString) => BoxItem.itemFromJson(T, jsonString)).toList();
+    });
+  }
 
   Future<List<T>> loadItemsFromDataSource() async {
     await dataSource.openDataBase();
@@ -25,7 +38,7 @@ class BasicData<T extends BoxItem> {
         .then((resultJson) {
       itemList = resultJson.map((jsonString) {
         T item = BoxItem.itemFromJson(T, jsonString);
-        _itemMap[item.boxId] = item;
+        _itemMap[item.timeId] = item;
         return item;
       }).toList();
     });
@@ -34,7 +47,7 @@ class BasicData<T extends BoxItem> {
   void addItemsFromList(List<T> items) {
     for (T item in items) {
       itemList.add(item);
-      _itemMap[item.boxId] = item;
+      _itemMap[item.timeId] = item;
     }
   }
 
@@ -57,13 +70,18 @@ class BasicData<T extends BoxItem> {
 
   Future<int> addItem(T item) async {
     itemList.add(item);
-    Map<String, dynamic> data = item.toJson();
-    await dataSource.openDataBase();
-    int id = await dataSource.database
-        .insert(dataSource.tables[BoxItem.typeName(T)].name, data);
-    item.boxId = id;
-    _itemMap[id] = item;
-    return id;
+    if (item.timeId == 0) {
+      item.timeId = getTimeId;
+      Map<String, dynamic> data = item.toJson();
+      await dataSource.openDataBase();
+      item.boxId = await dataSource.database
+          .insert(dataSource.tables[BoxItem.typeName(T)].name, data);
+      _itemMap[item.timeId] = item;
+    } else {
+      _itemMap[item.timeId] = item;
+    }
+    debugPrint('${item.runtimeType.toString()} addItem boxId = ${item.boxId} timeId = ${item.timeId}');
+    return item.timeId;
   }
 
   /// 修改[item]的时候传进来的可能是一个副本，只有[boxId]是可靠的，所以先
@@ -71,20 +89,32 @@ class BasicData<T extends BoxItem> {
   /// 处理。否则，通过indexOf方法定位到index，然后进行替换，并把[_itemMap]也进行
   /// 替换。
   Future<int> changeItem(T item) async {
-    debugPrint('changeItem id: ${item.boxId}');
+    debugPrint('${item.runtimeType.toString()}  changeItem boxId = ${item.boxId} timeId = ${item.timeId}');
     assert(item != null);
 
-    T temp = _itemMap[item.boxId];
+    T temp = _itemMap[item.timeId];
     assert(temp != null);
 
     if (temp != item) {
       int position = itemList.indexOf(temp);
-      debugPrint('itemList.indexOf(temp) = $position');
-
+      debugPrint('${T.runtimeType.toString()} itemList.indexOf(temp) = $position');
       assert(position != -1);
+
       itemList[position] = item;
-      _itemMap[item.boxId] = item;
+      _itemMap[item.timeId] = item;
     }
+    Map<String, dynamic> data = item.toJson();
+    await dataSource.openDataBase();
+    int changes = await dataSource.database.update(
+        dataSource.tables[BoxItem.typeName(T)].name, data,
+        where: 'boxId = ?', whereArgs: [item.boxId]);
+    return changes;
+  }
+
+  Future rawChangeItem(T item) async {
+    debugPrint('${item.runtimeType.toString()}  rawChangeItem boxId = ${item.boxId} timeId = ${item.timeId}');
+    assert(item != null);
+
     Map<String, dynamic> data = item.toJson();
     await dataSource.openDataBase();
     int changes = await dataSource.database.update(
@@ -96,7 +126,7 @@ class BasicData<T extends BoxItem> {
   /// 删除item的时候，传进来的可能是一个全新的副本，直接删除是有可能出错的。
   /// 所以需要通过传进来的[item.boxId]执行删除才能保证正确执行。
   Future<int> removeItem(T item) async {
-    return await removeItemByBoxId(item.boxId);
+    return await removeItemByBoxId(item.timeId);
   }
 
   Future<int> changeItemByBoxId(int id) async {
@@ -113,13 +143,13 @@ class BasicData<T extends BoxItem> {
     return changes;
   }
 
-  Future<int> removeItemByBoxId(int id) async {
-    T item = _itemMap[id];
+  Future<int> removeItemByBoxId(int timeId) async {
+    T item = _itemMap[timeId];
     assert(item != null);
     int changes = 0;
     if (item != null) {
       itemList.remove(item);
-      _itemMap.remove(item.boxId);
+      _itemMap.remove(item.timeId);
       await dataSource.openDataBase();
       changes = await dataSource.database.delete(
           dataSource.tables[BoxItem.typeName(T)].name,
@@ -138,21 +168,25 @@ class BasicData<T extends BoxItem> {
         where: where,
         whereArgs: whereArgs);
 
-    print('findByWhere 返回了(${rawList.length})条数据');
+    debugPrint('数据库 findByWhere 返回了(${rawList.length})条数据');
 
     list = rawList.map((jsonString) {
       T item = BoxItem.itemFromJson(T, jsonString);
-      _itemMap[item.boxId] = item;
+      if (item.timeId == 0) {
+        item.timeId = DateTime.now().millisecondsSinceEpoch;
+        changeItem(item);
+      }
+      _itemMap[item.timeId] = item;
       return item;
     }).toList();
 
     if (T == FocusEvent) {
       list.forEach((r) {
         FocusEvent e = r as FocusEvent;
-        print('item : ${e.focusItemBoxId}');
+        debugPrint('item : ${e.focusItemBoxId}');
       });
     }
-    print('转换了(${list.length})条数据');
+    debugPrint('转换了(${list.length})条数据');
     return list;
   }
 
@@ -302,7 +336,7 @@ class LabelKeys {
         if (line.getContent().contains(obj.getLabel())) {
           debugPrint('解析：${line.getContent()}');
           debugPrint('找到了：${obj.getLabel()}');
-          add(obj.boxId);
+          add(obj.timeId);
         }
       }
     }

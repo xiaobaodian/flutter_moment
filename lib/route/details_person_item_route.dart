@@ -33,7 +33,7 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
   void didChangeDependencies() {  //getFocusEventsFromPersonItemId
     super.didChangeDependencies();
     _store = GlobalStore.of(context);
-    widget._personItem.detailsList = _store.getFocusEventsFromPersonItemId(widget._personItem.boxId);
+    widget._personItem.detailsList = _store.getFocusEventsFromPersonItemId(widget._personItem.timeId);
   }
 
   @override
@@ -42,7 +42,7 @@ class PersonItemDetailsRouteState extends State<PersonItemDetailsRoute> {
   }
 
   void removePersonItem(BuildContext context) {
-    debugPrint('PersonItem BoxId: ${widget._personItem.boxId}');
+    debugPrint('PersonItem timeId: ${widget._personItem.timeId}');
     showDialog(
         context: context,
         barrierDismissible: false,
