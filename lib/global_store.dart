@@ -81,7 +81,7 @@ class GlobalStoreState extends State<GlobalStore> {
     debugPrint('GlobalStore 初始化...');
 
     taskCategories = TaskCategories(this);
-    //dataSource = DataSource();
+    dataSource = DataSource();
     Future.wait([
       dataSource.openDataBase().then((_) async {
         debugPrint('已打开数据库');
