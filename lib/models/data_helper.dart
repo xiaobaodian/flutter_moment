@@ -92,11 +92,11 @@ class BasicData<T extends BoxItem> {
     debugPrint('${item.runtimeType.toString()}  changeItem boxId = ${item.boxId} timeId = ${item.timeId}');
     assert(item != null);
 
-    T temp = _itemMap[item.timeId];
-    assert(temp != null);
+    T oldItem = _itemMap[item.timeId];
+    assert(oldItem != null);
 
-    if (temp != item) {
-      int position = itemList.indexOf(temp);
+    if (oldItem != item) {
+      int position = itemList.indexOf(oldItem);
       debugPrint('${T.runtimeType.toString()} itemList.indexOf(temp) = $position');
       assert(position != -1);
 
@@ -111,7 +111,7 @@ class BasicData<T extends BoxItem> {
     return changes;
   }
 
-  Future rawChangeItem(T item) async {
+  Future<int> rawChangeItem(T item) async {
     debugPrint('${item.runtimeType.toString()}  rawChangeItem boxId = ${item.boxId} timeId = ${item.timeId}');
     assert(item != null);
 

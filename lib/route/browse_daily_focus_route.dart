@@ -167,8 +167,11 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
     FocusItem focusItem = focusList[index];
     var gz = focusItem.count == 0 ? '' : '${focusItem.count} ';
     return CatListTile(
-      title: Text(
-        focusItem.title,
+      title: Text(focusItem.title,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text('boxId ${focusItem.boxId} - timeId: ${focusItem.timeId}',
         softWrap: false,
         overflow: TextOverflow.ellipsis,
       ),

@@ -310,7 +310,7 @@ class UserAccountRouteState extends State<UserAccountRoute> {
                       Divider(),
                       Text(
                           '${_store.androidInfo.brand} ${_store.androidInfo.model}'),
-                      //Text("${_store.androidInfo.version}"),
+                      Text("数据库版本： ${_store.dataSource.oldVersion}/${_store.dataSource.newVersion}"),
                       //Text("${_store.androidInfo.device}"),
                       //Text("${_store.androidInfo.display}"),
                       //Text("${_store.androidInfo.board}"),

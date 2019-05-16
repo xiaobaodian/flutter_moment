@@ -46,6 +46,9 @@ class GlobalStoreState extends State<GlobalStore> {
   UserItem user = UserItem();
   bool allowUpgrades = true;
 
+  int oldData = 0;
+  int newData = 0;
+
   ReferencesData<FocusItem> focusItemSet;
   ReferencesData<PersonItem> personSet;
   ReferencesData<PlaceItem> placeSet;
@@ -57,7 +60,7 @@ class GlobalStoreState extends State<GlobalStore> {
   TaskCategories taskCategories;
 
   @override
-  void initState() {
+  Future initState() async {
     super.initState();
     debugPrint('系统 初始化...');
     initSystem();
@@ -78,11 +81,14 @@ class GlobalStoreState extends State<GlobalStore> {
     debugPrint('GlobalStore 初始化...');
 
     taskCategories = TaskCategories(this);
-    dataSource = DataSource();
+    //dataSource = DataSource();
     Future.wait([
       dataSource.openDataBase().then((_) async {
         debugPrint('已打开数据库');
-        await dataSource.upgradeDataBase();
+        if (dataSource.hasUpdate) {
+          await dataSource.upgradeDataBase();
+          debugPrint('已升级数据库');
+        }
       })
     ]).then((_){
       focusItemSet = ReferencesData(dataSource: dataSource);
