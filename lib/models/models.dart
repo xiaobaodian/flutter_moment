@@ -139,10 +139,14 @@ class FocusItem extends SystemBaseItem with DetailsListMixin<FocusEvent> {
   FocusItem({
     this.title = "",
     this.comment = "",
+    int boxId = 0,
+    int timeId = 0,
     objectId,
     createdAt,
     updatedAt,
   }) : super(
+      boxId: boxId,
+      timeId: timeId,
       objectId: objectId,
       createdAt: createdAt,
       updatedAt: updatedAt);

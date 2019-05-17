@@ -16,7 +16,13 @@ class BasicData<T extends BoxItem> {
   List<T> itemList = [];
 
   int _timeIdStep = 0;
-  int get getTimeId => DateTime.now().millisecondsSinceEpoch + _timeIdStep++;
+  int get getTimeId => DateTime.now().millisecondsSinceEpoch * 100 + _timeIdStep++;
+
+  // 升级关键key使用
+  int getTimeIdByBoxId(int id) {
+    var obj = itemList.firstWhere((item) => item.boxId == id);
+    return obj?.timeId ?? -1;
+  }
 
   T getItemFromId(int id) => _itemMap[id];
 
@@ -38,6 +44,11 @@ class BasicData<T extends BoxItem> {
         .then((resultJson) {
       itemList = resultJson.map((jsonString) {
         T item = BoxItem.itemFromJson(T, jsonString);
+        // 升级关键key时使用，以后去掉
+        if (item.timeId == null || item.timeId == 0) {
+          item.timeId = getTimeId;
+          changeItem(item);
+        }
         _itemMap[item.timeId] = item;
         return item;
       }).toList();

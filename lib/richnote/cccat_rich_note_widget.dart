@@ -174,6 +174,13 @@ class RichNoteState extends State<RichNote> {
     Widget lineWidget;
     switch (item.type) {
       case RichType.FocusTitle:
+        // 升级关键key使用
+        int tempId = int.parse(item.getContent());
+        if (tempId < 10000) {
+          item.content = widget.store.focusItemSet.getTimeIdByBoxId(tempId).toString();
+          widget.store.focusItemSet.changeItemByBoxId(tempId);
+        }
+
         var effectiveSytle = layout.titleStyle == null
             ? textTheme.title.merge(mergeRichStyle(item.style))
             : layout.titleStyle;
