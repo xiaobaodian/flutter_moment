@@ -86,7 +86,7 @@ class GlobalStoreState extends State<GlobalStore> {
       dataSource.openDataBase().then((_) async {
         debugPrint('已打开数据库');
         if (dataSource.hasUpdate) {
-          //await dataSource.upgradeDataBase();
+          await dataSource.upgradeDataBase();
           debugPrint('已升级数据库');
         }
       })
@@ -224,27 +224,38 @@ class GlobalStoreState extends State<GlobalStore> {
 
   /// 将[RichLine]的[expandData]替换为[TaskItem]对象
   void replaceExpandDataWithTasks(FocusEvent event) {
-    bool updateTask = false;
+
+    // TODO: 升级完关键key以后去掉
+//    bool updateTask = false;
+//    if (event.focusItemBoxId < 10000) {
+//      updateTask = true;
+//      int timeId = focusItemSet.getTimeIdByBoxId(event.focusItemBoxId);
+//      event.focusItemBoxId = timeId;
+//    }
+
     for (var line in event.noteLines) {
       if (line.type == RichType.Task && line.expandData is int) {
         int id = line.expandData;
 
-        // 升级关键key时使用
-        if (id < 10000) {
-          updateTask = true;
-          int tId = taskSet.getTimeIdByBoxId(id);
-          line.expandData = tId;
-          id = tId;
-        }
+        // TODO: 升级完关键key以后去掉
+//        if (id < 10000) {
+//          updateTask = true;
+//          int tId = taskSet.getTimeIdByBoxId(id);
+//          line.expandData = tId;
+//          id = tId;
+//        }
 
         debugPrint('将ID转换成任务数据，当前ID：$id');
         line.expandData = taskSet.getItemFromId(id);
         assert(line.expandData != null);
       }
     }
-    if (updateTask) {
-      focusEventSet.changeItem(event);
-    }
+    // TODO: 升级完关键key以后去掉
+//    if (updateTask) {
+//      Future.delayed(Duration(seconds: 1), (){
+//        focusEventSet.changeItem(event);
+//      });
+//    }
   }
 
   void addRichLineToFocusEventInDailyRecord(RichLine richLine, int focusItemBoxId, int dayIndex) {

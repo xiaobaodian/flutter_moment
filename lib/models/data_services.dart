@@ -275,13 +275,13 @@ class DataSource {
     //await closeDataBase();
     //await openDataBase();
 
-    int focusItemStep = 100000000;
-    int personStep = 100000000;
-    int placeStep = 100000000;
-    int tagStep = 100000000;
-    int taskStep = 100000000;
-    int dailyRecordStep = 100000000;
-    int focusEventStep = 100000000;
+    int focusItemStep = 0;
+    int personStep = 0;
+    int placeStep = 0;
+    int tagStep = 0;
+    int taskStep = 0;
+    int dailyRecordStep = 0;
+    int focusEventStep = 0;
 
     ReferencesData<FocusItem> focusItemSet;
     ReferencesData<PersonItem> personSet;
@@ -299,106 +299,95 @@ class DataSource {
     dailyRecordSet = BasicData(dataSource: this);
     focusEventSet = BasicData(dataSource: this);
 
+    await focusItemSet.loadItemsFromDataSource();
+    for (var focusItem in focusItemSet.itemList) {
+      debugPrint('${focusItem.title} 生成timeId: ${focusItem.timeId}');
+      focusItem.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
+      if (focusItemStep >= 100) focusItemStep = 0;
+      await focusItemSet.rawChangeItem(focusItem);
+    }
 
-    Future.wait([
-      focusItemSet.loadItemsFromDataSource().then((_){
-        focusItemSet.itemList.forEach((item) async {
-          debugPrint('${item.title} 生成timeId: ${item.timeId}');
-          item.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-          await focusItemSet.rawChangeItem(item);
-        });
-      }),
-      personSet.loadItemsFromDataSource().then((_){
-        personSet.itemList.forEach((item) async {
-          debugPrint('${item.name} 生成timeId: ${item.timeId}');
-          item.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-          await personSet.rawChangeItem(item);
-        });
-      }),
-      placeSet.loadItemsFromDataSource().then((_){
-        placeSet.itemList.forEach((item) async {
-          debugPrint('${item.title} 生成timeId: ${item.timeId}');
-          item.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-          await placeSet.rawChangeItem(item);
-        });
-      }),
-      tagSet.loadItemsFromDataSource().then((_){
-        tagSet.itemList.forEach((item) async {
-          debugPrint('${item.title} 生成timeId: ${item.timeId}');
-          item.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-          await tagSet.rawChangeItem(item);
-        });
-      }),
-      taskSet.loadItemsFromDataSource().then((_){
-        taskSet.itemList.forEach((item) async {
-          debugPrint('${item.title} 生成timeId: ${item.timeId}');
-          item.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-          await taskSet.rawChangeItem(item);
-        });
-      }),
-      dailyRecordSet.loadItemsFromDataSource().then((_){
-        dailyRecordSet.itemList.forEach((item) async {
-          debugPrint('${item.dayIndex} 生成timeId: ${item.timeId}');
-          item.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-          await dailyRecordSet.rawChangeItem(item);
-        });
-      }),
-      focusEventSet.loadItemsFromDataSource().then((_){
-        focusEventSet.itemList.forEach((item) async {
-          debugPrint('${item.boxId} 生成timeId: ${item.timeId}');
-          item.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-        });
-      })
-    ]).then((_){
-      focusEventSet.itemList.forEach((item) async {
-        debugPrint('${item.boxId} 生成timeId: ${item.timeId}');
-        item.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-        if (item.focusItemBoxId < 10000) {
-          var focusItem = focusItemSet.itemList.firstWhere((focusItem)=> item.focusItemBoxId == focusItem.boxId);
-          item.focusItemBoxId = focusItem.timeId;
-        }
-        for (var line in item.noteLines) {
-          if (line.type == RichType.Task && line.expandData is int) {
-            int id = line.expandData;
-            var taskItem = taskSet.itemList.firstWhere((task) => id == task.boxId);
-            line.expandData = taskItem.timeId;
-            debugPrint('替换line.expandData：$id -> ${taskItem.timeId}');
-          } else {
-            line.content = 'hehehehehe';
-          }
-        }
+    await personSet.loadItemsFromDataSource();
+    for (var person in personSet.itemList) {
+      debugPrint('${person.name} 生成timeId: ${person.timeId}');
+      person.timeId = DateTime.now().millisecondsSinceEpoch * 100 + personStep++;
+      if (personStep >= 100) personStep = 0;
+      await personSet.rawChangeItem(person);
+    }
 
-        for (int i = 0; i < item.personKeys.keyList.length; i++) {
-          var key = item.personKeys.keyList[i];
-          if (key < 10000) {
-            var personItem = personSet.itemList.firstWhere((person) => person.boxId == key);
-            if (personItem != null) {
-              item.personKeys.keyList[i] = personItem.timeId;
-            }
-          }
+    await placeSet.loadItemsFromDataSource();
+    for (var place in placeSet.itemList) {
+      debugPrint('${place.title} 生成timeId: ${place.timeId}');
+      place.timeId = DateTime.now().millisecondsSinceEpoch * 100 + placeStep++;
+      if (placeStep >= 100) placeStep = 0;
+      await placeSet.rawChangeItem(place);
+    }
+
+    await tagSet.loadItemsFromDataSource();
+    for (var tag in tagSet.itemList) {
+      debugPrint('${tag.title} 生成timeId: ${tag.timeId}');
+      tag.timeId = DateTime.now().millisecondsSinceEpoch * 100 + tagStep++;
+      if (tagStep >= 100) tagStep = 0;
+      await tagSet.rawChangeItem(tag);
+    }
+
+    await taskSet.loadItemsFromDataSource();
+    for (var task in taskSet.itemList) {
+      debugPrint('${task.title} 生成timeId: ${task.timeId}');
+      task.timeId = DateTime.now().millisecondsSinceEpoch * 100 + taskStep++;
+      if (taskStep >= 100) taskStep = 0;
+      await taskSet.rawChangeItem(task);
+    }
+
+    await dailyRecordSet.loadItemsFromDataSource();
+    for (var dailyRecord in dailyRecordSet.itemList) {
+      debugPrint('${dailyRecord.dayIndex} 生成timeId: ${dailyRecord.timeId}');
+      dailyRecord.timeId = DateTime.now().millisecondsSinceEpoch * 100 + dailyRecordStep++;
+      if (dailyRecordStep >= 100) dailyRecordStep = 0;
+      await dailyRecordSet.rawChangeItem(dailyRecord);
+    }
+
+    await focusEventSet.loadItemsFromDataSource();
+    for (var focusEvent in focusEventSet.itemList) {
+      debugPrint('${focusEvent.boxId} 生成timeId: ${focusEvent.timeId}');
+      focusEvent.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusEventStep++;
+      if (focusEventStep >= 100) focusEventStep = 0;
+
+      if (focusEvent.focusItemBoxId < 10000) {
+        var focusItem = focusItemSet.itemList.firstWhere((focusItem)=> focusEvent.focusItemBoxId == focusItem.boxId);
+        focusEvent.focusItemBoxId = focusItem.timeId;
+      }
+
+      for (var line in focusEvent.noteLines) {
+        if (line.type == RichType.Task && line.expandData is int) {
+          int id = line.expandData;
+          int timeI = taskSet.getTimeIdByBoxId(id);
+          line.expandData = taskSet.getItemFromId(timeI);
+          debugPrint('替换line.expandData：$id -> ${line.expandData}');
         }
-        for (int i = 0; i < item.placeKeys.keyList.length; i++) {
-          var key = item.placeKeys.keyList[i];
-          if (key < 10000) {
-            var placeItem = placeSet.itemList.firstWhere((place) => place.boxId == key);
-            if (placeItem != null) {
-              item.placeKeys.keyList[i] = placeItem.timeId;
-            }
-          }
+      }
+      for (int i = 0; i < focusEvent.personKeys.keyList.length; i++) {
+        var key = focusEvent.personKeys.keyList[i];
+        if (key < 10000) {
+          focusEvent.personKeys.keyList[i] = personSet.getTimeIdByBoxId(key);
         }
-        for (int i = 0; i < item.tagKeys.keyList.length; i++) {
-          var key = item.tagKeys.keyList[i];
-          if (key < 10000) {
-            var tagItem = tagSet.itemList.firstWhere((tag) => tag.boxId == key);
-            if (tagItem != null) {
-              item.tagKeys.keyList[i] = tagItem.timeId;
-            }
-          }
+      }
+      for (int i = 0; i < focusEvent.placeKeys.keyList.length; i++) {
+        var key = focusEvent.placeKeys.keyList[i];
+        if (key < 10000) {
+          focusEvent.placeKeys.keyList[i] = placeSet.getTimeIdByBoxId(key);
         }
-        await focusEventSet.rawChangeItem(item);
-      });
-    });
-    await closeDataBase();
+      }
+      for (int i = 0; i < focusEvent.tagKeys.keyList.length; i++) {
+        var key = focusEvent.tagKeys.keyList[i];
+        if (key < 10000) {
+          focusEvent.tagKeys.keyList[i] = tagSet.getTimeIdByBoxId(key);
+        }
+      }
+      await focusEventSet.rawChangeItem(focusEvent);
+    }
+    //await closeDataBase();
+    //await openDataBase();
   }
 }
 
