@@ -274,22 +274,6 @@ class DataSource {
   Future upgradeDataBase(GlobalStoreState store) async {
     await openDataBase();
 
-//    ReferencesData<FocusItem> focusItemSet;
-//    ReferencesData<PersonItem> personSet;
-//    ReferencesData<PlaceItem> placeSet;
-//    ReferencesData<TagItem> tagSet;
-//    BasicData<TaskItem> taskSet;
-//    BasicData<FocusEvent> focusEventSet;
-//    BasicData<DailyRecord> dailyRecordSet;
-//
-//    focusItemSet = ReferencesData(dataSource: this);
-//    personSet = ReferencesData(dataSource: this);
-//    placeSet = ReferencesData(dataSource: this);
-//    tagSet = ReferencesData(dataSource: this);
-//    taskSet = BasicData(dataSource: this);
-//    dailyRecordSet = BasicData(dataSource: this);
-//    focusEventSet = BasicData(dataSource: this);
-
     await store.focusItemSet.rawLoadItemsFromDataSource();
 
     await store.personSet.rawLoadItemsFromDataSource();
@@ -301,8 +285,6 @@ class DataSource {
     await store.taskSet.rawLoadItemsFromDataSource().then((_){
       store.taskSet.itemList.forEach((task) => store.taskCategories.allTasks.assigned(task));
     });
-
-    await store.dailyRecordSet.rawLoadItemsFromDataSource();
 
     await store.focusEventSet.rawLoadItemsFromDataSource();
 
@@ -342,8 +324,15 @@ class DataSource {
           focusEvent.tagKeys.keyList[i] = store.tagSet.getTimeIdByBoxId(key);
         }
       }
-      await store.focusEventSet.changeItem(focusEvent);
+      store.focusEventSet.rawChangeItem(focusEvent);
     }
+
+    store.dailyRecordSet.rawLoadItemsFromDataSource().then((_){
+      store.dailyRecordSet.itemList.forEach((record){
+        int dayIndex = record.dayIndex;
+        store.calendarMap.everyDayIndex[dayIndex].dailyRecord = record;
+      });
+    });
 //    await closeDataBase();
 //    await openDataBase();
   }

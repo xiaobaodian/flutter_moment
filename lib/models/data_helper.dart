@@ -17,11 +17,11 @@ class BasicData<T extends BoxItem> {
 
   int _timeIdStep = 0;
   int get getTimeId {
-    if (_timeIdStep >= 100) _timeIdStep = 0;
-    return DateTime.now().millisecondsSinceEpoch * 100 + _timeIdStep++;
+    if (_timeIdStep >= 1000) _timeIdStep = 0;
+    return DateTime.now().millisecondsSinceEpoch * 1000 + _timeIdStep++;
   }
 
-  // 升级关键key使用
+  // TODO: 升级完关键key以后去掉
   int getTimeIdByBoxId(int id) {
     var obj = itemList.firstWhere((item) => item.boxId == id);
     return obj?.timeId ?? -1;
@@ -43,7 +43,7 @@ class BasicData<T extends BoxItem> {
         T item = BoxItem.itemFromJson(T, jsonString);
         if (item.timeId == null || item.timeId == 0) {
           item.timeId = getTimeId;
-          changeItem(item);
+          rawChangeItem(item);
         }
         _itemMap[item.timeId] = item;
         return item;

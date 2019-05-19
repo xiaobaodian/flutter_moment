@@ -682,76 +682,76 @@ class DailyRecord extends BoxItem {
     } else {
       richLines.clear();
     }
-    focusEvents.forEach((event) {
+    focusEvents.forEach((focusEvent) {
       // 加入FocusTitle
       richLines.add(RichLine(
         type: RichType.FocusTitle,
-        content: event.focusItemBoxId.toString(),
-        note: event,
+        content: focusEvent.focusItemBoxId.toString(),
+        note: focusEvent,
       ));
       //List<RichLine> lines = RichSource.getRichLinesFromJson(event.note);
 
       // 整体加入noteLines
-      event.noteLines?.forEach((line) {
-        line.note = event;
+      focusEvent.noteLines?.forEach((line) {
+        line.note = focusEvent;
       });
-      richLines.addAll(event.noteLines);
+      richLines.addAll(focusEvent.noteLines);
 
       if (hasRelated) {
-        if (event.personKeys.hasKeys()) {
+        if (focusEvent.personKeys.hasKeys()) {
           debugPrint('加入人物引用');
           String text;
-          for (int i = 0; i < event.personKeys.keyList.length; i++) {
+          for (int i = 0; i < focusEvent.personKeys.keyList.length; i++) {
             if (i == 0) {
-              text = store.personSet.getItemFromId(event.personKeys.keyList[i]).name;
+              text = store.personSet.getItemFromId(focusEvent.personKeys.keyList[i]).name;
             } else {
               text = text +
-                  "、${store.personSet.getItemFromId(event.personKeys.keyList[i]).name}";
+                  "、${store.personSet.getItemFromId(focusEvent.personKeys.keyList[i]).name}";
             }
           }
           richLines.add(RichLine(
             type: RichType.Related,
             indent: 0,
             content: text,
-            note: event,
+            note: focusEvent,
           ));
         }
 
-        if (event.placeKeys.hasKeys()) {
+        if (focusEvent.placeKeys.hasKeys()) {
           debugPrint('加入地点引用');
           String text;
-          for (int i = 0; i < event.placeKeys.keyList.length; i++) {
+          for (int i = 0; i < focusEvent.placeKeys.keyList.length; i++) {
             if (i == 0) {
               text =
-                  store.placeSet.getItemFromId(event.placeKeys.keyList[i]).title;
+                  store.placeSet.getItemFromId(focusEvent.placeKeys.keyList[i]).title;
             } else {
               text = text +
-                  "、${store.placeSet.getItemFromId(event.placeKeys.keyList[i]).title}";
+                  "、${store.placeSet.getItemFromId(focusEvent.placeKeys.keyList[i]).title}";
             }
           }
           richLines.add(RichLine(
             type: RichType.Related,
             indent: 1,
             content: text,
-            note: event,
+            note: focusEvent,
           ));
         }
-        if (event.tagKeys.hasKeys()) {
+        if (focusEvent.tagKeys.hasKeys()) {
           debugPrint('加入标签引用');
           String text;
-          for (int i = 0; i < event.tagKeys.keyList.length; i++) {
+          for (int i = 0; i < focusEvent.tagKeys.keyList.length; i++) {
             if (i == 0) {
-              text = store.tagSet.getItemFromId(event.tagKeys.keyList[i]).title;
+              text = store.tagSet.getItemFromId(focusEvent.tagKeys.keyList[i]).title;
             } else {
               text = text +
-                  "、${store.tagSet.getItemFromId(event.tagKeys.keyList[i]).title}";
+                  "、${store.tagSet.getItemFromId(focusEvent.tagKeys.keyList[i]).title}";
             }
           }
           richLines.add(RichLine(
             type: RichType.Related,
             indent: 2,
             content: text,
-            note: event,
+            note: focusEvent,
           ));
         }
       }
