@@ -26,16 +26,28 @@ class BasicData<T extends BoxItem> {
     var obj = itemList.firstWhere((item) => item.boxId == id);
     return obj?.timeId ?? -1;
   }
+  T getItemFromBoxId(int boxId) {
+    return itemList.firstWhere((item) => item.boxId == boxId);
+  }
 
   T getItemFromId(int id) => _itemMap[id];
 
+  // TODO: 升级完关键key以后去掉
   Future<List<T>> rawLoadItemsFromDataSource() async {
     await dataSource.openDataBase();
     return await dataSource.database
         .rawQuery(
         'SELECT * FROM ${dataSource.tables[BoxItem.typeName(T)].name}')
         .then((resultJson) {
-      itemList = resultJson.map((jsonString) => BoxItem.itemFromJson(T, jsonString)).toList();
+      itemList = resultJson.map((jsonString) {
+        T item = BoxItem.itemFromJson(T, jsonString);
+        if (item.timeId == null || item.timeId == 0) {
+          item.timeId = getTimeId;
+          changeItem(item);
+        }
+        _itemMap[item.timeId] = item;
+        return item;
+      }).toList();
     });
   }
 
@@ -47,13 +59,6 @@ class BasicData<T extends BoxItem> {
         .then((resultJson) {
       itemList = resultJson.map((jsonString) {
         T item = BoxItem.itemFromJson(T, jsonString);
-
-        // TODO: 升级完关键key以后去掉
-//        if (item.timeId == null || item.timeId == 0) {
-//          item.timeId = getTimeId;
-//          changeItem(item);
-//        }
-
         _itemMap[item.timeId] = item;
         return item;
       }).toList();

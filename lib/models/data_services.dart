@@ -271,123 +271,81 @@ class DataSource {
     });
   }
 
-  Future upgradeDataBase() async {
-    //await closeDataBase();
-    //await openDataBase();
+  Future upgradeDataBase(GlobalStoreState store) async {
+    await openDataBase();
 
-    int focusItemStep = 0;
-    int personStep = 0;
-    int placeStep = 0;
-    int tagStep = 0;
-    int taskStep = 0;
-    int dailyRecordStep = 0;
-    int focusEventStep = 0;
+//    ReferencesData<FocusItem> focusItemSet;
+//    ReferencesData<PersonItem> personSet;
+//    ReferencesData<PlaceItem> placeSet;
+//    ReferencesData<TagItem> tagSet;
+//    BasicData<TaskItem> taskSet;
+//    BasicData<FocusEvent> focusEventSet;
+//    BasicData<DailyRecord> dailyRecordSet;
+//
+//    focusItemSet = ReferencesData(dataSource: this);
+//    personSet = ReferencesData(dataSource: this);
+//    placeSet = ReferencesData(dataSource: this);
+//    tagSet = ReferencesData(dataSource: this);
+//    taskSet = BasicData(dataSource: this);
+//    dailyRecordSet = BasicData(dataSource: this);
+//    focusEventSet = BasicData(dataSource: this);
 
-    ReferencesData<FocusItem> focusItemSet;
-    ReferencesData<PersonItem> personSet;
-    ReferencesData<PlaceItem> placeSet;
-    ReferencesData<TagItem> tagSet;
-    BasicData<TaskItem> taskSet;
-    BasicData<FocusEvent> focusEventSet;
-    BasicData<DailyRecord> dailyRecordSet;
+    await store.focusItemSet.rawLoadItemsFromDataSource();
 
-    focusItemSet = ReferencesData(dataSource: this);
-    personSet = ReferencesData(dataSource: this);
-    placeSet = ReferencesData(dataSource: this);
-    tagSet = ReferencesData(dataSource: this);
-    taskSet = BasicData(dataSource: this);
-    dailyRecordSet = BasicData(dataSource: this);
-    focusEventSet = BasicData(dataSource: this);
+    await store.personSet.rawLoadItemsFromDataSource();
 
-    await focusItemSet.loadItemsFromDataSource();
-    for (var focusItem in focusItemSet.itemList) {
-      debugPrint('${focusItem.title} 生成timeId: ${focusItem.timeId}');
-      focusItem.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusItemStep++;
-      if (focusItemStep >= 100) focusItemStep = 0;
-      await focusItemSet.rawChangeItem(focusItem);
-    }
+    await store.placeSet.rawLoadItemsFromDataSource();
 
-    await personSet.loadItemsFromDataSource();
-    for (var person in personSet.itemList) {
-      debugPrint('${person.name} 生成timeId: ${person.timeId}');
-      person.timeId = DateTime.now().millisecondsSinceEpoch * 100 + personStep++;
-      if (personStep >= 100) personStep = 0;
-      await personSet.rawChangeItem(person);
-    }
+    await store.tagSet.rawLoadItemsFromDataSource();
 
-    await placeSet.loadItemsFromDataSource();
-    for (var place in placeSet.itemList) {
-      debugPrint('${place.title} 生成timeId: ${place.timeId}');
-      place.timeId = DateTime.now().millisecondsSinceEpoch * 100 + placeStep++;
-      if (placeStep >= 100) placeStep = 0;
-      await placeSet.rawChangeItem(place);
-    }
+    await store.taskSet.rawLoadItemsFromDataSource().then((_){
+      store.taskSet.itemList.forEach((task) => store.taskCategories.allTasks.assigned(task));
+    });
 
-    await tagSet.loadItemsFromDataSource();
-    for (var tag in tagSet.itemList) {
-      debugPrint('${tag.title} 生成timeId: ${tag.timeId}');
-      tag.timeId = DateTime.now().millisecondsSinceEpoch * 100 + tagStep++;
-      if (tagStep >= 100) tagStep = 0;
-      await tagSet.rawChangeItem(tag);
-    }
+    await store.dailyRecordSet.rawLoadItemsFromDataSource();
 
-    await taskSet.loadItemsFromDataSource();
-    for (var task in taskSet.itemList) {
-      debugPrint('${task.title} 生成timeId: ${task.timeId}');
-      task.timeId = DateTime.now().millisecondsSinceEpoch * 100 + taskStep++;
-      if (taskStep >= 100) taskStep = 0;
-      await taskSet.rawChangeItem(task);
-    }
+    await store.focusEventSet.rawLoadItemsFromDataSource();
 
-    await dailyRecordSet.loadItemsFromDataSource();
-    for (var dailyRecord in dailyRecordSet.itemList) {
-      debugPrint('${dailyRecord.dayIndex} 生成timeId: ${dailyRecord.timeId}');
-      dailyRecord.timeId = DateTime.now().millisecondsSinceEpoch * 100 + dailyRecordStep++;
-      if (dailyRecordStep >= 100) dailyRecordStep = 0;
-      await dailyRecordSet.rawChangeItem(dailyRecord);
-    }
+    for (var focusEvent in store.focusEventSet.itemList) {
 
-    await focusEventSet.loadItemsFromDataSource();
-    for (var focusEvent in focusEventSet.itemList) {
-      debugPrint('${focusEvent.boxId} 生成timeId: ${focusEvent.timeId}');
-      focusEvent.timeId = DateTime.now().millisecondsSinceEpoch * 100 + focusEventStep++;
-      if (focusEventStep >= 100) focusEventStep = 0;
-
-      if (focusEvent.focusItemBoxId < 10000) {
-        var focusItem = focusItemSet.itemList.firstWhere((focusItem)=> focusEvent.focusItemBoxId == focusItem.boxId);
-        focusEvent.focusItemBoxId = focusItem.timeId;
+      int id = focusEvent.focusItemBoxId;
+      if (id < 10000) {
+        focusEvent.focusItemBoxId = store.focusItemSet.getTimeIdByBoxId(id);
       }
 
       for (var line in focusEvent.noteLines) {
         if (line.type == RichType.Task && line.expandData is int) {
           int id = line.expandData;
-          int timeI = taskSet.getTimeIdByBoxId(id);
-          line.expandData = taskSet.getItemFromId(timeI);
-          debugPrint('替换line.expandData：$id -> ${line.expandData}');
+          if (id < 10000) {
+            TaskItem task = store.taskSet.getItemFromBoxId(id);
+            line.expandData = task;
+            debugPrint('替换line.expandData：$id -> ${line.expandData}');
+          }
         }
       }
+
       for (int i = 0; i < focusEvent.personKeys.keyList.length; i++) {
         var key = focusEvent.personKeys.keyList[i];
         if (key < 10000) {
-          focusEvent.personKeys.keyList[i] = personSet.getTimeIdByBoxId(key);
+          focusEvent.personKeys.keyList[i] = store.personSet.getTimeIdByBoxId(key);
         }
       }
       for (int i = 0; i < focusEvent.placeKeys.keyList.length; i++) {
         var key = focusEvent.placeKeys.keyList[i];
         if (key < 10000) {
-          focusEvent.placeKeys.keyList[i] = placeSet.getTimeIdByBoxId(key);
+          focusEvent.placeKeys.keyList[i] = store.placeSet.getTimeIdByBoxId(key);
         }
       }
       for (int i = 0; i < focusEvent.tagKeys.keyList.length; i++) {
         var key = focusEvent.tagKeys.keyList[i];
         if (key < 10000) {
-          focusEvent.tagKeys.keyList[i] = tagSet.getTimeIdByBoxId(key);
+          focusEvent.tagKeys.keyList[i] = store.tagSet.getTimeIdByBoxId(key);
         }
       }
-      await focusEventSet.rawChangeItem(focusEvent);
+      await store.focusEventSet.changeItem(focusEvent);
     }
-    //await closeDataBase();
-    //await openDataBase();
+//    await closeDataBase();
+//    await openDataBase();
   }
 }
 

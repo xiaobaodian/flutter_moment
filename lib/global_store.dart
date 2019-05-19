@@ -63,8 +63,17 @@ class GlobalStoreState extends State<GlobalStore> {
   initState() {
     super.initState();
     debugPrint('系统 初始化...');
+    taskCategories = TaskCategories(this);
+    dataSource = DataSource();
+    focusItemSet = ReferencesData(dataSource: dataSource);
+    personSet = ReferencesData(dataSource: dataSource);
+    placeSet = ReferencesData(dataSource: dataSource);
+    tagSet = ReferencesData(dataSource: dataSource);
+    taskSet = BasicData(dataSource: dataSource);
+    dailyRecordSet = BasicData(dataSource: dataSource);
+    focusEventSet = BasicData(dataSource: dataSource);
     initSystem();
-    initDataBase();
+    checkDataBase();
   }
 
   Future initSystem() async {
@@ -77,57 +86,43 @@ class GlobalStoreState extends State<GlobalStore> {
     initDailyReminders();
   }
 
+  Future checkDataBase() async {
+    debugPrint('检查数据库是否需要更新...');
+    await dataSource.openDataBase();
+    if (dataSource.hasUpdate) {
+      dataSource.upgradeDataBase(this);
+    } else {
+      initDataBase();
+    }
+  }
+
   void initDataBase() {
-    debugPrint('GlobalStore 初始化...');
+    debugPrint('导入数据...');
 
-    taskCategories = TaskCategories(this);
-    dataSource = DataSource();
-    Future.wait([
-      dataSource.openDataBase().then((_) async {
-        debugPrint('已打开数据库');
-        if (dataSource.hasUpdate) {
-          await dataSource.upgradeDataBase();
-          debugPrint('已升级数据库');
-        }
-      })
-    ]).then((_){
-      focusItemSet = ReferencesData(dataSource: dataSource);
-      personSet = ReferencesData(dataSource: dataSource);
-      placeSet = ReferencesData(dataSource: dataSource);
-      tagSet = ReferencesData(dataSource: dataSource);
-      taskSet = BasicData(dataSource: dataSource);
-      dailyRecordSet = BasicData(dataSource: dataSource);
-      focusEventSet = BasicData(dataSource: dataSource);
-
-      focusItemSet.loadItemsFromDataSource().then((_){
-        if (focusItemSet.itemList.isEmpty) {
-          dataSource.initData(this);
-        }
-      });
-      personSet.loadItemsFromDataSource();
-      placeSet.loadItemsFromDataSource();
-      tagSet.loadItemsFromDataSource();
-      taskSet.loadItemsFromDataSource().then((_){
-        taskSet.itemList.forEach((task){
-          taskCategories.allTasks.assigned(task);
-        });
-      });
-      dailyRecordSet.loadItemsFromDataSource().then((_){
-        dailyRecordSet.itemList.forEach((record){
-          int dayIndex = record.dayIndex;
-          calendarMap.everyDayIndex[dayIndex].dailyRecord = record;
-        });
-      });
-      focusEventSet.loadItemsFromDataSource().then((_){
-        focusEventSet.itemList.forEach((focusEvent){
-          replaceExpandDataWithTasks(focusEvent);
-        });
-      });
-
-      personSet.sort();
-      placeSet.sort();
-      tagSet.sort();
+    focusItemSet.loadItemsFromDataSource().then((_){
+      if (focusItemSet.itemList.isEmpty) {
+        dataSource.initData(this);
+      }
     });
+    personSet.loadItemsFromDataSource();
+    placeSet.loadItemsFromDataSource();
+    tagSet.loadItemsFromDataSource();
+    taskSet.loadItemsFromDataSource().then((_){
+      taskSet.itemList.forEach((task) => taskCategories.allTasks.assigned(task));
+    });
+    dailyRecordSet.loadItemsFromDataSource().then((_){
+      dailyRecordSet.itemList.forEach((record){
+        int dayIndex = record.dayIndex;
+        calendarMap.everyDayIndex[dayIndex].dailyRecord = record;
+      });
+    });
+    focusEventSet.loadItemsFromDataSource().then((_){
+      focusEventSet.itemList.forEach((focusEvent) => replaceExpandDataWithTasks(focusEvent));
+    });
+
+    personSet.sort();
+    placeSet.sort();
+    tagSet.sort();
   }
 
   Future initVersion() async {
@@ -227,11 +222,6 @@ class GlobalStoreState extends State<GlobalStore> {
 
     // TODO: 升级完关键key以后去掉
 //    bool updateTask = false;
-//    if (event.focusItemBoxId < 10000) {
-//      updateTask = true;
-//      int timeId = focusItemSet.getTimeIdByBoxId(event.focusItemBoxId);
-//      event.focusItemBoxId = timeId;
-//    }
 
     for (var line in event.noteLines) {
       if (line.type == RichType.Task && line.expandData is int) {
