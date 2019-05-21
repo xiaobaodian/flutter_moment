@@ -89,7 +89,7 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
   assets:
-    - assets/image/SplashPage.png
+    - assets/image/splash.png
     - assets/image/defaultPersonPhoto1.png
     - assets/image/defaultPersonPhoto2.png
     - assets/image/iconBoy.png

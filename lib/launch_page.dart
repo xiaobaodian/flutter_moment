@@ -28,8 +28,11 @@ class _LaunchPageState extends State<LaunchPage>{
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: bootHomeScreen,//设置页面点击事件
-      child: Image.asset("assets/image/SplashPage.png",
-        fit: BoxFit.cover,
+      child: Container(
+        color: Colors.white,
+        child: Image.asset("assets/image/splash.png",
+          fit: BoxFit.none,
+        ),
       ),
     );
   }
