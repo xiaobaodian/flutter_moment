@@ -173,7 +173,7 @@ class BrowseTaskCategoryRouteState extends State<BrowseTaskCategoryRoute>
   Widget buildTaskItem(
       GlobalStoreState store, BuildContext context, TaskItem task) {
     final date = store.calendarMap.getDateFromIndex(task.startDate);
-    final str = '${DateTimeExt.chineseDateString(date)} boxId: ${task.boxId} timeId: ${task.timeId}';
+    final str = '${DateTimeExt.chineseDateString(date)}';
     return CatListTile(
       leading: SizedBox(
         width: 32,

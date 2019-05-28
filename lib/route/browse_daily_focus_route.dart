@@ -171,10 +171,6 @@ class BrowseDailyFocusRouteState extends State<BrowseDailyFocusRoute>
         softWrap: false,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text('boxId ${focusItem.boxId} - timeId: ${focusItem.timeId}',
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-      ),
       trailText: Text(gz),
       trailing: Icon(Icons.arrow_right),
       onTap: () {

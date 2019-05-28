@@ -13,6 +13,7 @@ import 'package:flutter_moment/route/calendar_route.dart';
 import 'package:flutter_moment/route/details_focus_item_route.dart';
 import 'package:flutter_moment/route/editer_focus_event_route.dart';
 import 'package:flutter_moment/route/browse_daily_focus_route.dart';
+import 'package:flutter_moment/route/home_route.dart';
 import 'package:flutter_moment/route/user_account_details_route.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
@@ -300,6 +301,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   jumpToCurrentPage();
                 },
               ),
+            ),
+            IconButton(
+              icon: Icon(Icons.store),
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                  return HomeRoute(_store);
+                }));
+              },
             ),
             IconButton(
               icon: Icon(Icons.today),
