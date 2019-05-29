@@ -14,6 +14,8 @@ import 'package:flutter_moment/models/models.dart';
 import 'package:flutter_moment/richnote/cccat_rich_note_data.dart';
 import 'package:flutter_moment/task/task_item.dart';
 
+import 'calendar_tools.dart';
+
 class GlobalStore extends StatefulWidget {
   final Widget child;
   final CalendarMap calendarMap;
@@ -45,6 +47,7 @@ class GlobalStoreState extends State<GlobalStore> {
   AppPreferences prefs;
   UserItem user = UserItem();
   bool allowUpgrades = true;
+  TimeLineTools timeLineTools;
 
   int oldData = 0;
   int newData = 0;
@@ -63,6 +66,7 @@ class GlobalStoreState extends State<GlobalStore> {
   initState() {
     super.initState();
     debugPrint('系统 初始化...');
+    timeLineTools = TimeLineTools(this);
     taskCategories = TaskCategories(this);
     dataSource = DataSource();
     focusItemSet = ReferencesData(dataSource: dataSource);

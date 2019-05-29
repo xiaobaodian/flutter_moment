@@ -19,11 +19,13 @@ class TreeNode<I> {
   void Function(dynamic arg) behavior;
   void Function(I tem) onLostItem;
 
+  /// 只在这一级执行动作
   void action(dynamic parameters) {
     if (behavior == null) return;
     behavior(parameters);
   }
 
+  /// 在这一级与所有的下级中执行动作
   void actionAll(dynamic arg) {
     if (behavior != null) {
       behavior(arg);
@@ -111,4 +113,23 @@ class TreeNode<I> {
   bool get subNodeIsNotEmpty => subNodes.isNotEmpty;
   bool get childrenIsEmpty => count() == 0;
   bool get childrenIsNotEmpty => count() > 0;
+
+  /// 获取本级别或以下所有级别的[children]列表
+  List<I> getChildren() {
+    if (subNodeIsEmpty) {
+      return children;
+    } else {
+      List<I> subList = [];
+      subNodes.forEach((node){
+        subList.addAll(node.getChildren());
+      });
+      return subList;
+    }
+  }
+
+  /// 遍历执行本级别或以下所有级别的[children]
+  void forEach(void f(I element)) {
+    List<I> subList = getChildren();
+    for (I element in subList) f(element);
+  }
 }

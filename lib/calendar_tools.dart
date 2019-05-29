@@ -3,12 +3,22 @@
 // 2月闰年是29天,平年是28天.
 // 年份能被4整除【如年份是整百数的能被400整除】的为闰年.
 
+import 'global_store.dart';
+
 class DateTimeExt {
     DateTimeExt(this.dateTime) {
     firstDayOfMonth = DateTime(dateTime.year, dateTime.month, 1);
   }
 
-  static String chineseDateString(DateTime date) {
+  static String chineseDateString(DateTime date, {bool short = true}) {
+    if (short) {
+      var now = DateTime.now();
+      if (now.year == date.year && now.month == date.month) {
+        return '${date.day}日';
+      } else if (now.year == date.year) {
+        return '${date.month}月${date.day}日';
+      }
+    }
     return '${date.year}年${date.month}月${date.day}日';
   }
   static String chineseMonthNumber(DateTime date) {
@@ -183,5 +193,33 @@ class TimeRange {
 
   String toString() {
     return '${start.toString()} - ${end.toString()}';
+  }
+}
+
+class TimeLineTools {
+  TimeLineTools(this._store);
+
+  GlobalStoreState _store;
+
+  String getDateTitle(int dayIndex) {
+    int todayIndex = _store.calendarMap.getDateIndex();
+    String name;
+    if (dayIndex == todayIndex) {
+      name = '今天';
+    } else if (dayIndex == todayIndex - 1) {
+      name = '昨天';
+    } else if (dayIndex == todayIndex - 2) {
+      name = '前天';
+    } else if (dayIndex == todayIndex + 1) {
+      name = '明天';
+    } else if (dayIndex == todayIndex + 2) {
+      name = '后天';
+    } else {
+      DateTime date = _store.calendarMap.getDateFromIndex(dayIndex);
+      name = DateTimeExt.chineseDateString(date) +
+          ' ' +
+          DateTimeExt.chineseWeekName(date);
+    }
+    return name;
   }
 }
