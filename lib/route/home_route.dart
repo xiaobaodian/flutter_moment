@@ -14,7 +14,9 @@ class HomeRoute extends StatefulWidget {
 
   final GlobalStoreState store;
   final Color cardColor = Color.fromARGB(254, 248, 248, 246);
-  final Color timeLineColor = Color.fromARGB(254, 230, 230, 230);
+  //final Color timeLineColor = Color.fromARGB(254, 230, 230, 230);
+  final Color timeLineColor = Color.fromARGB(254, 253, 205, 0);
+  final double timeLineLeft = 16;
 
   @override
   HomeRouteState createState() => HomeRouteState();
@@ -92,7 +94,7 @@ class HomeRouteState extends State<HomeRoute> {
         children: <Widget>[
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).accentColor,
+              color: widget.timeLineColor,
               borderRadius: BorderRadiusDirectional.horizontal(
                 end: Radius.circular(6),
               )
@@ -101,7 +103,7 @@ class HomeRouteState extends State<HomeRoute> {
             width: 30,
             child: Text('End',
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.black45,
               fontSize: 10),
             ),
           ),
@@ -119,7 +121,7 @@ class HomeRouteState extends State<HomeRoute> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
+          margin: EdgeInsets.fromLTRB(widget.timeLineLeft, 0, 0, 0),
           decoration: boxDecoration,
           child: SizedBox(height: 8),
         ),
@@ -127,16 +129,18 @@ class HomeRouteState extends State<HomeRoute> {
           alignment: AlignmentDirectional.centerStart,
           children: <Widget>[
             Container(
-              margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
+              margin: EdgeInsets.fromLTRB(widget.timeLineLeft, 0, 0, 0),
               padding: EdgeInsets.fromLTRB(16, 4, 8, 4),
               decoration: boxDecoration,
               child: Text(
                 widget.store.getFocusTitleBy(event.focusItemBoxId),
                 style: Theme.of(context).textTheme.body1.merge(TextStyle(fontWeight: FontWeight.bold)),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Positioned(
-              left: 6.5,
+              left: widget.timeLineLeft - 5.5,
               //top: 21,
               child: Icon(
                 MdiIcons.brightness1,
@@ -147,7 +151,7 @@ class HomeRouteState extends State<HomeRoute> {
           ],
         ),
         Container(
-          margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
+          margin: EdgeInsets.fromLTRB(widget.timeLineLeft, 0, 0, 0),
           padding: EdgeInsets.fromLTRB(16, 8, 8, 0),
           decoration: boxDecoration,
           child: Column(
@@ -173,7 +177,7 @@ class HomeRouteState extends State<HomeRoute> {
     widget.store.setFocusEventsToDailyRecord(dailyRecord);
     //var date = widget.store.calendarMap.getDateFromIndex(dailyRecord.dayIndex);
     //var dateTitle = DateTimeExt.chineseDateString(date);
-    var dateTitle = widget.store.timeLineTools.getDateTitle(dailyRecord.dayIndex);
+    var dateTitle = widget.store.timeLineTools.getDateTitle(dailyRecord.dayIndex, hasWeekTitle: true);
     var boxDecoration = BoxDecoration(
         border: BorderDirectional(
             start: BorderSide(
@@ -211,14 +215,14 @@ class HomeRouteState extends State<HomeRoute> {
         ),
         // 标题下面的空行
         Container(
-          margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
+          margin: EdgeInsets.fromLTRB(widget.timeLineLeft, 0, 0, 0),
           padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
           decoration: boxDecoration,
           child: SizedBox(height: 6),
         ),
         for (var event in dailyRecord.focusEvents) _buildEventItem(event, boxDecoration),
         Container(
-          margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
+          margin: EdgeInsets.fromLTRB(widget.timeLineLeft, 0, 0, 0),
           padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
           decoration: boxDecoration,
           child: SizedBox(height: 16),
@@ -237,7 +241,7 @@ class HomeRouteState extends State<HomeRoute> {
 
   Widget _buildTaskLine(List<TaskItem> items) {
     if (items.length == 0) {
-      return Text('没有');
+      return Center(child: Text('没有任务'));
     } else if (items.length <= 4) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +259,15 @@ class HomeRouteState extends State<HomeRoute> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         for (var item in subItems) _getTaskLine(item.title),
-        Text('还有 $ys 条任务'),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
+          child: Center(
+            child: Text('还有 $ys 条任务',
+              style: Theme.of(context).textTheme.caption,
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -278,7 +290,7 @@ class HomeRouteState extends State<HomeRoute> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 0 ,0),
-                child: Text('逾期'),
+                child: Text('逾期', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
               Card(
                 color: cardColor,
@@ -299,7 +311,7 @@ class HomeRouteState extends State<HomeRoute> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 0 ,0),
-                child: Text('执行'),
+                child: Text('执行', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
               Card(
                 color: cardColor,
@@ -320,7 +332,7 @@ class HomeRouteState extends State<HomeRoute> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 0 ,0),
-                child: Text('待定'),
+                child: Text('待定', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
               Card(
                 color: cardColor,

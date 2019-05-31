@@ -201,8 +201,9 @@ class TimeLineTools {
 
   GlobalStoreState _store;
 
-  String getDateTitle(int dayIndex) {
+  String getDateTitle(int dayIndex, {bool hasWeekTitle = false}) {
     int todayIndex = _store.calendarMap.getDateIndex();
+    DateTime date = _store.calendarMap.getDateFromIndex(dayIndex);
     String name;
     if (dayIndex == todayIndex) {
       name = '今天';
@@ -215,10 +216,10 @@ class TimeLineTools {
     } else if (dayIndex == todayIndex + 2) {
       name = '后天';
     } else {
-      DateTime date = _store.calendarMap.getDateFromIndex(dayIndex);
-      name = DateTimeExt.chineseDateString(date) +
-          ' ' +
-          DateTimeExt.chineseWeekName(date);
+      name = DateTimeExt.chineseDateString(date);
+    }
+    if (hasWeekTitle) {
+      return '$name  ${DateTimeExt.chineseWeekName(date)}';
     }
     return name;
   }
