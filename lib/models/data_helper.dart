@@ -14,6 +14,13 @@ class BasicData<T extends BoxItem> {
 
   Map<int, T> _itemMap = Map();
   List<T> itemList = [];
+  int Function(T a, T b) compare;
+
+  void sortList() {
+    if (compare != null) {
+      itemList.sort((a, b) => compare(a, b));
+    }
+  }
 
   int _timeIdStep = 0;
   int get getTimeId {
@@ -62,6 +69,7 @@ class BasicData<T extends BoxItem> {
         _itemMap[item.timeId] = item;
         return item;
       }).toList();
+      sortList();
     });
   }
 
@@ -89,8 +97,16 @@ class BasicData<T extends BoxItem> {
 //    });
 //  }
 
-  Future<int> addItem(T item) async {
-    itemList.add(item);
+  Future<int> addItem(T item, {isSort = true}) async {
+    if (compare != null && isSort) {
+      var lastItem = itemList.last;
+      itemList.add(item);
+      if (compare(item, lastItem) < 0) {
+        itemList.sort((a, b) => compare(a, b));
+      }
+    } else {
+      itemList.add(item);
+    }
     if (item.timeId == 0) {
       item.timeId = getTimeId;
       Map<String, dynamic> data = item.toJson();
@@ -262,7 +278,7 @@ class ReferencesData<T extends ReferencesBoxItem> extends BasicData<T> {
     return sum;
   }
 
-  void sort() {
+  void sortList() {
     //itemList.sort((one, two) => one.count.compareTo(two.count));
     itemList.sort((one, two) => two.count.compareTo(one.count));
   }

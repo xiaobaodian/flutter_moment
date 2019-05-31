@@ -10,8 +10,8 @@ class DateTimeExt {
     firstDayOfMonth = DateTime(dateTime.year, dateTime.month, 1);
   }
 
-  static String chineseDateString(DateTime date, {bool short = true}) {
-    if (short) {
+  static String chineseDateString(DateTime date, {bool isShort = true}) {
+    if (isShort) {
       var now = DateTime.now();
       if (now.year == date.year && now.month == date.month) {
         return '${date.day}日';

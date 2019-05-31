@@ -75,6 +75,7 @@ class GlobalStoreState extends State<GlobalStore> {
     tagSet = ReferencesData(dataSource: dataSource);
     taskSet = BasicData(dataSource: dataSource);
     dailyRecordSet = BasicData(dataSource: dataSource);
+    dailyRecordSet.compare = (a, b) => a.dayIndex.compareTo(b.dayIndex);
     focusEventSet = BasicData(dataSource: dataSource);
     initSystem();
     checkDataBase();
@@ -124,9 +125,9 @@ class GlobalStoreState extends State<GlobalStore> {
       focusEventSet.itemList.forEach((focusEvent) => replaceExpandDataWithTasks(focusEvent));
     });
 
-    personSet.sort();
-    placeSet.sort();
-    tagSet.sort();
+    personSet.sortList();
+    placeSet.sortList();
+    tagSet.sortList();
   }
 
   Future initVersion() async {
