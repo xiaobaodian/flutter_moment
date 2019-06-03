@@ -822,16 +822,13 @@ class FocusEvent extends BoxItem {
   List<RichLine> noteLines;
 
   /// [personIds]在内容[noteLines]里面提及相关人员的boxId
-  //List<int> personIds;
   LabelKeys personKeys = LabelKeys();
 
   /// [placeIds]在内容[noteLines]里面提及相关地点的boxId
   LabelKeys placeKeys = LabelKeys();
-  //List<int> placeIds;
 
   /// [tagIds]在内容[noteLines]里面提及相关标签的boxId
   LabelKeys tagKeys = LabelKeys();
-  //List<int> tagIds;
 
   void extractingPersonList(List<PersonItem> personList) {
     personKeys.fromExtracting(noteLines, personList);

@@ -555,4 +555,8 @@ class TaskCategories {
     DayIndexRange agoRange = store.calendarMap.getLastMonthRange();
     return agoRange.begin - 1;
   }
+
+  bool hasEffectiveTask() {
+    return lateTasks.count() > 0 || actionTasks.count() > 0;
+  }
 }

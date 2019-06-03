@@ -13,9 +13,14 @@ class HomeRoute extends StatefulWidget {
   HomeRoute(this.store);
 
   final GlobalStoreState store;
-  final Color cardColor = Color.fromARGB(254, 248, 248, 246);
+  final Color cardColor = Color.fromARGB(254, 246, 246, 244);
+  final Color actionCardColor = Color.fromARGB(254, 56, 226, 188);
+  final Color lateCardColor = Color.fromARGB(254, 235, 63, 100);
+  final Color waitCardColor = Color.fromARGB(254, 253, 228, 86);
+  final Color timeTiTleColor = Color.fromARGB(254, 248, 248, 246);
+  final Color timeLineColor = Color.fromARGB(254, 240, 240, 238);
   //final Color timeLineColor = Color.fromARGB(254, 230, 230, 230);
-  final Color timeLineColor = Color.fromARGB(254, 253, 205, 0);
+  //final Color timeLineColor = Color.fromARGB(254, 253, 205, 0);
   final double timeLineLeft = 16;
 
   @override
@@ -77,11 +82,13 @@ class HomeRouteState extends State<HomeRoute> {
     List<Widget> slivers = List<Widget>();
     int dailyLength = widget.store.dailyRecordSet.itemList.length;
 
+    if (widget.store.taskCategories.hasEffectiveTask()) {
+      slivers.add(SliverToBoxAdapter(
+        child: _buildTaskCards(),
+      ));
+    }
     slivers.add(SliverToBoxAdapter(
-      child: _buildTaskCards(),
-    ));
-    slivers.add(SliverToBoxAdapter(
-      child: SizedBox(height: 16,),
+      child: SizedBox(height: 2,),
     ));
     slivers.add(SliverList(
         delegate: SliverChildBuilderDelegate(
@@ -163,7 +170,10 @@ class HomeRouteState extends State<HomeRoute> {
                   '${line.getContent()}',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.body1,
+                  style: Theme.of(context)
+                      .textTheme
+                      .body2
+                      .merge(TextStyle(color: Colors.black54)),
                 ),
               )
             ],
@@ -190,12 +200,15 @@ class HomeRouteState extends State<HomeRoute> {
       children: <Widget>[
         // 每天的日期标题
         Container(
+          width: double.infinity,
+          height: 32,
+          alignment: Alignment.centerLeft,
           padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
           decoration: BoxDecoration(
-            color: widget.timeLineColor,
-            borderRadius: BorderRadiusDirectional.horizontal(
-              end: Radius.circular(8),
-            ),
+            color: widget.timeTiTleColor,
+//            borderRadius: BorderRadiusDirectional.horizontal(
+//              end: Radius.circular(8),
+//            ),
 //            boxShadow: [
 //              BoxShadow(
 //                color: Colors.black12,
@@ -208,7 +221,7 @@ class HomeRouteState extends State<HomeRoute> {
           child: Text(
             dateTitle,
             style: TextStyle(
-              //color: Colors.white,
+              color: Colors.black45,
               fontSize: 10,
             ),
           ),
@@ -232,21 +245,22 @@ class HomeRouteState extends State<HomeRoute> {
     );
   }
 
-  Widget _getTaskLine(String title) {
+  Widget _getTaskLine(String title, Color color) {
     return Text('□ $title',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+      style: TextStyle(color: color),
     );
   }
 
-  Widget _buildTaskLine(List<TaskItem> items) {
+  Widget _buildTaskLine(List<TaskItem> items, Color color) {
     if (items.length == 0) {
       return Center(child: Text('没有任务'));
     } else if (items.length <= 4) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          for (var item in items) _getTaskLine(item.title)
+          for (var item in items) _getTaskLine(item.title, color)
         ],
       );
     }
@@ -258,12 +272,15 @@ class HomeRouteState extends State<HomeRoute> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        for (var item in subItems) _getTaskLine(item.title),
+        for (var item in subItems) _getTaskLine(item.title, color),
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 2, 0, 0),
           child: Center(
             child: Text('还有 $ys 条任务',
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context)
+                  .textTheme
+                  .caption
+                  .merge(TextStyle(color: color)),
               textAlign: TextAlign.end,
             ),
           ),
@@ -276,8 +293,6 @@ class HomeRouteState extends State<HomeRoute> {
     List<TaskItem> lateItems = widget.store.taskCategories.lateTasks.getChildren();
     List<TaskItem> actionItems = widget.store.taskCategories.actionTasks.getChildren();
     //List<TaskItem> lateItems = widget.store.taskCategories.lateTasks.getChildren();
-
-    Color cardColor = Color.fromARGB(254, 248, 248, 246);
 
     return SizedBox(
       height: 146,
@@ -293,14 +308,14 @@ class HomeRouteState extends State<HomeRoute> {
                 child: Text('逾期', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
               Card(
-                color: cardColor,
+                color: widget.lateCardColor,
                 elevation: 0,
                 child: SizedBox(
                   height: 104,
                   width: 260,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: _buildTaskLine(lateItems),
+                    child: _buildTaskLine(lateItems, Colors.white),
                   ),
                 ),
               ),
@@ -314,14 +329,14 @@ class HomeRouteState extends State<HomeRoute> {
                 child: Text('执行', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
               Card(
-                color: cardColor,
+                color: widget.actionCardColor,
                 elevation: 0,
                 child: SizedBox(
                   height: 104,
                   width: 200,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: _buildTaskLine(actionItems),
+                    child: _buildTaskLine(actionItems, Colors.black54),
                   ),
                 ),
               ),
@@ -335,7 +350,7 @@ class HomeRouteState extends State<HomeRoute> {
                 child: Text('待定', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
               Card(
-                color: cardColor,
+                color: widget.waitCardColor,
                 elevation: 0,
                 child: SizedBox(
                   height: 104,

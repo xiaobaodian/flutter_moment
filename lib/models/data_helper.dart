@@ -98,7 +98,7 @@ class BasicData<T extends BoxItem> {
 //  }
 
   Future<int> addItem(T item, {isSort = true}) async {
-    if (compare != null && isSort) {
+    if (compare != null && isSort && itemList.length > 0) {
       var lastItem = itemList.last;
       itemList.add(item);
       if (compare(item, lastItem) < 0) {
