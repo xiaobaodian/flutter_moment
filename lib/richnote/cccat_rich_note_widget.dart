@@ -181,7 +181,7 @@ class RichNoteState extends State<RichNote> {
         }
 
         var effectiveSytle = layout.titleStyle == null
-            ? textTheme.title.merge(mergeRichStyle(item.style))
+            ? Theme.of(context).textTheme.body1.merge(TextStyle(fontWeight: FontWeight.bold))
             : layout.titleStyle;
         if (widget.isEditable) {
           lineWidget =
@@ -189,7 +189,9 @@ class RichNoteState extends State<RichNote> {
         } else {
           lineWidget = layout.richLayoutTitle(Text(
               widget.store.getFocusTitleBy(int.parse(item.getContent())),
-              style: effectiveSytle));
+              style: effectiveSytle,
+
+          ));
         }
         break;
       case RichType.Title:
